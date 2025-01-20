@@ -1,3 +1,5 @@
+package main
+
 //create an account
 
 //create product

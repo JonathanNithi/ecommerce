@@ -1,2 +1,10 @@
 # to generate graphql files
 
+schema: schema.graphql
+
+models:
+  Account:
+    model: github.com/JonathanNithi/ecommerce/graphql.Account
+    fields:
+      orders:
+        resolver: true

@@ -1,4 +1,5 @@
-//this resolver is created because orders are associated with a particular account
+// this resolver is created because orders are associated with a particular account
+package main
 
 //get order query
 
