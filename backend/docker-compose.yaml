@@ -4,7 +4,11 @@ services:
   account:
   catalog:
   order:
+  payment:
+  basket:
   graphql:
   account_db:
   catalog_db:
   order_db:
+  payment_db:
+  basket_db:
