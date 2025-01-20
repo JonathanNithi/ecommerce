@@ -1,5 +1,15 @@
 package main
 
-// get all accounts
+type queryResolver struct {
+	server *Server
+}
 
-// get all products
+// get all accounts
+// func (r *queryResolver) Accounts(ctx context.Context, pagination *PaginationInput, id *string) ([]*Account, error) {
+
+// }
+
+// // get all products
+// func (r *queryResolver) Products(ctx context.Context, pagination *PaginationInput, query *string, id *string) ([]*Product, error) {
+
+// }

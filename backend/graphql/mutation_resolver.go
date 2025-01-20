@@ -1,10 +1,23 @@
 package main
 
-//create an account
+type mutationResolver struct {
+	server *Server
+}
 
-//create product
+// create an account
+// func (r *mutationResolver) createAccount(ctx context.context, in AccountInput) (*Account, error) {
 
-//create order
+// }
+
+// // create product
+// func (r *mutationResolver) createProduct(ctx context.context, in ProductInput) (*Product, error) {
+
+// }
+
+// // create order
+// func (r *mutationResolver) createOrder(ctx context.context, in OrderInput) (*Order, error) {
+
+// }
 
 //create basket
 
