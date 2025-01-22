@@ -1,37 +1,39 @@
 package main
 
+import "github.com/99designs/gqlgen/graphql"
+
 type Server struct {
-	// 	accountClient 	*account.Client
-	// 	catalogClient 	*account.Client
-	// 	orderClient 	*account.Client
+	// accountClient *account.Client
+	// catalogClient *cataog.Client
+	// orderClient   *order.Client
 }
 
-// func NewGraphQLServer(accountUrl, catalogUrl, orderUrl string) (*Server, error) {
-// 	accountClient, err := account.NewClient(accountUrl)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+func NewGraphQLServer(accountUrl, catalogUrl, orderUrl string) (*Server, error) {
+	// 	accountClient, err := account.NewClient(accountUrl)
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
 
-// 	catalogClient, err := catalog.NewClient(catalogUrl)
-// 	if err != nil {
-// 		accountClient.Close()
-// 		return nil, err
-// 	}
+	// 	catalogClient, err := catalog.NewClient(catalogUrl)
+	// 	if err != nil {
+	// 		accountClient.Close()
+	// 		return nil, err
+	// 	}
 
-// 	orderClient, err := order.NewClient(orderUrl)
-// 	if err != nil {
-// 		accountClient.Close()
-// 		catalogClient.Close()
-// 		return nil, err
-// 	}
+	// 	orderClient, err := order.NewClient(orderUrl)
+	// 	if err != nil {
+	// 		accountClient.Close()
+	// 		catalogClient.Close()
+	// 		return nil, err
+	// 	}
 
-// 	return &Server{
-// 		accountClient,
-// 		catalogClient,
-// 		orderClient,
-// 	}, nil
+	return &Server{
+		// 		accountClient,
+		// 		catalogClient,
+		// 		orderClient,
+	}, nil
 
-// }
+}
 
 // func (s *Server) Mutation() MutationResolver {
 // 	return &mutationResolver{
@@ -51,8 +53,8 @@ type Server struct {
 // 	}
 // }
 
-// func (s *Server) ToExecutableSchema() graphql.ExecutableSchema {
-// 	return NewExecutableSchema(Config{
-// 		Resolvers: s,
-// 	})
-// }
+func (s *Server) ToExecutableSchema() graphql.ExecutableSchema {
+	return NewExecutableSchema(Config{
+		Resolvers: s,
+	})
+}
