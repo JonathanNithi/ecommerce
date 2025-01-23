@@ -46,7 +46,7 @@ func (r *postgresRepository) PutAccount(ctx context.Context, a Account) error {
 }
 
 func (r *postgresRepository) GetAccountByID(ctx context.Context, id string) (*Account, error) {
-	r.db.QueryRowContext(ctx, "SELECT id, name FROM account WHERE id = $1", id)
+	row := r.db.QueryRowContext(ctx, "SELECT id, name FROM accounts WHERE id = $1", id)
 	a := &Account{}
 	if err := row.Scan(&a.ID, &a.Name); err != nil {
 		return nil, err
@@ -67,7 +67,7 @@ func (r *postgresRepository) ListAccounts(ctx context.Context, skip uint64, take
 
 	accounts := []Account{}
 	for rows.Next() {
-		a := &Acount{}
+		a := &Account{}
 		if err = rows.Scan(&a.ID, &a.Name); err == nil {
 			accounts = append(accounts, *a)
 		}
