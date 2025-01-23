@@ -4,7 +4,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/JonathanNithi/ecommerce/account"
+	"github.com/JonathanNithi/ecommerce/backend/account"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/tinrab/retry"
 )
@@ -22,16 +22,15 @@ func main() {
 
 	var r account.Repository
 	retry.ForeverSleep(2*time.Second, func(_ int) (err error) {
-		//Connected to database
-		account.NewPostgresRepository(cfg.DatabaseURL)
+		r, err = account.NewPostgresRepository(cfg.DatabaseURL)
 		if err != nil {
 			log.Println(err)
 		}
 		return
 	})
 	defer r.Close()
-	//started GRPC server
-	log.Println("Listening on port 8080.....")
+
+	log.Println("Listening on port 8080...")
 	s := account.NewService(r)
 	log.Fatal(account.ListenGRPC(s, 8080))
 }

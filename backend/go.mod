@@ -1,4 +1,4 @@
-module github.com/JonathanNithi/ecommerce
+module github.com/JonathanNithi/ecommerce/backend
 
 go 1.23.2
 

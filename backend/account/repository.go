@@ -29,7 +29,7 @@ func NewPostgresRepository(url string) (Repository, error) {
 		return nil, err
 	}
 
-	return &postgresRepository(db), nil
+	return &postgresRepository{db}, nil
 }
 
 func (r *postgresRepository) Close() {
