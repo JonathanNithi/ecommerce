@@ -3,7 +3,7 @@ package account
 import (
 	"context"
 
-	"github.com/JonathanNithi/ecommerce/account/pb/github.com/JonathanNithi/ecommerce/backend/account/pb"
+	"github.com/JonathanNithi/ecommerce/backend/account/pb"
 	"google.golang.org/grpc"
 )
 
