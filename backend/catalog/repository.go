@@ -18,7 +18,7 @@ type Repository interface {
 	PutProduct(ctx context.Context, p Product) error
 	GetProductByID(ctx context.Context, id string) (*Product, error)
 	ListProducts(ctx context.Context, skip uint64, take uint64) ([]Product, error)
-	ListProductsByID(ctx context.Context, ids []string) ([]Product, error)
+	ListProductsWithIDs(ctx context.Context, ids []string) ([]Product, error)
 	SearchProducts(ctx context.Context, query string, skip uint64, take uint64) ([]Product, error)
 }
 
@@ -27,9 +27,9 @@ type elasticRepository struct {
 }
 
 type productDocument struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Price       string `json:"price"`
+	Name        string  `json:"name"`
+	Description string  `json:"description"`
+	Price       float64 `json:"price"`
 }
 
 func NewElasticRepository(url string) (Repository, error) {
@@ -40,7 +40,7 @@ func NewElasticRepository(url string) (Repository, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &elasticRepository(client), nil
+	return &elasticRepository{client}, nil
 }
 
 func (r *elasticRepository) Close() {
@@ -70,8 +70,7 @@ func (r *elasticRepository) GetProductByID(ctx context.Context, id string) (*Pro
 	if err != nil {
 		return nil, err
 	}
-
-	if !res.found {
+	if !res.Found {
 		return nil, ErrNotFound
 	}
 	p := productDocument{}
@@ -84,7 +83,6 @@ func (r *elasticRepository) GetProductByID(ctx context.Context, id string) (*Pro
 		Description: p.Description,
 		Price:       p.Price,
 	}, err
-
 }
 
 func (r *elasticRepository) ListProducts(ctx context.Context, skip, take uint64) ([]Product, error) {
