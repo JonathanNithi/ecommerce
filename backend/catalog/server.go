@@ -27,8 +27,14 @@ func ListenGRPC(s Service, port int) error {
 	return serv.Serve(lis)
 }
 
-PostProduct
+func (s *grpc) PostProduct {
 
-GetProduct
+}
 
-Get
+func (s *grpc) GetProduct {
+
+}
+
+func (s *grpc) GetProducts {
+
+}
