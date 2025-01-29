@@ -4,7 +4,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/JonathanNithi/ecommerce/backend/catalog "
+	"github.com/JonathanNithi/ecommerce/backend/catalog"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/tinrab/retry"
 )
