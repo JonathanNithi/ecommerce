@@ -10,7 +10,7 @@ import (
 )
 
 type Config struct {
-	DatabaseURL string `envconfig:"DATABASE_URL"`
+	DatabaseURL string `envconfig:"DATABASE_URL" default:"postgres://postgres:root@localhost/account_db?sslmode=disable"`
 }
 
 func main() {

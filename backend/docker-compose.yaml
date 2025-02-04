@@ -1,14 +1,23 @@
-
+version: "3.7"
 
 services:
   account:
-  catalog:
-  order:
-  payment:
-  basket:
-  graphql:
+    build:
+      context: .
+      dockerfile: ./account/app.dockerfile
+    depends_on:
+      - account_db
+    environment:
+      DATABASE_URL: postgres://postgres:root@account_db/postgres?sslmode=disable
+    restart: on-failure
   account_db:
-  catalog_db:
-  order_db:
-  payment_db:
-  basket_db:
+    build:
+      context: ./account
+      dockerfile: ./db.dockerfile
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+    restart: unless-stopped
+
+

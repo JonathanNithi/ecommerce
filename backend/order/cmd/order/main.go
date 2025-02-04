@@ -10,7 +10,7 @@ import (
 )
 
 type Config struct {
-	DatabaseURL string `envconfig:"DATABASE_URL"`
+	DatabaseURL string `envconfig:"DATABASE_URL" default:"postgres://postgres:root@localhost/order_db?sslmode=disable"`
 	AccountURL  string `envconfig:"ACCOUNT_SERVICE_URL"`
 	CatalogURL  string `envconfig:"CATALOG_SERVICE_URL"`
 }
