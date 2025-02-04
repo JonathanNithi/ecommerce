@@ -4,7 +4,7 @@ schema: schema.graphql
 
 models:
   Account:
-    model: github.com/JonathanNithi/ecommerce/graphql.Account
+    model: github.com/JonathanNithi/ecommerce/backend/graphql.Account
     fields:
       orders:
         resolver: true

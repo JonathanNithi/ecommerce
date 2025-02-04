@@ -442,7 +442,7 @@ func (ec *executionContext) field_Mutation_createAccount_argsAccount(
 
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("account"))
 	if tmp, ok := rawArgs["account"]; ok {
-		return ec.unmarshalNAccountInput2githubᚗcomᚋJonathanNithiᚋecommerceᚋgraphqlᚐAccountInput(ctx, tmp)
+		return ec.unmarshalNAccountInput2githubᚗcomᚋJonathanNithiᚋecommerceᚋbackendᚋgraphqlᚐAccountInput(ctx, tmp)
 	}
 
 	var zeroVal AccountInput
@@ -470,7 +470,7 @@ func (ec *executionContext) field_Mutation_createOrder_argsOrder(
 
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("order"))
 	if tmp, ok := rawArgs["order"]; ok {
-		return ec.unmarshalNOrderInput2githubᚗcomᚋJonathanNithiᚋecommerceᚋgraphqlᚐOrderInput(ctx, tmp)
+		return ec.unmarshalNOrderInput2githubᚗcomᚋJonathanNithiᚋecommerceᚋbackendᚋgraphqlᚐOrderInput(ctx, tmp)
 	}
 
 	var zeroVal OrderInput
@@ -498,7 +498,7 @@ func (ec *executionContext) field_Mutation_createProduct_argsProduct(
 
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("product"))
 	if tmp, ok := rawArgs["product"]; ok {
-		return ec.unmarshalNProductInput2githubᚗcomᚋJonathanNithiᚋecommerceᚋgraphqlᚐProductInput(ctx, tmp)
+		return ec.unmarshalNProductInput2githubᚗcomᚋJonathanNithiᚋecommerceᚋbackendᚋgraphqlᚐProductInput(ctx, tmp)
 	}
 
 	var zeroVal ProductInput
@@ -559,7 +559,7 @@ func (ec *executionContext) field_Query_accounts_argsPagination(
 
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("pagination"))
 	if tmp, ok := rawArgs["pagination"]; ok {
-		return ec.unmarshalOPaginationInput2ᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋgraphqlᚐPaginationInput(ctx, tmp)
+		return ec.unmarshalOPaginationInput2ᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋbackendᚋgraphqlᚐPaginationInput(ctx, tmp)
 	}
 
 	var zeroVal *PaginationInput
@@ -615,7 +615,7 @@ func (ec *executionContext) field_Query_products_argsPagination(
 
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("pagination"))
 	if tmp, ok := rawArgs["pagination"]; ok {
-		return ec.unmarshalOPaginationInput2ᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋgraphqlᚐPaginationInput(ctx, tmp)
+		return ec.unmarshalOPaginationInput2ᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋbackendᚋgraphqlᚐPaginationInput(ctx, tmp)
 	}
 
 	var zeroVal *PaginationInput
@@ -655,6 +655,62 @@ func (ec *executionContext) field_Query_products_argsID(
 	}
 
 	var zeroVal *string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field___Directive_args_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := ec.field___Directive_args_argsIncludeDeprecated(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["includeDeprecated"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field___Directive_args_argsIncludeDeprecated(
+	ctx context.Context,
+	rawArgs map[string]any,
+) (*bool, error) {
+	if _, ok := rawArgs["includeDeprecated"]; !ok {
+		var zeroVal *bool
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("includeDeprecated"))
+	if tmp, ok := rawArgs["includeDeprecated"]; ok {
+		return ec.unmarshalOBoolean2ᚖbool(ctx, tmp)
+	}
+
+	var zeroVal *bool
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field___Field_args_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := ec.field___Field_args_argsIncludeDeprecated(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["includeDeprecated"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field___Field_args_argsIncludeDeprecated(
+	ctx context.Context,
+	rawArgs map[string]any,
+) (*bool, error) {
+	if _, ok := rawArgs["includeDeprecated"]; !ok {
+		var zeroVal *bool
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("includeDeprecated"))
+	if tmp, ok := rawArgs["includeDeprecated"]; ok {
+		return ec.unmarshalOBoolean2ᚖbool(ctx, tmp)
+	}
+
+	var zeroVal *bool
 	return zeroVal, nil
 }
 
@@ -838,7 +894,7 @@ func (ec *executionContext) _Account_orders(ctx context.Context, field graphql.C
 	}
 	res := resTmp.([]*Order)
 	fc.Result = res
-	return ec.marshalNOrder2ᚕᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋgraphqlᚐOrderᚄ(ctx, field.Selections, res)
+	return ec.marshalNOrder2ᚕᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋbackendᚋgraphqlᚐOrderᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Account_orders(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -889,7 +945,7 @@ func (ec *executionContext) _Mutation_createAccount(ctx context.Context, field g
 	}
 	res := resTmp.(*Account)
 	fc.Result = res
-	return ec.marshalOAccount2ᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋgraphqlᚐAccount(ctx, field.Selections, res)
+	return ec.marshalOAccount2ᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋbackendᚋgraphqlᚐAccount(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_createAccount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -949,7 +1005,7 @@ func (ec *executionContext) _Mutation_createProduct(ctx context.Context, field g
 	}
 	res := resTmp.(*Product)
 	fc.Result = res
-	return ec.marshalOProduct2ᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋgraphqlᚐProduct(ctx, field.Selections, res)
+	return ec.marshalOProduct2ᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋbackendᚋgraphqlᚐProduct(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_createProduct(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1011,7 +1067,7 @@ func (ec *executionContext) _Mutation_createOrder(ctx context.Context, field gra
 	}
 	res := resTmp.(*Order)
 	fc.Result = res
-	return ec.marshalOOrder2ᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋgraphqlᚐOrder(ctx, field.Selections, res)
+	return ec.marshalOOrder2ᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋbackendᚋgraphqlᚐOrder(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_createOrder(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1208,7 +1264,7 @@ func (ec *executionContext) _Order_products(ctx context.Context, field graphql.C
 	}
 	res := resTmp.([]*OrderedProduct)
 	fc.Result = res
-	return ec.marshalNOrderedProduct2ᚕᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋgraphqlᚐOrderedProductᚄ(ctx, field.Selections, res)
+	return ec.marshalNOrderedProduct2ᚕᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋbackendᚋgraphqlᚐOrderedProductᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Order_products(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1660,7 +1716,7 @@ func (ec *executionContext) _Query_accounts(ctx context.Context, field graphql.C
 	}
 	res := resTmp.([]*Account)
 	fc.Result = res
-	return ec.marshalNAccount2ᚕᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋgraphqlᚐAccountᚄ(ctx, field.Selections, res)
+	return ec.marshalNAccount2ᚕᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋbackendᚋgraphqlᚐAccountᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_accounts(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1723,7 +1779,7 @@ func (ec *executionContext) _Query_products(ctx context.Context, field graphql.C
 	}
 	res := resTmp.([]*Product)
 	fc.Result = res
-	return ec.marshalNProduct2ᚕᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋgraphqlᚐProductᚄ(ctx, field.Selections, res)
+	return ec.marshalNProduct2ᚕᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋbackendᚋgraphqlᚐProductᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_products(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1816,6 +1872,8 @@ func (ec *executionContext) fieldContext_Query___type(ctx context.Context, field
 				return ec.fieldContext___Type_ofType(ctx, field)
 			case "specifiedByURL":
 				return ec.fieldContext___Type_specifiedByURL(ctx, field)
+			case "isOneOf":
+				return ec.fieldContext___Type_isOneOf(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __Type", field.Name)
 		},
@@ -2049,7 +2107,7 @@ func (ec *executionContext) ___Directive_args(ctx context.Context, field graphql
 	return ec.marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext___Directive_args(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext___Directive_args(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__Directive",
 		Field:      field,
@@ -2065,9 +2123,24 @@ func (ec *executionContext) fieldContext___Directive_args(_ context.Context, fie
 				return ec.fieldContext___InputValue_type(ctx, field)
 			case "defaultValue":
 				return ec.fieldContext___InputValue_defaultValue(ctx, field)
+			case "isDeprecated":
+				return ec.fieldContext___InputValue_isDeprecated(ctx, field)
+			case "deprecationReason":
+				return ec.fieldContext___InputValue_deprecationReason(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __InputValue", field.Name)
 		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field___Directive_args_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
 	}
 	return fc, nil
 }
@@ -2402,7 +2475,7 @@ func (ec *executionContext) ___Field_args(ctx context.Context, field graphql.Col
 	return ec.marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext___Field_args(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext___Field_args(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__Field",
 		Field:      field,
@@ -2418,9 +2491,24 @@ func (ec *executionContext) fieldContext___Field_args(_ context.Context, field g
 				return ec.fieldContext___InputValue_type(ctx, field)
 			case "defaultValue":
 				return ec.fieldContext___InputValue_defaultValue(ctx, field)
+			case "isDeprecated":
+				return ec.fieldContext___InputValue_isDeprecated(ctx, field)
+			case "deprecationReason":
+				return ec.fieldContext___InputValue_deprecationReason(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __InputValue", field.Name)
 		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field___Field_args_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
 	}
 	return fc, nil
 }
@@ -2484,6 +2572,8 @@ func (ec *executionContext) fieldContext___Field_type(_ context.Context, field g
 				return ec.fieldContext___Type_ofType(ctx, field)
 			case "specifiedByURL":
 				return ec.fieldContext___Type_specifiedByURL(ctx, field)
+			case "isOneOf":
+				return ec.fieldContext___Type_isOneOf(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __Type", field.Name)
 		},
@@ -2720,6 +2810,8 @@ func (ec *executionContext) fieldContext___InputValue_type(_ context.Context, fi
 				return ec.fieldContext___Type_ofType(ctx, field)
 			case "specifiedByURL":
 				return ec.fieldContext___Type_specifiedByURL(ctx, field)
+			case "isOneOf":
+				return ec.fieldContext___Type_isOneOf(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __Type", field.Name)
 		},
@@ -2760,6 +2852,91 @@ func (ec *executionContext) fieldContext___InputValue_defaultValue(_ context.Con
 		Object:     "__InputValue",
 		Field:      field,
 		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) ___InputValue_isDeprecated(ctx context.Context, field graphql.CollectedField, obj *introspection.InputValue) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext___InputValue_isDeprecated(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsDeprecated(), nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext___InputValue_isDeprecated(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "__InputValue",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) ___InputValue_deprecationReason(ctx context.Context, field graphql.CollectedField, obj *introspection.InputValue) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext___InputValue_deprecationReason(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DeprecationReason(), nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext___InputValue_deprecationReason(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "__InputValue",
+		Field:      field,
+		IsMethod:   true,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
@@ -2868,6 +3045,8 @@ func (ec *executionContext) fieldContext___Schema_types(_ context.Context, field
 				return ec.fieldContext___Type_ofType(ctx, field)
 			case "specifiedByURL":
 				return ec.fieldContext___Type_specifiedByURL(ctx, field)
+			case "isOneOf":
+				return ec.fieldContext___Type_isOneOf(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __Type", field.Name)
 		},
@@ -2934,6 +3113,8 @@ func (ec *executionContext) fieldContext___Schema_queryType(_ context.Context, f
 				return ec.fieldContext___Type_ofType(ctx, field)
 			case "specifiedByURL":
 				return ec.fieldContext___Type_specifiedByURL(ctx, field)
+			case "isOneOf":
+				return ec.fieldContext___Type_isOneOf(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __Type", field.Name)
 		},
@@ -2997,6 +3178,8 @@ func (ec *executionContext) fieldContext___Schema_mutationType(_ context.Context
 				return ec.fieldContext___Type_ofType(ctx, field)
 			case "specifiedByURL":
 				return ec.fieldContext___Type_specifiedByURL(ctx, field)
+			case "isOneOf":
+				return ec.fieldContext___Type_isOneOf(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __Type", field.Name)
 		},
@@ -3060,6 +3243,8 @@ func (ec *executionContext) fieldContext___Schema_subscriptionType(_ context.Con
 				return ec.fieldContext___Type_ofType(ctx, field)
 			case "specifiedByURL":
 				return ec.fieldContext___Type_specifiedByURL(ctx, field)
+			case "isOneOf":
+				return ec.fieldContext___Type_isOneOf(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __Type", field.Name)
 		},
@@ -3371,6 +3556,8 @@ func (ec *executionContext) fieldContext___Type_interfaces(_ context.Context, fi
 				return ec.fieldContext___Type_ofType(ctx, field)
 			case "specifiedByURL":
 				return ec.fieldContext___Type_specifiedByURL(ctx, field)
+			case "isOneOf":
+				return ec.fieldContext___Type_isOneOf(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __Type", field.Name)
 		},
@@ -3434,6 +3621,8 @@ func (ec *executionContext) fieldContext___Type_possibleTypes(_ context.Context,
 				return ec.fieldContext___Type_ofType(ctx, field)
 			case "specifiedByURL":
 				return ec.fieldContext___Type_specifiedByURL(ctx, field)
+			case "isOneOf":
+				return ec.fieldContext___Type_isOneOf(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __Type", field.Name)
 		},
@@ -3547,6 +3736,10 @@ func (ec *executionContext) fieldContext___Type_inputFields(_ context.Context, f
 				return ec.fieldContext___InputValue_type(ctx, field)
 			case "defaultValue":
 				return ec.fieldContext___InputValue_defaultValue(ctx, field)
+			case "isDeprecated":
+				return ec.fieldContext___InputValue_isDeprecated(ctx, field)
+			case "deprecationReason":
+				return ec.fieldContext___InputValue_deprecationReason(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __InputValue", field.Name)
 		},
@@ -3610,6 +3803,8 @@ func (ec *executionContext) fieldContext___Type_ofType(_ context.Context, field 
 				return ec.fieldContext___Type_ofType(ctx, field)
 			case "specifiedByURL":
 				return ec.fieldContext___Type_specifiedByURL(ctx, field)
+			case "isOneOf":
+				return ec.fieldContext___Type_isOneOf(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __Type", field.Name)
 		},
@@ -3653,6 +3848,47 @@ func (ec *executionContext) fieldContext___Type_specifiedByURL(_ context.Context
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) ___Type_isOneOf(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext___Type_isOneOf(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsOneOf(), nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalOBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext___Type_isOneOf(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "__Type",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
 		},
 	}
 	return fc, nil
@@ -3712,7 +3948,7 @@ func (ec *executionContext) unmarshalInputOrderInput(ctx context.Context, obj an
 			it.AccountID = data
 		case "products":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("products"))
-			data, err := ec.unmarshalNOrderProductInput2ᚕᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋgraphqlᚐOrderProductInputᚄ(ctx, v)
+			data, err := ec.unmarshalNOrderProductInput2ᚕᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋbackendᚋgraphqlᚐOrderProductInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -4422,6 +4658,13 @@ func (ec *executionContext) ___InputValue(ctx context.Context, sel ast.Selection
 			}
 		case "defaultValue":
 			out.Values[i] = ec.___InputValue_defaultValue(ctx, field, obj)
+		case "isDeprecated":
+			out.Values[i] = ec.___InputValue_isDeprecated(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "deprecationReason":
+			out.Values[i] = ec.___InputValue_deprecationReason(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4534,6 +4777,8 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 			out.Values[i] = ec.___Type_ofType(ctx, field, obj)
 		case "specifiedByURL":
 			out.Values[i] = ec.___Type_specifiedByURL(ctx, field, obj)
+		case "isOneOf":
+			out.Values[i] = ec.___Type_isOneOf(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4561,7 +4806,7 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) marshalNAccount2ᚕᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋgraphqlᚐAccountᚄ(ctx context.Context, sel ast.SelectionSet, v []*Account) graphql.Marshaler {
+func (ec *executionContext) marshalNAccount2ᚕᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋbackendᚋgraphqlᚐAccountᚄ(ctx context.Context, sel ast.SelectionSet, v []*Account) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -4585,7 +4830,7 @@ func (ec *executionContext) marshalNAccount2ᚕᚖgithubᚗcomᚋJonathanNithi�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNAccount2ᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋgraphqlᚐAccount(ctx, sel, v[i])
+			ret[i] = ec.marshalNAccount2ᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋbackendᚋgraphqlᚐAccount(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -4605,7 +4850,7 @@ func (ec *executionContext) marshalNAccount2ᚕᚖgithubᚗcomᚋJonathanNithi�
 	return ret
 }
 
-func (ec *executionContext) marshalNAccount2ᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋgraphqlᚐAccount(ctx context.Context, sel ast.SelectionSet, v *Account) graphql.Marshaler {
+func (ec *executionContext) marshalNAccount2ᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋbackendᚋgraphqlᚐAccount(ctx context.Context, sel ast.SelectionSet, v *Account) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -4615,7 +4860,7 @@ func (ec *executionContext) marshalNAccount2ᚖgithubᚗcomᚋJonathanNithiᚋec
 	return ec._Account(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNAccountInput2githubᚗcomᚋJonathanNithiᚋecommerceᚋgraphqlᚐAccountInput(ctx context.Context, v any) (AccountInput, error) {
+func (ec *executionContext) unmarshalNAccountInput2githubᚗcomᚋJonathanNithiᚋecommerceᚋbackendᚋgraphqlᚐAccountInput(ctx context.Context, v any) (AccountInput, error) {
 	res, err := ec.unmarshalInputAccountInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
@@ -4665,7 +4910,7 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
-func (ec *executionContext) marshalNOrder2ᚕᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋgraphqlᚐOrderᚄ(ctx context.Context, sel ast.SelectionSet, v []*Order) graphql.Marshaler {
+func (ec *executionContext) marshalNOrder2ᚕᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋbackendᚋgraphqlᚐOrderᚄ(ctx context.Context, sel ast.SelectionSet, v []*Order) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -4689,7 +4934,7 @@ func (ec *executionContext) marshalNOrder2ᚕᚖgithubᚗcomᚋJonathanNithiᚋe
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNOrder2ᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋgraphqlᚐOrder(ctx, sel, v[i])
+			ret[i] = ec.marshalNOrder2ᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋbackendᚋgraphqlᚐOrder(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -4709,7 +4954,7 @@ func (ec *executionContext) marshalNOrder2ᚕᚖgithubᚗcomᚋJonathanNithiᚋe
 	return ret
 }
 
-func (ec *executionContext) marshalNOrder2ᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋgraphqlᚐOrder(ctx context.Context, sel ast.SelectionSet, v *Order) graphql.Marshaler {
+func (ec *executionContext) marshalNOrder2ᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋbackendᚋgraphqlᚐOrder(ctx context.Context, sel ast.SelectionSet, v *Order) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -4719,12 +4964,12 @@ func (ec *executionContext) marshalNOrder2ᚖgithubᚗcomᚋJonathanNithiᚋecom
 	return ec._Order(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNOrderInput2githubᚗcomᚋJonathanNithiᚋecommerceᚋgraphqlᚐOrderInput(ctx context.Context, v any) (OrderInput, error) {
+func (ec *executionContext) unmarshalNOrderInput2githubᚗcomᚋJonathanNithiᚋecommerceᚋbackendᚋgraphqlᚐOrderInput(ctx context.Context, v any) (OrderInput, error) {
 	res, err := ec.unmarshalInputOrderInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNOrderProductInput2ᚕᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋgraphqlᚐOrderProductInputᚄ(ctx context.Context, v any) ([]*OrderProductInput, error) {
+func (ec *executionContext) unmarshalNOrderProductInput2ᚕᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋbackendᚋgraphqlᚐOrderProductInputᚄ(ctx context.Context, v any) ([]*OrderProductInput, error) {
 	var vSlice []any
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
@@ -4733,7 +4978,7 @@ func (ec *executionContext) unmarshalNOrderProductInput2ᚕᚖgithubᚗcomᚋJon
 	res := make([]*OrderProductInput, len(vSlice))
 	for i := range vSlice {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNOrderProductInput2ᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋgraphqlᚐOrderProductInput(ctx, vSlice[i])
+		res[i], err = ec.unmarshalNOrderProductInput2ᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋbackendᚋgraphqlᚐOrderProductInput(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
@@ -4741,12 +4986,12 @@ func (ec *executionContext) unmarshalNOrderProductInput2ᚕᚖgithubᚗcomᚋJon
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalNOrderProductInput2ᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋgraphqlᚐOrderProductInput(ctx context.Context, v any) (*OrderProductInput, error) {
+func (ec *executionContext) unmarshalNOrderProductInput2ᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋbackendᚋgraphqlᚐOrderProductInput(ctx context.Context, v any) (*OrderProductInput, error) {
 	res, err := ec.unmarshalInputOrderProductInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNOrderedProduct2ᚕᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋgraphqlᚐOrderedProductᚄ(ctx context.Context, sel ast.SelectionSet, v []*OrderedProduct) graphql.Marshaler {
+func (ec *executionContext) marshalNOrderedProduct2ᚕᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋbackendᚋgraphqlᚐOrderedProductᚄ(ctx context.Context, sel ast.SelectionSet, v []*OrderedProduct) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -4770,7 +5015,7 @@ func (ec *executionContext) marshalNOrderedProduct2ᚕᚖgithubᚗcomᚋJonathan
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNOrderedProduct2ᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋgraphqlᚐOrderedProduct(ctx, sel, v[i])
+			ret[i] = ec.marshalNOrderedProduct2ᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋbackendᚋgraphqlᚐOrderedProduct(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -4790,7 +5035,7 @@ func (ec *executionContext) marshalNOrderedProduct2ᚕᚖgithubᚗcomᚋJonathan
 	return ret
 }
 
-func (ec *executionContext) marshalNOrderedProduct2ᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋgraphqlᚐOrderedProduct(ctx context.Context, sel ast.SelectionSet, v *OrderedProduct) graphql.Marshaler {
+func (ec *executionContext) marshalNOrderedProduct2ᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋbackendᚋgraphqlᚐOrderedProduct(ctx context.Context, sel ast.SelectionSet, v *OrderedProduct) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -4800,7 +5045,7 @@ func (ec *executionContext) marshalNOrderedProduct2ᚖgithubᚗcomᚋJonathanNit
 	return ec._OrderedProduct(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNProduct2ᚕᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋgraphqlᚐProductᚄ(ctx context.Context, sel ast.SelectionSet, v []*Product) graphql.Marshaler {
+func (ec *executionContext) marshalNProduct2ᚕᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋbackendᚋgraphqlᚐProductᚄ(ctx context.Context, sel ast.SelectionSet, v []*Product) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -4824,7 +5069,7 @@ func (ec *executionContext) marshalNProduct2ᚕᚖgithubᚗcomᚋJonathanNithi�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNProduct2ᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋgraphqlᚐProduct(ctx, sel, v[i])
+			ret[i] = ec.marshalNProduct2ᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋbackendᚋgraphqlᚐProduct(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -4844,7 +5089,7 @@ func (ec *executionContext) marshalNProduct2ᚕᚖgithubᚗcomᚋJonathanNithi�
 	return ret
 }
 
-func (ec *executionContext) marshalNProduct2ᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋgraphqlᚐProduct(ctx context.Context, sel ast.SelectionSet, v *Product) graphql.Marshaler {
+func (ec *executionContext) marshalNProduct2ᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋbackendᚋgraphqlᚐProduct(ctx context.Context, sel ast.SelectionSet, v *Product) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -4854,7 +5099,7 @@ func (ec *executionContext) marshalNProduct2ᚖgithubᚗcomᚋJonathanNithiᚋec
 	return ec._Product(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNProductInput2githubᚗcomᚋJonathanNithiᚋecommerceᚋgraphqlᚐProductInput(ctx context.Context, v any) (ProductInput, error) {
+func (ec *executionContext) unmarshalNProductInput2githubᚗcomᚋJonathanNithiᚋecommerceᚋbackendᚋgraphqlᚐProductInput(ctx context.Context, v any) (ProductInput, error) {
 	res, err := ec.unmarshalInputProductInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
@@ -5142,7 +5387,7 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 	return res
 }
 
-func (ec *executionContext) marshalOAccount2ᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋgraphqlᚐAccount(ctx context.Context, sel ast.SelectionSet, v *Account) graphql.Marshaler {
+func (ec *executionContext) marshalOAccount2ᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋbackendᚋgraphqlᚐAccount(ctx context.Context, sel ast.SelectionSet, v *Account) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -5191,14 +5436,14 @@ func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.Sele
 	return res
 }
 
-func (ec *executionContext) marshalOOrder2ᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋgraphqlᚐOrder(ctx context.Context, sel ast.SelectionSet, v *Order) graphql.Marshaler {
+func (ec *executionContext) marshalOOrder2ᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋbackendᚋgraphqlᚐOrder(ctx context.Context, sel ast.SelectionSet, v *Order) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Order(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOPaginationInput2ᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋgraphqlᚐPaginationInput(ctx context.Context, v any) (*PaginationInput, error) {
+func (ec *executionContext) unmarshalOPaginationInput2ᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋbackendᚋgraphqlᚐPaginationInput(ctx context.Context, v any) (*PaginationInput, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -5206,7 +5451,7 @@ func (ec *executionContext) unmarshalOPaginationInput2ᚖgithubᚗcomᚋJonathan
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOProduct2ᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋgraphqlᚐProduct(ctx context.Context, sel ast.SelectionSet, v *Product) graphql.Marshaler {
+func (ec *executionContext) marshalOProduct2ᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋbackendᚋgraphqlᚐProduct(ctx context.Context, sel ast.SelectionSet, v *Product) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
