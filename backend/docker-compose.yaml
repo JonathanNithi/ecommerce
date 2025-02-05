@@ -8,7 +8,7 @@ services:
     depends_on:
       - account_db
     environment:
-      DATABASE_URL: postgres://postgres:root@account_db/postgres?sslmode=disable
+      DATABASE_URL: postgres://postgres:root@account_db/account_db?sslmode=disable
     restart: on-failure
   
   catalog:
@@ -28,7 +28,7 @@ services:
     depends_on:
       - order_db
     environment:
-      DATABASE_URL: postgres://postgres:root@order_db/postgres?sslmode=disable
+      DATABASE_URL: postgres://postgres:root@order_db/order_db?sslmode=disable
       ACCOUNT_SERVICE_URL: account:8080
       CATALOG_SERVICE_URL: catalog:8080
     restart: on-failure
@@ -56,6 +56,8 @@ services:
       POSTGRES_DB: account_db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: root
+    ports:
+      - "5431:5432"
     restart: unless-stopped
   
   catalog_db:
@@ -72,6 +74,8 @@ services:
       POSTGRES_DB: order_db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: root
+    ports:
+      - "5430:5432"
     restart: unless-stopped
 
 
