@@ -25,17 +25,24 @@ func (c *Client) Close() {
 	c.conn.Close()
 }
 
-func (c *Client) PostAccount(ctx context.Context, name string) (*Account, error) {
+func (c *Client) PostAccount(ctx context.Context, first_name string, last_name string, email string, password string) (*Account, error) {
 	r, err := c.service.PostAccount(
 		ctx,
-		&pb.PostAccountRequest{Name: name},
+		&pb.PostAccountRequest{FirstName: first_name,
+			LastName:     last_name,
+			Email:        email,
+			PasswordHash: password,
+		},
 	)
 	if err != nil {
 		return nil, err
 	}
 	return &Account{
-		ID:   r.Account.Id,
-		Name: r.Account.Name,
+		ID:           r.Account.Id,
+		FirstName:    r.Account.FirstName,
+		LastName:     r.Account.LastName,
+		Email:        r.Account.Email,
+		PasswordHash: r.Account.PasswordHash,
 	}, nil
 }
 
@@ -48,8 +55,10 @@ func (c *Client) GetAccount(ctx context.Context, id string) (*Account, error) {
 		return nil, err
 	}
 	return &Account{
-		ID:   r.Account.Id,
-		Name: r.Account.Name,
+		ID:        r.Account.Id,
+		FirstName: r.Account.FirstName,
+		LastName:  r.Account.LastName,
+		Email:     r.Account.Email,
 	}, nil
 }
 
@@ -67,8 +76,10 @@ func (c *Client) GetAccounts(ctx context.Context, skip uint64, take uint64) ([]A
 	accounts := []Account{}
 	for _, a := range r.Accounts {
 		accounts = append(accounts, Account{
-			ID:   a.Id,
-			Name: a.Name,
+			ID:        a.Id,
+			FirstName: a.FirstName,
+			LastName:  a.LastName,
+			Email:     a.Email,
 		})
 	}
 	return accounts, nil

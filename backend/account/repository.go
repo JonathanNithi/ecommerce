@@ -41,14 +41,22 @@ func (r *postgresRepository) Ping() error {
 }
 
 func (r *postgresRepository) PutAccount(ctx context.Context, a Account) error {
-	_, err := r.db.ExecContext(ctx, "INSERT INTO accounts(id,name) VALUES ($1, $2)", a.ID, a.Name)
+	_, err := r.db.ExecContext(
+		ctx,
+		"INSERT INTO accounts(id, first_name, last_name, email, password_hash, role) VALUES ($1, $2, $3, $4, $5, $6)",
+		a.ID, a.FirstName, a.LastName, a.Email, a.PasswordHash, a.Role,
+	)
 	return err
 }
 
 func (r *postgresRepository) GetAccountByID(ctx context.Context, id string) (*Account, error) {
-	row := r.db.QueryRowContext(ctx, "SELECT id, name FROM accounts WHERE id = $1", id)
+	row := r.db.QueryRowContext(
+		ctx,
+		"SELECT id, first_name, last_name, email, password_hash, role FROM accounts WHERE id = $1",
+		id,
+	)
 	a := &Account{}
-	if err := row.Scan(&a.ID, &a.Name); err != nil {
+	if err := row.Scan(&a.ID, &a.FirstName, &a.LastName, &a.Email, &a.PasswordHash, &a.Role); err != nil {
 		return nil, err
 	}
 	return a, nil
@@ -57,7 +65,7 @@ func (r *postgresRepository) GetAccountByID(ctx context.Context, id string) (*Ac
 func (r *postgresRepository) ListAccounts(ctx context.Context, skip uint64, take uint64) ([]Account, error) {
 	rows, err := r.db.QueryContext(
 		ctx,
-		"SELECT id, name FROM accounts ORDER BY id DESC OFFSET $1 LIMIT $2",
+		"SELECT id, first_name, last_name, email, password_hash, role FROM accounts ORDER BY id DESC OFFSET $1 LIMIT $2",
 		skip, take,
 	)
 	if err != nil {
@@ -68,7 +76,8 @@ func (r *postgresRepository) ListAccounts(ctx context.Context, skip uint64, take
 	accounts := []Account{}
 	for rows.Next() {
 		a := &Account{}
-		if err = rows.Scan(&a.ID, &a.Name); err == nil {
+		// Scan the result into the Account struct
+		if err = rows.Scan(&a.ID, &a.FirstName, &a.LastName, &a.Email, &a.PasswordHash, &a.Role); err == nil {
 			accounts = append(accounts, *a)
 		}
 	}

@@ -29,25 +29,32 @@ func ListenGRPC(s Service, port int) error {
 }
 
 func (s *grpcServer) PostAccount(ctx context.Context, r *pb.PostAccountRequest) (*pb.PostAccountResponse, error) {
-	a, err := s.service.PostAccount(ctx, r.Name)
+	p, err := s.service.PostAccount(ctx, r.FirstName, r.LastName, r.Email, r.PasswordHash)
 	if err != nil {
 		return nil, err
 	}
 	return &pb.PostAccountResponse{Account: &pb.Account{
-		Id:   a.ID,
-		Name: a.Name,
+		Id:           p.ID,
+		FirstName:    p.FirstName,
+		LastName:     p.LastName,
+		Email:        p.Email,
+		PasswordHash: p.PasswordHash,
 	}}, nil
 }
 
 func (s *grpcServer) GetAccount(ctx context.Context, r *pb.GetAccountRequest) (*pb.GetAccountResponse, error) {
-	a, err := s.service.GetAccount(ctx, r.Id)
+	p, err := s.service.GetAccount(ctx, r.Id)
 	if err != nil {
 		return nil, err
 	}
 	return &pb.GetAccountResponse{
 		Account: &pb.Account{
-			Id:   a.ID,
-			Name: a.Name,
+			Id:           p.ID,
+			FirstName:    p.FirstName,
+			LastName:     p.LastName,
+			Email:        p.Email,
+			PasswordHash: p.PasswordHash,
+			Role:         p.Role,
 		},
 	}, nil
 }
@@ -62,8 +69,12 @@ func (s *grpcServer) GetAccounts(ctx context.Context, r *pb.GetAccountsRequest) 
 		accounts = append(
 			accounts,
 			&pb.Account{
-				Id:   p.ID,
-				Name: p.Name,
+				Id:           p.ID,
+				FirstName:    p.FirstName,
+				LastName:     p.LastName,
+				Email:        p.Email,
+				PasswordHash: p.PasswordHash,
+				Role:         p.Role,
 			},
 		)
 	}

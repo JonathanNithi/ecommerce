@@ -22,8 +22,11 @@ func (r *queryResolver) Accounts(ctx context.Context, pagination *PaginationInpu
 			return nil, err
 		}
 		return []*Account{{
-			ID:   r.ID,
-			Name: r.Name,
+			ID:        r.ID,
+			FirstName: r.FirstName,
+			LastName:  r.LastName,
+			Email:     r.Email,
+			Role:      r.Role,
 		}}, nil
 	}
 
@@ -41,8 +44,11 @@ func (r *queryResolver) Accounts(ctx context.Context, pagination *PaginationInpu
 	var accounts []*Account
 	for _, a := range accountList {
 		account := &Account{
-			ID:   a.ID,
-			Name: a.Name,
+			ID:        a.ID,
+			FirstName: a.FirstName,
+			LastName:  a.LastName,
+			Email:     a.Email,
+			Role:      a.Role,
 		}
 		accounts = append(accounts, account)
 	}

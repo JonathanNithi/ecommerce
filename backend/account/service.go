@@ -7,14 +7,18 @@ import (
 )
 
 type Service interface {
-	PostAccount(ctx context.Context, name string) (*Account, error)
+	PostAccount(ctx context.Context, first_name string, last_name string, email string, password string) (*Account, error) // Updated method signature
 	GetAccount(ctx context.Context, id string) (*Account, error)
 	GetAccounts(ctx context.Context, skip uint64, take uint64) ([]Account, error)
 }
 
 type Account struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	ID           string `json:"id"`
+	FirstName    string `json:"first_name"`
+	LastName     string `json:"last_name"`
+	Email        string `json:"email"`
+	PasswordHash string `json:"password_hash"`
+	Role         string `json:"role"`
 }
 
 type accountService struct {
@@ -25,10 +29,15 @@ func NewService(r Repository) Service {
 	return &accountService{r}
 }
 
-func (s *accountService) PostAccount(ctx context.Context, name string) (*Account, error) {
+func (s *accountService) PostAccount(ctx context.Context, first_name string, last_name string, email string, password string) (*Account, error) {
 	a := &Account{
-		Name: name,
-		ID:   ksuid.New().String(),
+		FirstName: first_name,
+		LastName:  last_name,
+		Email:     email,
+		//password hashing needs to be done here
+		PasswordHash: password,
+		Role:         "user",
+		ID:           ksuid.New().String(),
 	}
 	if err := s.repository.PutAccount(ctx, *a); err != nil {
 		return nil, err

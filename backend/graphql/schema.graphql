@@ -2,7 +2,10 @@ scalar Time
 
 type Account {
   id: String!
-  name: String!
+  first_name: String!
+  last_name: String!
+  email: String!
+  password_hash: String!
   orders: [Order!]!
 }
 
@@ -34,7 +37,10 @@ input PaginationInput {
 }
 
 input AccountInput {
-  name: String!
+  first_name: String!
+  last_name: String!
+  email: String!
+  password_hash: String!
 }
 
 input ProductInput {
