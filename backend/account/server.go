@@ -80,3 +80,23 @@ func (s *grpcServer) GetAccounts(ctx context.Context, r *pb.GetAccountsRequest) 
 	}
 	return &pb.GetAccountsResponse{Accounts: accounts}, nil
 }
+
+// In server.go
+func (s *grpcServer) Login(ctx context.Context, r *pb.LoginRequest) (*pb.LoginResponse, error) {
+	account, err := s.service.Login(ctx, r.Email, r.Password)
+	if err != nil {
+		return nil, err // If login fails, return an error
+	}
+
+	// Return the account details if login is successful
+	return &pb.LoginResponse{
+		Account: &pb.Account{
+			Id:           account.ID,
+			FirstName:    account.FirstName,
+			LastName:     account.LastName,
+			Email:        account.Email,
+			PasswordHash: account.PasswordHash,
+			Role:         account.Role,
+		},
+	}, nil
+}

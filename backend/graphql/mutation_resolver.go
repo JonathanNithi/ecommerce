@@ -80,3 +80,23 @@ func (r *mutationResolver) CreateOrder(ctx context.Context, in OrderInput) (*Ord
 		TotalPrice: o.TotalPrice,
 	}, nil
 }
+
+// In mutation_resolver.go
+func (r *mutationResolver) Login(ctx context.Context, email string, password string) (*Account, error) {
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+
+	account, err := r.server.accountClient.Login(ctx, email, password)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	return &Account{
+		ID:           account.ID,
+		FirstName:    account.FirstName,
+		LastName:     account.LastName,
+		Email:        account.Email,
+		PasswordHash: account.PasswordHash,
+	}, nil
+}

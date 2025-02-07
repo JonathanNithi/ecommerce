@@ -12,6 +12,7 @@ type Repository interface {
 	PutAccount(ctx context.Context, a Account) error
 	GetAccountByID(ctx context.Context, id string) (*Account, error)
 	ListAccounts(ctx context.Context, skip uint64, take uint64) ([]Account, error)
+	GetAccountByEmail(ctx context.Context, email string) (*Account, error) // Add this line
 }
 
 type postgresRepository struct {
@@ -87,4 +88,17 @@ func (r *postgresRepository) ListAccounts(ctx context.Context, skip uint64, take
 	}
 
 	return accounts, nil
+}
+
+func (r *postgresRepository) GetAccountByEmail(ctx context.Context, email string) (*Account, error) {
+	row := r.db.QueryRowContext(
+		ctx,
+		"SELECT id, first_name, last_name, email, password_hash, role FROM accounts WHERE email = $1",
+		email,
+	)
+	account := &Account{}
+	if err := row.Scan(&account.ID, &account.FirstName, &account.LastName, &account.Email, &account.PasswordHash, &account.Role); err != nil {
+		return nil, err // Return error if no account is found
+	}
+	return account, nil
 }

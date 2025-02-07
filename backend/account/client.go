@@ -84,3 +84,20 @@ func (c *Client) GetAccounts(ctx context.Context, skip uint64, take uint64) ([]A
 	}
 	return accounts, nil
 }
+
+func (c *Client) Login(ctx context.Context, email string, password string) (*Account, error) {
+	r, err := c.service.Login(ctx, &pb.LoginRequest{
+		Email:    email,
+		Password: password,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &Account{
+		ID:           r.Account.Id,
+		FirstName:    r.Account.FirstName,
+		LastName:     r.Account.LastName,
+		Email:        r.Account.Email,
+		PasswordHash: r.Account.PasswordHash,
+	}, nil
+}

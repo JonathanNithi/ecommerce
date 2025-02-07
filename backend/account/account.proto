@@ -42,16 +42,18 @@ message GetAccountsResponse {
     repeated Account accounts = 1;
 }
 
+message LoginRequest {
+    string email = 1;
+    string password = 2;
+}
+
+message LoginResponse {
+    Account account = 1;
+}
+
 service AccountService {
-    rpc PostAccount (PostAccountRequest) returns (PostAccountResponse){
-
-    }
-
-    rpc GetAccount (GetAccountRequest) returns (GetAccountResponse){
-        
-    }
-
-    rpc GetAccounts (GetAccountsRequest) returns (GetAccountsResponse){
-        
-    }
+    rpc PostAccount (PostAccountRequest) returns (PostAccountResponse);
+    rpc GetAccount (GetAccountRequest) returns (GetAccountResponse);
+    rpc GetAccounts (GetAccountsRequest) returns (GetAccountsResponse);
+    rpc Login (LoginRequest) returns (LoginResponse); // New Login RPC
 }

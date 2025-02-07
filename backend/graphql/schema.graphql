@@ -63,6 +63,7 @@ type Mutation {
   createAccount(account: AccountInput!): Account
   createProduct(product: ProductInput!): Product
   createOrder(order: OrderInput!): Order
+  login(email: String!, password: String!): Account
 }
 
 type Query {
