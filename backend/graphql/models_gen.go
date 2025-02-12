@@ -13,6 +13,12 @@ type AccountInput struct {
 	PasswordHash string `json:"password_hash"`
 }
 
+type LoginResponse struct {
+	Account      *Account `json:"account"`
+	AccessToken  string   `json:"accessToken"`
+	RefreshToken string   `json:"refreshToken"`
+}
+
 type Mutation struct {
 }
 

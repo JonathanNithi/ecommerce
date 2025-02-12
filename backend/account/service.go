@@ -12,7 +12,7 @@ type Service interface {
 	PostAccount(ctx context.Context, first_name string, last_name string, email string, password string) (*Account, error)
 	GetAccount(ctx context.Context, id string) (*Account, error)
 	GetAccounts(ctx context.Context, skip uint64, take uint64) ([]Account, error)
-	Login(ctx context.Context, email string, password string) (*Account, error) // New method
+	Login(ctx context.Context, email string, password string) (*Account, string, string, error) // New method
 }
 
 type Account struct {
@@ -63,19 +63,30 @@ func (s *accountService) ValidatePassword(storedHash string, password string) bo
 	return err == nil
 }
 
-func (s *accountService) Login(ctx context.Context, email string, password string) (*Account, error) {
+func (s *accountService) Login(ctx context.Context, email string, password string) (*Account, string, string, error) {
 	// Fetch account by email
 	account, err := s.repository.GetAccountByEmail(ctx, email)
 	if err != nil {
-		return nil, err // If account is not found, return an error
+		return nil, "", "", err // If account is not found, return an error
 	}
 
 	// Validate password
 	if !s.ValidatePassword(account.PasswordHash, password) {
-		return nil, fmt.Errorf("invalid email or password")
+		return nil, "", "", fmt.Errorf("invalid email or password")
 	}
 
-	return account, nil
+	// Generate access and refresh tokens
+	accessToken, err := GenerateAccessToken(account.Email)
+	if err != nil {
+		return nil, "", "", err
+	}
+
+	refreshToken, err := GenerateRefreshToken(account.Email)
+	if err != nil {
+		return nil, "", "", err
+	}
+
+	return account, accessToken, refreshToken, nil
 }
 
 func (s *accountService) GetAccount(ctx context.Context, id string) (*Account, error) {

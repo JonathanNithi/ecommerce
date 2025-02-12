@@ -81,22 +81,27 @@ func (r *mutationResolver) CreateOrder(ctx context.Context, in OrderInput) (*Ord
 	}, nil
 }
 
-// In mutation_resolver.go
-func (r *mutationResolver) Login(ctx context.Context, email string, password string) (*Account, error) {
+func (r *mutationResolver) Login(ctx context.Context, email string, password string) (*LoginResponse, error) {
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
 
-	account, err := r.server.accountClient.Login(ctx, email, password)
+	// Modify this line to expect the AccessToken and RefreshToken
+	account, accessToken, refreshToken, err := r.server.accountClient.Login(ctx, email, password)
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
 
-	return &Account{
-		ID:           account.ID,
-		FirstName:    account.FirstName,
-		LastName:     account.LastName,
-		Email:        account.Email,
-		PasswordHash: account.PasswordHash,
+	// Return the Account along with AccessToken and RefreshToken
+	return &LoginResponse{
+		Account: &Account{
+			ID:           account.ID,
+			FirstName:    account.FirstName,
+			LastName:     account.LastName,
+			Email:        account.Email,
+			PasswordHash: account.PasswordHash,
+		},
+		AccessToken:  accessToken,  // Now you're correctly passing the tokens
+		RefreshToken: refreshToken, // Similarly for the RefreshToken
 	}, nil
 }

@@ -49,11 +49,22 @@ message LoginRequest {
 
 message LoginResponse {
     Account account = 1;
+    string accessToken = 2;
+    string refreshToken = 3;
+}
+
+message RefreshTokenRequest {
+    string refresh_token = 1;
+}
+
+message RefreshTokenResponse {
+    string access_token = 1;
 }
 
 service AccountService {
     rpc PostAccount (PostAccountRequest) returns (PostAccountResponse);
     rpc GetAccount (GetAccountRequest) returns (GetAccountResponse);
     rpc GetAccounts (GetAccountsRequest) returns (GetAccountsResponse);
-    rpc Login (LoginRequest) returns (LoginResponse); // New Login RPC
+    rpc Login (LoginRequest) returns (LoginResponse);
+    rpc RefreshToken (RefreshTokenRequest) returns (RefreshTokenResponse); 
 }
