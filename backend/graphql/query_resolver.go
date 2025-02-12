@@ -10,13 +10,13 @@ type queryResolver struct {
 	server *Server
 }
 
-func (r *queryResolver) Accounts(ctx context.Context, pagination *PaginationInput, id *string) ([]*Account, error) {
+func (r *queryResolver) Accounts(ctx context.Context, pagination *PaginationInput, id *string, accessToken *string, refreshToken *string) ([]*Account, error) {
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
 
 	// Get single
 	if id != nil {
-		r, err := r.server.accountClient.GetAccount(ctx, *id)
+		r, err := r.server.accountClient.GetAccount(ctx, *id, *accessToken, *refreshToken)
 		if err != nil {
 			log.Println(err)
 			return nil, err

@@ -3,6 +3,7 @@ package account
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/segmentio/ksuid"
 	"golang.org/x/crypto/bcrypt"
@@ -10,7 +11,7 @@ import (
 
 type Service interface {
 	PostAccount(ctx context.Context, first_name string, last_name string, email string, password string) (*Account, error)
-	GetAccount(ctx context.Context, id string) (*Account, error)
+	GetAccount(ctx context.Context, id string, accessToken string, refreshToken string) (*Account, error)
 	GetAccounts(ctx context.Context, skip uint64, take uint64) ([]Account, error)
 	Login(ctx context.Context, email string, password string) (*Account, string, string, error) // New method
 }
@@ -89,7 +90,28 @@ func (s *accountService) Login(ctx context.Context, email string, password strin
 	return account, accessToken, refreshToken, nil
 }
 
-func (s *accountService) GetAccount(ctx context.Context, id string) (*Account, error) {
+func (s *accountService) GetAccount(ctx context.Context, id string, accessToken string, refreshToken string) (*Account, error) {
+	// Validate the access token
+	claims, err := ValidateToken(accessToken)
+	if err != nil {
+		return nil, err
+	}
+
+	// validate the refresh token
+	_, err = ValidateToken(refreshToken)
+	if err != nil {
+		return nil, err
+	}
+
+	// regenerate the accessToken if its expired
+	if claims.ExpiresAt.Before(time.Now()) {
+		accessToken, err = GenerateAccessToken(claims.Username)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// If the access token is valid, return the account
 	return s.repository.GetAccountByID(ctx, id)
 }
 

@@ -43,7 +43,7 @@ func (s *grpcServer) PostAccount(ctx context.Context, r *pb.PostAccountRequest) 
 }
 
 func (s *grpcServer) GetAccount(ctx context.Context, r *pb.GetAccountRequest) (*pb.GetAccountResponse, error) {
-	p, err := s.service.GetAccount(ctx, r.Id)
+	p, err := s.service.GetAccount(ctx, r.Id, r.AccessToken, r.RefreshToken)
 	if err != nil {
 		return nil, err
 	}

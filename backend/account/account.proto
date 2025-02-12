@@ -27,6 +27,8 @@ message PostAccountResponse {
 
 message GetAccountRequest {
     string id = 1;
+    string accessToken = 2;
+    string refreshToken = 3;
 }
 
 message GetAccountResponse {

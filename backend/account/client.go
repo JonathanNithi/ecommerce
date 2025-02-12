@@ -46,10 +46,12 @@ func (c *Client) PostAccount(ctx context.Context, first_name string, last_name s
 	}, nil
 }
 
-func (c *Client) GetAccount(ctx context.Context, id string) (*Account, error) {
+func (c *Client) GetAccount(ctx context.Context, id string, accessToken string, refreshToken string) (*Account, error) {
 	r, err := c.service.GetAccount(
 		ctx,
-		&pb.GetAccountRequest{Id: id},
+		&pb.GetAccountRequest{Id: id,
+			AccessToken:  accessToken,
+			RefreshToken: refreshToken},
 	)
 	if err != nil {
 		return nil, err
