@@ -64,12 +64,14 @@ func (c *Client) GetAccount(ctx context.Context, id string, accessToken string, 
 	}, nil
 }
 
-func (c *Client) GetAccounts(ctx context.Context, skip uint64, take uint64) ([]Account, error) {
+func (c *Client) GetAccounts(ctx context.Context, skip uint64, take uint64, accessToken string, refreshToken string) ([]Account, error) {
 	r, err := c.service.GetAccounts(
 		ctx,
 		&pb.GetAccountsRequest{
-			Skip: skip,
-			Take: take,
+			Skip:         skip,
+			Take:         take,
+			AccessToken:  accessToken,
+			RefreshToken: refreshToken,
 		},
 	)
 	if err != nil {
@@ -82,6 +84,7 @@ func (c *Client) GetAccounts(ctx context.Context, skip uint64, take uint64) ([]A
 			FirstName: a.FirstName,
 			LastName:  a.LastName,
 			Email:     a.Email,
+			Role:      a.Role,
 		})
 	}
 	return accounts, nil
@@ -105,4 +108,26 @@ func (c *Client) Login(ctx context.Context, email string, password string) (*Acc
 		Email:        r.Account.Email,
 		PasswordHash: r.Account.PasswordHash,
 	}, r.AccessToken, r.RefreshToken, nil
+}
+
+func (c *Client) SetAccountAsAdmin(ctx context.Context, accessToken string, refreshToken string, userId string) (*Account, error) {
+	r, err := c.service.SetAccountAsAdmin(
+		ctx,
+		&pb.SetAccountAsAdminRequest{
+			AccessToken:  accessToken,
+			RefreshToken: refreshToken,
+			Id:           userId,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &Account{
+		ID:           r.Account.Id,
+		FirstName:    r.Account.FirstName,
+		LastName:     r.Account.LastName,
+		Email:        r.Account.Email,
+		PasswordHash: r.Account.PasswordHash,
+		Role:         r.Account.Role,
+	}, nil
 }

@@ -66,6 +66,8 @@ services:
     environment:
       ES_JAVA_OPTS: -Xms1g -Xmx1g
       discovery.type: single-node
+    ports:
+      - 9200:9200
 
   order_db:
     build:
@@ -78,5 +80,13 @@ services:
     ports:
       - "5430:5432"
     restart: unless-stopped
+  
+  kibana:
+    image: docker.elastic.co/kibana/kibana:6.2.4
+    environment:
+      - ELASTICSEARCH_URL=http://catalog_db:9200
+    ports:
+      - 5601:5601
+  
 
 

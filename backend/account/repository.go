@@ -12,7 +12,8 @@ type Repository interface {
 	PutAccount(ctx context.Context, a Account) error
 	GetAccountByID(ctx context.Context, id string) (*Account, error)
 	ListAccounts(ctx context.Context, skip uint64, take uint64) ([]Account, error)
-	GetAccountByEmail(ctx context.Context, email string) (*Account, error) // Add this line
+	GetAccountByEmail(ctx context.Context, email string) (*Account, error)
+	UpdateAccountRole(ctx context.Context, id string, role string) (*Account, error)
 }
 
 type postgresRepository struct {
@@ -101,4 +102,24 @@ func (r *postgresRepository) GetAccountByEmail(ctx context.Context, email string
 		return nil, err // Return error if no account is found
 	}
 	return account, nil
+}
+
+func (r *postgresRepository) UpdateAccountRole(ctx context.Context, id string, role string) (*Account, error) {
+	_, err := r.db.ExecContext(
+		ctx,
+		"UPDATE accounts SET role = $1 WHERE id = $2",
+		role, id,
+	)
+
+	row := r.db.QueryRowContext(
+		ctx,
+		"SELECT id, first_name, last_name, email, password_hash, role FROM accounts WHERE id = $1",
+		id,
+	)
+	account := &Account{}
+	if err := row.Scan(&account.ID, &account.FirstName, &account.LastName, &account.Email, &account.PasswordHash, &account.Role); err != nil {
+		return nil, err // Return error if no account is found
+	}
+
+	return account, err
 }

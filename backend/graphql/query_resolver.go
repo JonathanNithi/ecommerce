@@ -10,13 +10,13 @@ type queryResolver struct {
 	server *Server
 }
 
-func (r *queryResolver) Accounts(ctx context.Context, pagination *PaginationInput, id *string, accessToken *string, refreshToken *string) ([]*Account, error) {
+func (r *queryResolver) Accounts(ctx context.Context, pagination *PaginationInput, id *string, accessToken string, refreshToken string) ([]*Account, error) {
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
 
 	// Get single
 	if id != nil {
-		r, err := r.server.accountClient.GetAccount(ctx, *id, *accessToken, *refreshToken)
+		r, err := r.server.accountClient.GetAccount(ctx, *id, accessToken, refreshToken)
 		if err != nil {
 			log.Println(err)
 			return nil, err
@@ -26,7 +26,7 @@ func (r *queryResolver) Accounts(ctx context.Context, pagination *PaginationInpu
 			FirstName: r.FirstName,
 			LastName:  r.LastName,
 			Email:     r.Email,
-			Role:      r.Role,
+			Role:      Role(r.Role),
 		}}, nil
 	}
 
@@ -34,8 +34,8 @@ func (r *queryResolver) Accounts(ctx context.Context, pagination *PaginationInpu
 	if pagination != nil {
 		skip, take = pagination.bounds()
 	}
-
-	accountList, err := r.server.accountClient.GetAccounts(ctx, skip, take)
+	//Get all
+	accountList, err := r.server.accountClient.GetAccounts(ctx, skip, take, accessToken, refreshToken)
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -48,13 +48,14 @@ func (r *queryResolver) Accounts(ctx context.Context, pagination *PaginationInpu
 			FirstName: a.FirstName,
 			LastName:  a.LastName,
 			Email:     a.Email,
-			Role:      a.Role,
+			Role:      Role(a.Role),
 		}
 		accounts = append(accounts, account)
 	}
 
 	return accounts, nil
 }
+
 func (r *queryResolver) Products(ctx context.Context, pagination *PaginationInput, query *string, id *string) ([]*Product, error) {
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()

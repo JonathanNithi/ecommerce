@@ -60,7 +60,7 @@ func (s *grpcServer) GetAccount(ctx context.Context, r *pb.GetAccountRequest) (*
 }
 
 func (s *grpcServer) GetAccounts(ctx context.Context, r *pb.GetAccountsRequest) (*pb.GetAccountsResponse, error) {
-	res, err := s.service.GetAccounts(ctx, r.Skip, r.Take)
+	res, err := s.service.GetAccounts(ctx, r.Skip, r.Take, r.AccessToken, r.RefreshToken)
 	if err != nil {
 		return nil, err
 	}
@@ -110,12 +110,29 @@ func (s *grpcServer) RefreshToken(ctx context.Context, r *pb.RefreshTokenRequest
 	}
 
 	// Generate a new access token
-	newAccessToken, err := GenerateAccessToken(claims.Username)
+	newAccessToken, err := GenerateAccessToken(claims.Username, claims.Role)
 	if err != nil {
 		return nil, err
 	}
 
 	return &pb.RefreshTokenResponse{
 		AccessToken: newAccessToken,
+	}, nil
+}
+
+func (s *grpcServer) SetAccountAsAdmin(ctx context.Context, r *pb.SetAccountAsAdminRequest) (*pb.SetAccountAsAdminResponse, error) {
+	p, err := s.service.SetAccountAsAdmin(ctx, r.AccessToken, r.RefreshToken, r.Id)
+	if err != nil {
+		return nil, err
+	}
+	return &pb.SetAccountAsAdminResponse{
+		Account: &pb.Account{
+			Id:           p.ID,
+			FirstName:    p.FirstName,
+			LastName:     p.LastName,
+			Email:        p.Email,
+			PasswordHash: p.PasswordHash,
+			Role:         p.Role,
+		},
 	}, nil
 }

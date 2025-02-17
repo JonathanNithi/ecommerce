@@ -1,5 +1,10 @@
 scalar Time
 
+enum Role {
+  user
+  admin
+}
+
 type Account {
   id: String!
   first_name: String!
@@ -7,6 +12,7 @@ type Account {
   email: String!
   password_hash: String!
   orders: [Order!]!
+  role: Role!
 }
 
 type Product {
@@ -70,9 +76,10 @@ type Mutation {
   createProduct(product: ProductInput!): Product
   createOrder(order: OrderInput!): Order
   login(email: String!, password: String!): LoginResponse
+  setAccountAsAdmin(accessToken: String!, refreshToken: String!, userId: String!): Account
 }
 
 type Query {
-  accounts(pagination: PaginationInput, id: String, accessToken: String, refreshToken: String): [Account!]!
+  accounts(pagination: PaginationInput, id: String, accessToken: String!, refreshToken: String!): [Account!]!
   products(pagination: PaginationInput, query: String, id: String): [Product!]!
 }

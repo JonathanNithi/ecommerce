@@ -3,7 +3,6 @@ package account
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/segmentio/ksuid"
 	"golang.org/x/crypto/bcrypt"
@@ -12,8 +11,9 @@ import (
 type Service interface {
 	PostAccount(ctx context.Context, first_name string, last_name string, email string, password string) (*Account, error)
 	GetAccount(ctx context.Context, id string, accessToken string, refreshToken string) (*Account, error)
-	GetAccounts(ctx context.Context, skip uint64, take uint64) ([]Account, error)
-	Login(ctx context.Context, email string, password string) (*Account, string, string, error) // New method
+	GetAccounts(ctx context.Context, skip uint64, take uint64, accessToken string, refreshToken string) ([]Account, error)
+	Login(ctx context.Context, email string, password string) (*Account, string, string, error)
+	SetAccountAsAdmin(ctx context.Context, accessToken string, refreshToken string, id string) (*Account, error)
 }
 
 type Account struct {
@@ -77,12 +77,12 @@ func (s *accountService) Login(ctx context.Context, email string, password strin
 	}
 
 	// Generate access and refresh tokens
-	accessToken, err := GenerateAccessToken(account.Email)
+	accessToken, err := GenerateAccessToken(account.Email, account.Role)
 	if err != nil {
 		return nil, "", "", err
 	}
 
-	refreshToken, err := GenerateRefreshToken(account.Email)
+	refreshToken, err := GenerateRefreshToken(account.Email, account.Role)
 	if err != nil {
 		return nil, "", "", err
 	}
@@ -91,33 +91,47 @@ func (s *accountService) Login(ctx context.Context, email string, password strin
 }
 
 func (s *accountService) GetAccount(ctx context.Context, id string, accessToken string, refreshToken string) (*Account, error) {
-	// Validate the access token
-	claims, err := ValidateToken(accessToken)
+	_, err := s.validateAndRegenerateToken(ctx, accessToken, refreshToken)
 	if err != nil {
 		return nil, err
-	}
-
-	// validate the refresh token
-	_, err = ValidateToken(refreshToken)
-	if err != nil {
-		return nil, err
-	}
-
-	// regenerate the accessToken if its expired
-	if claims.ExpiresAt.Before(time.Now()) {
-		accessToken, err = GenerateAccessToken(claims.Username)
-		if err != nil {
-			return nil, err
-		}
 	}
 
 	// If the access token is valid, return the account
 	return s.repository.GetAccountByID(ctx, id)
 }
 
-func (s *accountService) GetAccounts(ctx context.Context, skip uint64, take uint64) ([]Account, error) {
+func (s *accountService) GetAccounts(ctx context.Context, skip uint64, take uint64, accessToken string, refreshToken string) ([]Account, error) {
+	// Validate and potentially regenerate tokens
+	claims, err := s.validateAndRegenerateToken(ctx, accessToken, refreshToken)
+	if err != nil {
+		return nil, err
+	}
+
+	// Validate if role is equal to admin
+	if claims.Role != "admin" {
+		return nil, fmt.Errorf("unauthorized")
+	}
+
+	// Handle pagination logic
 	if take > 100 || (skip == 0 && take == 0) {
 		take = 100
 	}
+
 	return s.repository.ListAccounts(ctx, skip, take)
+}
+
+func (s *accountService) SetAccountAsAdmin(ctx context.Context, accessToken string, refreshToken string, id string) (*Account, error) {
+	// Validate and potentially regenerate tokens
+	claims, err := s.validateAndRegenerateToken(ctx, accessToken, refreshToken)
+	if err != nil {
+		return nil, err
+	}
+
+	// Validate if role is equal to admin
+	if claims.Role != "admin" {
+		return nil, fmt.Errorf("unauthorized")
+	}
+
+	// Update the account role
+	return s.repository.UpdateAccountRole(ctx, id, "admin")
 }

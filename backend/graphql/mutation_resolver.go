@@ -101,7 +101,27 @@ func (r *mutationResolver) Login(ctx context.Context, email string, password str
 			Email:        account.Email,
 			PasswordHash: account.PasswordHash,
 		},
-		AccessToken:  accessToken,  // Now you're correctly passing the tokens
-		RefreshToken: refreshToken, // Similarly for the RefreshToken
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+	}, nil
+}
+
+func (r *mutationResolver) SetAccountAsAdmin(ctx context.Context, accessToken string, refreshToken string, userId string) (*Account, error) {
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+
+	a, err := r.server.accountClient.SetAccountAsAdmin(ctx, accessToken, refreshToken, userId)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	return &Account{
+		ID:           a.ID,
+		FirstName:    a.FirstName,
+		LastName:     a.LastName,
+		Email:        a.Email,
+		PasswordHash: a.PasswordHash,
+		Role:         Role(a.Role),
 	}, nil
 }

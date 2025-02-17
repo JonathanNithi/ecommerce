@@ -11,6 +11,11 @@ type accountResolver struct {
 	server *Server
 }
 
+func (r *accountResolver) Role(ctx context.Context, obj *Account) (Role, error) {
+	// Assuming the role is already part of the Account object.
+	return obj.Role, nil
+}
+
 func (r *accountResolver) Orders(ctx context.Context, obj *Account) ([]*Order, error) {
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()

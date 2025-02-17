@@ -38,6 +38,8 @@ message GetAccountResponse {
 message GetAccountsRequest {
     uint64 skip = 1;
     uint64 take = 2;
+    string accessToken = 3;
+    string refreshToken = 4;
 }
 
 message GetAccountsResponse {
@@ -63,10 +65,21 @@ message RefreshTokenResponse {
     string access_token = 1;
 }
 
+message SetAccountAsAdminRequest {
+    string id = 1;
+    string accessToken = 2;
+    string refreshToken = 3;
+}
+
+message SetAccountAsAdminResponse {
+    Account account = 1;
+}
+
 service AccountService {
     rpc PostAccount (PostAccountRequest) returns (PostAccountResponse);
     rpc GetAccount (GetAccountRequest) returns (GetAccountResponse);
     rpc GetAccounts (GetAccountsRequest) returns (GetAccountsResponse);
     rpc Login (LoginRequest) returns (LoginResponse);
     rpc RefreshToken (RefreshTokenRequest) returns (RefreshTokenResponse); 
+    rpc SetAccountAsAdmin (SetAccountAsAdminRequest) returns (SetAccountAsAdminResponse);
 }

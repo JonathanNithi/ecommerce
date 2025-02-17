@@ -19,11 +19,12 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	AccountService_PostAccount_FullMethodName  = "/pb.AccountService/PostAccount"
-	AccountService_GetAccount_FullMethodName   = "/pb.AccountService/GetAccount"
-	AccountService_GetAccounts_FullMethodName  = "/pb.AccountService/GetAccounts"
-	AccountService_Login_FullMethodName        = "/pb.AccountService/Login"
-	AccountService_RefreshToken_FullMethodName = "/pb.AccountService/RefreshToken"
+	AccountService_PostAccount_FullMethodName       = "/pb.AccountService/PostAccount"
+	AccountService_GetAccount_FullMethodName        = "/pb.AccountService/GetAccount"
+	AccountService_GetAccounts_FullMethodName       = "/pb.AccountService/GetAccounts"
+	AccountService_Login_FullMethodName             = "/pb.AccountService/Login"
+	AccountService_RefreshToken_FullMethodName      = "/pb.AccountService/RefreshToken"
+	AccountService_SetAccountAsAdmin_FullMethodName = "/pb.AccountService/SetAccountAsAdmin"
 )
 
 // AccountServiceClient is the client API for AccountService service.
@@ -35,6 +36,7 @@ type AccountServiceClient interface {
 	GetAccounts(ctx context.Context, in *GetAccountsRequest, opts ...grpc.CallOption) (*GetAccountsResponse, error)
 	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
 	RefreshToken(ctx context.Context, in *RefreshTokenRequest, opts ...grpc.CallOption) (*RefreshTokenResponse, error)
+	SetAccountAsAdmin(ctx context.Context, in *SetAccountAsAdminRequest, opts ...grpc.CallOption) (*SetAccountAsAdminResponse, error)
 }
 
 type accountServiceClient struct {
@@ -95,6 +97,16 @@ func (c *accountServiceClient) RefreshToken(ctx context.Context, in *RefreshToke
 	return out, nil
 }
 
+func (c *accountServiceClient) SetAccountAsAdmin(ctx context.Context, in *SetAccountAsAdminRequest, opts ...grpc.CallOption) (*SetAccountAsAdminResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SetAccountAsAdminResponse)
+	err := c.cc.Invoke(ctx, AccountService_SetAccountAsAdmin_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AccountServiceServer is the server API for AccountService service.
 // All implementations must embed UnimplementedAccountServiceServer
 // for forward compatibility.
@@ -104,6 +116,7 @@ type AccountServiceServer interface {
 	GetAccounts(context.Context, *GetAccountsRequest) (*GetAccountsResponse, error)
 	Login(context.Context, *LoginRequest) (*LoginResponse, error)
 	RefreshToken(context.Context, *RefreshTokenRequest) (*RefreshTokenResponse, error)
+	SetAccountAsAdmin(context.Context, *SetAccountAsAdminRequest) (*SetAccountAsAdminResponse, error)
 	mustEmbedUnimplementedAccountServiceServer()
 }
 
@@ -128,6 +141,9 @@ func (UnimplementedAccountServiceServer) Login(context.Context, *LoginRequest) (
 }
 func (UnimplementedAccountServiceServer) RefreshToken(context.Context, *RefreshTokenRequest) (*RefreshTokenResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RefreshToken not implemented")
+}
+func (UnimplementedAccountServiceServer) SetAccountAsAdmin(context.Context, *SetAccountAsAdminRequest) (*SetAccountAsAdminResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetAccountAsAdmin not implemented")
 }
 func (UnimplementedAccountServiceServer) mustEmbedUnimplementedAccountServiceServer() {}
 func (UnimplementedAccountServiceServer) testEmbeddedByValue()                        {}
@@ -240,6 +256,24 @@ func _AccountService_RefreshToken_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AccountService_SetAccountAsAdmin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetAccountAsAdminRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AccountServiceServer).SetAccountAsAdmin(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AccountService_SetAccountAsAdmin_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AccountServiceServer).SetAccountAsAdmin(ctx, req.(*SetAccountAsAdminRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AccountService_ServiceDesc is the grpc.ServiceDesc for AccountService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -266,6 +300,10 @@ var AccountService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RefreshToken",
 			Handler:    _AccountService_RefreshToken_Handler,
+		},
+		{
+			MethodName: "SetAccountAsAdmin",
+			Handler:    _AccountService_SetAccountAsAdmin_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
