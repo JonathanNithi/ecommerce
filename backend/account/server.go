@@ -29,31 +29,38 @@ func ListenGRPC(s Service, port int) error {
 }
 
 func (s *grpcServer) PostAccount(ctx context.Context, r *pb.PostAccountRequest) (*pb.PostAccountResponse, error) {
-	a, err := s.service.PostAccount(ctx, r.Name)
+	p, err := s.service.PostAccount(ctx, r.FirstName, r.LastName, r.Email, r.PasswordHash)
 	if err != nil {
 		return nil, err
 	}
 	return &pb.PostAccountResponse{Account: &pb.Account{
-		Id:   a.ID,
-		Name: a.Name,
+		Id:           p.ID,
+		FirstName:    p.FirstName,
+		LastName:     p.LastName,
+		Email:        p.Email,
+		PasswordHash: p.PasswordHash,
 	}}, nil
 }
 
 func (s *grpcServer) GetAccount(ctx context.Context, r *pb.GetAccountRequest) (*pb.GetAccountResponse, error) {
-	a, err := s.service.GetAccount(ctx, r.Id)
+	p, err := s.service.GetAccount(ctx, r.Id, r.AccessToken, r.RefreshToken)
 	if err != nil {
 		return nil, err
 	}
 	return &pb.GetAccountResponse{
 		Account: &pb.Account{
-			Id:   a.ID,
-			Name: a.Name,
+			Id:           p.ID,
+			FirstName:    p.FirstName,
+			LastName:     p.LastName,
+			Email:        p.Email,
+			PasswordHash: p.PasswordHash,
+			Role:         p.Role,
 		},
 	}, nil
 }
 
 func (s *grpcServer) GetAccounts(ctx context.Context, r *pb.GetAccountsRequest) (*pb.GetAccountsResponse, error) {
-	res, err := s.service.GetAccounts(ctx, r.Skip, r.Take)
+	res, err := s.service.GetAccounts(ctx, r.Skip, r.Take, r.AccessToken, r.RefreshToken)
 	if err != nil {
 		return nil, err
 	}
@@ -62,10 +69,70 @@ func (s *grpcServer) GetAccounts(ctx context.Context, r *pb.GetAccountsRequest) 
 		accounts = append(
 			accounts,
 			&pb.Account{
-				Id:   p.ID,
-				Name: p.Name,
+				Id:           p.ID,
+				FirstName:    p.FirstName,
+				LastName:     p.LastName,
+				Email:        p.Email,
+				PasswordHash: p.PasswordHash,
+				Role:         p.Role,
 			},
 		)
 	}
 	return &pb.GetAccountsResponse{Accounts: accounts}, nil
+}
+
+func (s *grpcServer) Login(ctx context.Context, r *pb.LoginRequest) (*pb.LoginResponse, error) {
+	// Call the service layer login method
+	account, accessToken, refreshToken, err := s.service.Login(ctx, r.Email, r.Password)
+	if err != nil {
+		return nil, err
+	}
+
+	// Map the account to the protobuf Account type
+	return &pb.LoginResponse{
+		Account: &pb.Account{
+			Id:           account.ID,
+			FirstName:    account.FirstName,
+			LastName:     account.LastName,
+			Email:        account.Email,
+			PasswordHash: account.PasswordHash,
+			Role:         account.Role,
+		},
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+	}, nil
+}
+
+func (s *grpcServer) RefreshToken(ctx context.Context, r *pb.RefreshTokenRequest) (*pb.RefreshTokenResponse, error) {
+	claims, err := ValidateToken(r.RefreshToken)
+	if err != nil {
+		return nil, err
+	}
+
+	// Generate a new access token
+	newAccessToken, err := GenerateAccessToken(claims.Username, claims.Role)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.RefreshTokenResponse{
+		AccessToken: newAccessToken,
+	}, nil
+}
+
+func (s *grpcServer) SetAccountAsAdmin(ctx context.Context, r *pb.SetAccountAsAdminRequest) (*pb.SetAccountAsAdminResponse, error) {
+	p, err := s.service.SetAccountAsAdmin(ctx, r.AccessToken, r.RefreshToken, r.Id)
+	if err != nil {
+		return nil, err
+	}
+	return &pb.SetAccountAsAdminResponse{
+		Account: &pb.Account{
+			Id:           p.ID,
+			FirstName:    p.FirstName,
+			LastName:     p.LastName,
+			Email:        p.Email,
+			PasswordHash: p.PasswordHash,
+			Role:         p.Role,
+		},
+	}, nil
 }

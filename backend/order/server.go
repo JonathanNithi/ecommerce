@@ -56,8 +56,8 @@ func (s *grpcServer) PostOrder(
 	ctx context.Context,
 	r *pb.PostOrderRequest,
 ) (*pb.PostOrderResponse, error) {
-	// Check if account exists
-	_, err := s.accountClient.GetAccount(ctx, r.AccountId)
+	// Check if account exists - I need to provide access token and refresh token
+	_, err := s.accountClient.GetAccount(ctx, r.AccountId, "", "")
 	if err != nil {
 		log.Println("Error getting account: ", err)
 		return nil, errors.New("account not found")

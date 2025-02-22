@@ -20,16 +20,19 @@ type mutationResolver struct {
 func (r *mutationResolver) CreateAccount(ctx context.Context, in AccountInput) (*Account, error) {
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
-
-	a, err := r.server.accountClient.PostAccount(ctx, in.Name)
+	//password without hashing will be sent to service where it will be hashed
+	a, err := r.server.accountClient.PostAccount(ctx, in.FirstName, in.LastName, in.Email, in.PasswordHash)
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
 
 	return &Account{
-		ID:   a.ID,
-		Name: a.Name,
+		ID:           a.ID,
+		FirstName:    a.FirstName,
+		LastName:     a.LastName,
+		Email:        a.Email,
+		PasswordHash: a.PasswordHash,
 	}, nil
 }
 
@@ -75,5 +78,50 @@ func (r *mutationResolver) CreateOrder(ctx context.Context, in OrderInput) (*Ord
 		ID:         o.ID,
 		CreatedAt:  o.CreatedAt,
 		TotalPrice: o.TotalPrice,
+	}, nil
+}
+
+func (r *mutationResolver) Login(ctx context.Context, email string, password string) (*LoginResponse, error) {
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+
+	// Modify this line to expect the AccessToken and RefreshToken
+	account, accessToken, refreshToken, err := r.server.accountClient.Login(ctx, email, password)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	// Return the Account along with AccessToken and RefreshToken
+	return &LoginResponse{
+		Account: &Account{
+			ID:           account.ID,
+			FirstName:    account.FirstName,
+			LastName:     account.LastName,
+			Email:        account.Email,
+			PasswordHash: account.PasswordHash,
+		},
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+	}, nil
+}
+
+func (r *mutationResolver) SetAccountAsAdmin(ctx context.Context, accessToken string, refreshToken string, userId string) (*Account, error) {
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+
+	a, err := r.server.accountClient.SetAccountAsAdmin(ctx, accessToken, refreshToken, userId)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	return &Account{
+		ID:           a.ID,
+		FirstName:    a.FirstName,
+		LastName:     a.LastName,
+		Email:        a.Email,
+		PasswordHash: a.PasswordHash,
+		Role:         Role(a.Role),
 	}, nil
 }

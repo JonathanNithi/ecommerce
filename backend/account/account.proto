@@ -6,11 +6,19 @@ option go_package = "./";
 
 message Account {
     string id = 1;
-    string name = 2;
+    string first_name = 2;
+    string last_name = 3;
+    string email = 4;
+    string password_hash = 5;
+    string role = 6; // 'admin' or 'user'
 }
 
 message PostAccountRequest {
-    string name = 1;
+    string first_name = 1;
+    string last_name = 2;
+    string email = 3;
+    string password_hash = 4;
+    string role = 5; // 'admin' or 'user'
 }
 
 message PostAccountResponse {
@@ -19,6 +27,8 @@ message PostAccountResponse {
 
 message GetAccountRequest {
     string id = 1;
+    string accessToken = 2;
+    string refreshToken = 3;
 }
 
 message GetAccountResponse {
@@ -28,22 +38,48 @@ message GetAccountResponse {
 message GetAccountsRequest {
     uint64 skip = 1;
     uint64 take = 2;
+    string accessToken = 3;
+    string refreshToken = 4;
 }
 
 message GetAccountsResponse {
     repeated Account accounts = 1;
 }
 
+message LoginRequest {
+    string email = 1;
+    string password = 2;
+}
+
+message LoginResponse {
+    Account account = 1;
+    string accessToken = 2;
+    string refreshToken = 3;
+}
+
+message RefreshTokenRequest {
+    string refresh_token = 1;
+}
+
+message RefreshTokenResponse {
+    string access_token = 1;
+}
+
+message SetAccountAsAdminRequest {
+    string id = 1;
+    string accessToken = 2;
+    string refreshToken = 3;
+}
+
+message SetAccountAsAdminResponse {
+    Account account = 1;
+}
+
 service AccountService {
-    rpc PostAccount (PostAccountRequest) returns (PostAccountResponse){
-
-    }
-
-    rpc GetAccount (GetAccountRequest) returns (GetAccountResponse){
-        
-    }
-
-    rpc GetAccounts (GetAccountsRequest) returns (GetAccountsResponse){
-        
-    }
+    rpc PostAccount (PostAccountRequest) returns (PostAccountResponse);
+    rpc GetAccount (GetAccountRequest) returns (GetAccountResponse);
+    rpc GetAccounts (GetAccountsRequest) returns (GetAccountsResponse);
+    rpc Login (LoginRequest) returns (LoginResponse);
+    rpc RefreshToken (RefreshTokenRequest) returns (RefreshTokenResponse); 
+    rpc SetAccountAsAdmin (SetAccountAsAdminRequest) returns (SetAccountAsAdminResponse);
 }
