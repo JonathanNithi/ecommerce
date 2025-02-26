@@ -20,6 +20,11 @@ type Product {
   name: String!
   description: String!
   price: Float!
+  category: String!
+  imageUrl: String!
+  tags: [String!]
+  availability: Boolean!
+  stock: Int!    
 }
 
 type Order {
@@ -59,6 +64,10 @@ input ProductInput {
   name: String!
   description: String!
   price: Float!
+  category: String!
+  imageUrl: String!
+  tags: [String!]
+  stock: Int!
 }
 
 input OrderProductInput {

@@ -56,16 +56,25 @@ type PaginationInput struct {
 }
 
 type Product struct {
-	ID          string  `json:"id"`
-	Name        string  `json:"name"`
-	Description string  `json:"description"`
-	Price       float64 `json:"price"`
+	ID           string   `json:"id"`
+	Name         string   `json:"name"`
+	Description  string   `json:"description"`
+	Price        float64  `json:"price"`
+	Category     string   `json:"category"`
+	ImageURL     string   `json:"imageUrl"`
+	Tags         []string `json:"tags,omitempty"`
+	Availability bool     `json:"availability"`
+	Stock        int      `json:"stock"`
 }
 
 type ProductInput struct {
-	Name        string  `json:"name"`
-	Description string  `json:"description"`
-	Price       float64 `json:"price"`
+	Name        string   `json:"name"`
+	Description string   `json:"description"`
+	Price       float64  `json:"price"`
+	Category    string   `json:"category"`
+	ImageURL    string   `json:"imageUrl"`
+	Tags        []string `json:"tags,omitempty"`
+	Stock       int      `json:"stock"`
 }
 
 type Query struct {

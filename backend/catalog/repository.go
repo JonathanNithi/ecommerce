@@ -29,9 +29,14 @@ type elasticRepository struct {
 }
 
 type productDocument struct {
-	Name        string  `json:"name"`
-	Description string  `json:"description"`
-	Price       float64 `json:"price"`
+	Name         string   `json:"name"`
+	Description  string   `json:"description"`
+	Price        float64  `json:"price"`
+	Category     string   `json:"category"`
+	ImageURL     string   `json:"image_url"`
+	Tags         []string `json:"tags"`
+	Availability bool     `json:"availability"`
+	Stock        uint64   `json:"stock"`
 }
 
 func NewElasticRepository(url string) (Repository, error) {
@@ -92,9 +97,14 @@ func (r *elasticRepository) PutProduct(ctx context.Context, p Product) error {
 
 	// Step 2: Index the new product
 	doc := productDocument{
-		Name:        p.Name,
-		Description: p.Description,
-		Price:       p.Price,
+		Name:         p.Name,
+		Description:  p.Description,
+		Price:        p.Price,
+		Category:     p.Category,
+		ImageURL:     p.ImageURL,
+		Tags:         p.Tags,
+		Availability: p.Availability,
+		Stock:        p.Stock,
 	}
 	docJSON, err := json.Marshal(doc)
 	if err != nil {
@@ -146,10 +156,15 @@ func (r *elasticRepository) GetProductByID(ctx context.Context, id string) (*Pro
 	}
 
 	return &Product{
-		ID:          id,
-		Name:        p.Name,
-		Description: p.Description,
-		Price:       p.Price,
+		ID:           id,
+		Name:         p.Name,
+		Description:  p.Description,
+		Price:        p.Price,
+		Category:     p.Category,
+		ImageURL:     p.ImageURL,
+		Tags:         p.Tags,
+		Availability: p.Availability,
+		Stock:        uint64(p.Stock),
 	}, nil
 }
 
@@ -195,10 +210,15 @@ func (r *elasticRepository) ListProducts(ctx context.Context, skip, take uint64)
 		}
 
 		products = append(products, Product{
-			ID:          hit.(map[string]interface{})["_id"].(string),
-			Name:        p.Name,
-			Description: p.Description,
-			Price:       p.Price,
+			ID:           hit.(map[string]interface{})["_id"].(string),
+			Name:         p.Name,
+			Description:  p.Description,
+			Price:        p.Price,
+			Category:     p.Category,
+			ImageURL:     p.ImageURL,
+			Tags:         p.Tags,
+			Availability: p.Availability,
+			Stock:        uint64(p.Stock),
 		})
 	}
 
@@ -254,10 +274,15 @@ func (r *elasticRepository) ListProductsWithIDs(ctx context.Context, ids []strin
 		}
 
 		products = append(products, Product{
-			ID:          hit.(map[string]interface{})["_id"].(string),
-			Name:        p.Name,
-			Description: p.Description,
-			Price:       p.Price,
+			ID:           hit.(map[string]interface{})["_id"].(string),
+			Name:         p.Name,
+			Description:  p.Description,
+			Price:        p.Price,
+			Category:     p.Category,
+			ImageURL:     p.ImageURL,
+			Tags:         p.Tags,
+			Availability: p.Availability,
+			Stock:        uint64(p.Stock),
 		})
 	}
 
@@ -316,10 +341,15 @@ func (r *elasticRepository) SearchProducts(ctx context.Context, query string, sk
 		}
 
 		products = append(products, Product{
-			ID:          hit.(map[string]interface{})["_id"].(string),
-			Name:        p.Name,
-			Description: p.Description,
-			Price:       p.Price,
+			ID:           hit.(map[string]interface{})["_id"].(string),
+			Name:         p.Name,
+			Description:  p.Description,
+			Price:        p.Price,
+			Category:     p.Category,
+			ImageURL:     p.ImageURL,
+			Tags:         p.Tags,
+			Availability: p.Availability,
+			Stock:        uint64(p.Stock),
 		})
 	}
 

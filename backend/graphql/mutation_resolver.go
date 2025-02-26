@@ -40,17 +40,22 @@ func (r *mutationResolver) CreateProduct(ctx context.Context, in ProductInput) (
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
 
-	p, err := r.server.catalogClient.PostProduct(ctx, in.Name, in.Description, in.Price)
+	p, err := r.server.catalogClient.PostProduct(ctx, in.Name, in.Description, in.Price, in.Category, in.ImageURL, in.Tags, uint64(in.Stock))
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
 
 	return &Product{
-		ID:          p.ID,
-		Name:        p.Name,
-		Description: p.Description,
-		Price:       p.Price,
+		ID:           p.ID,
+		Name:         p.Name,
+		Description:  p.Description,
+		Price:        p.Price,
+		Category:     p.Category,
+		ImageURL:     p.ImageURL,
+		Tags:         p.Tags,
+		Availability: p.Availability,
+		Stock:        int(p.Stock),
 	}, nil
 }
 
