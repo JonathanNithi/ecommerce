@@ -4,13 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"log"
+	"fmt"
+	"strings"
 
-	elastic "gopkg.in/olivere/elastic.v5"
+	"github.com/elastic/go-elasticsearch/v8"
+	"github.com/elastic/go-elasticsearch/v8/esapi"
 )
 
 var (
-	ErrNotFound = errors.New("Entity not found")
+	ErrNotFound = errors.New("entity not found")
 )
 
 type Repository interface {
@@ -23,20 +25,25 @@ type Repository interface {
 }
 
 type elasticRepository struct {
-	client *elastic.Client
+	client *elasticsearch.Client
 }
 
 type productDocument struct {
-	Name        string  `json:"name"`
-	Description string  `json:"description"`
-	Price       float64 `json:"price"`
+	Name         string   `json:"name"`
+	Description  string   `json:"description"`
+	Price        float64  `json:"price"`
+	Category     string   `json:"category"`
+	ImageURL     string   `json:"image_url"`
+	Tags         []string `json:"tags"`
+	Availability bool     `json:"availability"`
+	Stock        uint64   `json:"stock"`
 }
 
 func NewElasticRepository(url string) (Repository, error) {
-	client, err := elastic.NewClient(
-		elastic.SetURL(url),
-		elastic.SetSniff(false),
-	)
+	cfg := elasticsearch.Config{
+		Addresses: []string{url},
+	}
+	client, err := elasticsearch.NewClient(cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -44,128 +51,307 @@ func NewElasticRepository(url string) (Repository, error) {
 }
 
 func (r *elasticRepository) Close() {
-
+	// The Elasticsearch client does not require explicit closing.
 }
 
 func (r *elasticRepository) PutProduct(ctx context.Context, p Product) error {
-	_, err := r.client.Index().
-		Index("catalog").
-		Type("product").
-		Id(p.ID).
-		BodyJson(productDocument{
-			Name:        p.Name,
-			Description: p.Description,
-			Price:       p.Price,
-		}).
-		Do(ctx)
-	return err
+	// Step 1: Check for existing product with the same name (case-insensitive)
+	searchQuery := map[string]interface{}{
+		"query": map[string]interface{}{
+			"term": map[string]interface{}{
+				"name.keyword": p.Name, // Normalize the query term
+			},
+		},
+		"size": 1,
+	}
+
+	queryJSON, err := json.Marshal(searchQuery)
+	if err != nil {
+		return fmt.Errorf("error marshaling search query: %v", err)
+	}
+
+	searchReq := esapi.SearchRequest{
+		Index: []string{"catalog"},
+		Body:  strings.NewReader(string(queryJSON)),
+	}
+
+	res, err := searchReq.Do(ctx, r.client)
+	if err != nil {
+		return fmt.Errorf("error executing search request: %v", err)
+	}
+	defer res.Body.Close()
+
+	if res.IsError() {
+		return fmt.Errorf("error searching for existing product: status=%s, response=%s", res.Status(), res.String())
+	}
+
+	var result map[string]interface{}
+	if err := json.NewDecoder(res.Body).Decode(&result); err != nil {
+		return fmt.Errorf("error decoding search response: %v", err)
+	}
+
+	hits := result["hits"].(map[string]interface{})["hits"].([]interface{})
+	if len(hits) > 0 {
+		return fmt.Errorf("product with the same name '%s' already exists", p.Name)
+	}
+
+	// Step 2: Index the new product
+	doc := productDocument{
+		Name:         p.Name,
+		Description:  p.Description,
+		Price:        p.Price,
+		Category:     p.Category,
+		ImageURL:     p.ImageURL,
+		Tags:         p.Tags,
+		Availability: p.Availability,
+		Stock:        p.Stock,
+	}
+	docJSON, err := json.Marshal(doc)
+	if err != nil {
+		return fmt.Errorf("error marshaling product document: %v", err)
+	}
+
+	indexReq := esapi.IndexRequest{
+		Index:      "catalog",
+		DocumentID: p.ID,
+		Body:       strings.NewReader(string(docJSON)),
+		Refresh:    "true",
+	}
+
+	res, err = indexReq.Do(ctx, r.client)
+	if err != nil {
+		return fmt.Errorf("error executing index request: %v", err)
+	}
+	defer res.Body.Close()
+
+	if res.IsError() {
+		return fmt.Errorf("error indexing document: status=%s, response=%s", res.Status(), res.String())
+	}
+
+	return nil
 }
 
 func (r *elasticRepository) GetProductByID(ctx context.Context, id string) (*Product, error) {
-	res, err := r.client.Get().
-		Index("catalog").
-		Type("product").
-		Id(id).
-		Do(ctx)
+	req := esapi.GetRequest{
+		Index:      "catalog",
+		DocumentID: id,
+	}
+
+	res, err := req.Do(ctx, r.client)
 	if err != nil {
 		return nil, err
 	}
-	if !res.Found {
-		return nil, ErrNotFound
+	defer res.Body.Close()
+
+	if res.IsError() {
+		if res.StatusCode == 404 {
+			return nil, ErrNotFound
+		}
+		return nil, fmt.Errorf("error fetching document: %s", res.String())
 	}
-	p := productDocument{}
-	if err = json.Unmarshal(*res.Source, &p); err != nil {
+
+	var p productDocument
+	if err := json.NewDecoder(res.Body).Decode(&p); err != nil {
 		return nil, err
 	}
+
 	return &Product{
-		ID:          id,
-		Name:        p.Name,
-		Description: p.Description,
-		Price:       p.Price,
-	}, err
+		ID:           id,
+		Name:         p.Name,
+		Description:  p.Description,
+		Price:        p.Price,
+		Category:     p.Category,
+		ImageURL:     p.ImageURL,
+		Tags:         p.Tags,
+		Availability: p.Availability,
+		Stock:        uint64(p.Stock),
+	}, nil
 }
 
 func (r *elasticRepository) ListProducts(ctx context.Context, skip, take uint64) ([]Product, error) {
-	res, err := r.client.Search().
-		Index("catalog").
-		Type("product").
-		Query(elastic.NewMatchAllQuery()).
-		From(int(skip)).Size(int(take)).
-		Do(ctx)
+	req := esapi.SearchRequest{
+		Index: []string{"catalog"},
+		Body: strings.NewReader(fmt.Sprintf(`{
+			"from": %d,
+			"size": %d,
+			"query": {
+				"match_all": {}
+			}
+		}`, skip, take)),
+	}
+
+	res, err := req.Do(ctx, r.client)
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
-	products := []Product{}
-	for _, hit := range res.Hits.Hits {
-		p := productDocument{}
-		if err = json.Unmarshal(*hit.Source, &p); err == nil {
-			products = append(products, Product{
-				ID:          hit.Id,
-				Name:        p.Name,
-				Description: p.Description,
-				Price:       p.Price,
-			})
-		}
+	defer res.Body.Close()
+
+	if res.IsError() {
+		return nil, fmt.Errorf("error searching documents: %s", res.String())
 	}
-	return products, err
+
+	var result map[string]interface{}
+	if err := json.NewDecoder(res.Body).Decode(&result); err != nil {
+		return nil, err
+	}
+
+	products := []Product{}
+	hits := result["hits"].(map[string]interface{})["hits"].([]interface{})
+	for _, hit := range hits {
+		source := hit.(map[string]interface{})["_source"]
+		sourceJSON, err := json.Marshal(source)
+		if err != nil {
+			return nil, err
+		}
+
+		var p productDocument
+		if err := json.Unmarshal(sourceJSON, &p); err != nil {
+			return nil, err
+		}
+
+		products = append(products, Product{
+			ID:           hit.(map[string]interface{})["_id"].(string),
+			Name:         p.Name,
+			Description:  p.Description,
+			Price:        p.Price,
+			Category:     p.Category,
+			ImageURL:     p.ImageURL,
+			Tags:         p.Tags,
+			Availability: p.Availability,
+			Stock:        uint64(p.Stock),
+		})
+	}
+
+	return products, nil
 }
 
 func (r *elasticRepository) ListProductsWithIDs(ctx context.Context, ids []string) ([]Product, error) {
-	items := []*elastic.MultiGetItem{}
-	for _, id := range ids {
-		items = append(
-			items,
-			elastic.NewMultiGetItem().
-				Index("catalog").
-				Type("product").
-				Id(id),
-		)
+	query := map[string]interface{}{
+		"query": map[string]interface{}{
+			"ids": map[string]interface{}{
+				"values": ids,
+			},
+		},
 	}
-	res, err := r.client.MultiGet().
-		Add(items...).
-		Do(ctx)
+
+	queryJSON, err := json.Marshal(query)
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
-	products := []Product{}
-	for _, doc := range res.Docs {
-		p := productDocument{}
-		if err = json.Unmarshal(*doc.Source, &p); err == nil {
-			products = append(products, Product{
-				ID:          doc.Id,
-				Name:        p.Name,
-				Description: p.Description,
-				Price:       p.Price,
-			})
-		}
+
+	req := esapi.SearchRequest{
+		Index: []string{"catalog"},
+		Body:  strings.NewReader(string(queryJSON)),
 	}
+
+	res, err := req.Do(ctx, r.client)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	if res.IsError() {
+		return nil, fmt.Errorf("error searching documents: %s", res.String())
+	}
+
+	var result map[string]interface{}
+	if err := json.NewDecoder(res.Body).Decode(&result); err != nil {
+		return nil, err
+	}
+
+	products := []Product{}
+	hits := result["hits"].(map[string]interface{})["hits"].([]interface{})
+	for _, hit := range hits {
+		source := hit.(map[string]interface{})["_source"]
+		sourceJSON, err := json.Marshal(source)
+		if err != nil {
+			return nil, err
+		}
+
+		var p productDocument
+		if err := json.Unmarshal(sourceJSON, &p); err != nil {
+			return nil, err
+		}
+
+		products = append(products, Product{
+			ID:           hit.(map[string]interface{})["_id"].(string),
+			Name:         p.Name,
+			Description:  p.Description,
+			Price:        p.Price,
+			Category:     p.Category,
+			ImageURL:     p.ImageURL,
+			Tags:         p.Tags,
+			Availability: p.Availability,
+			Stock:        uint64(p.Stock),
+		})
+	}
+
 	return products, nil
 }
 
 func (r *elasticRepository) SearchProducts(ctx context.Context, query string, skip, take uint64) ([]Product, error) {
-	res, err := r.client.Search().
-		Index("catalog").
-		Type("product").
-		Query(elastic.NewMultiMatchQuery(query, "name", "description")).
-		From(int(skip)).Size(int(take)).
-		Do(ctx)
+	searchQuery := map[string]interface{}{
+		"from": skip,
+		"size": take,
+		"query": map[string]interface{}{
+			"multi_match": map[string]interface{}{
+				"query":  query,
+				"fields": []string{"name", "description"},
+			},
+		},
+	}
+
+	queryJSON, err := json.Marshal(searchQuery)
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
-	products := []Product{}
-	for _, hit := range res.Hits.Hits {
-		p := productDocument{}
-		if err = json.Unmarshal(*hit.Source, &p); err == nil {
-			products = append(products, Product{
-				ID:          hit.Id,
-				Name:        p.Name,
-				Description: p.Description,
-				Price:       p.Price,
-			})
-		}
+
+	req := esapi.SearchRequest{
+		Index: []string{"catalog"},
+		Body:  strings.NewReader(string(queryJSON)),
 	}
-	return products, err
+
+	res, err := req.Do(ctx, r.client)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	if res.IsError() {
+		return nil, fmt.Errorf("error searching documents: %s", res.String())
+	}
+
+	var result map[string]interface{}
+	if err := json.NewDecoder(res.Body).Decode(&result); err != nil {
+		return nil, err
+	}
+
+	products := []Product{}
+	hits := result["hits"].(map[string]interface{})["hits"].([]interface{})
+	for _, hit := range hits {
+		source := hit.(map[string]interface{})["_source"]
+		sourceJSON, err := json.Marshal(source)
+		if err != nil {
+			return nil, err
+		}
+
+		var p productDocument
+		if err := json.Unmarshal(sourceJSON, &p); err != nil {
+			return nil, err
+		}
+
+		products = append(products, Product{
+			ID:           hit.(map[string]interface{})["_id"].(string),
+			Name:         p.Name,
+			Description:  p.Description,
+			Price:        p.Price,
+			Category:     p.Category,
+			ImageURL:     p.ImageURL,
+			Tags:         p.Tags,
+			Availability: p.Availability,
+			Stock:        uint64(p.Stock),
+		})
+	}
+
+	return products, nil
 }

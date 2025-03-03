@@ -68,10 +68,15 @@ func (r *queryResolver) Products(ctx context.Context, pagination *PaginationInpu
 			return nil, err
 		}
 		return []*Product{{
-			ID:          r.ID,
-			Name:        r.Name,
-			Description: r.Description,
-			Price:       r.Price,
+			ID:           r.ID,
+			Name:         r.Name,
+			Description:  r.Description,
+			Price:        r.Price,
+			Category:     r.Category,
+			ImageURL:     r.ImageURL,
+			Tags:         r.Tags,
+			Availability: r.Availability,
+			Stock:        int(r.Stock),
 		}}, nil
 	}
 
@@ -94,10 +99,15 @@ func (r *queryResolver) Products(ctx context.Context, pagination *PaginationInpu
 	for _, a := range productList {
 		products = append(products,
 			&Product{
-				ID:          a.ID,
-				Name:        a.Name,
-				Description: a.Description,
-				Price:       a.Price,
+				ID:           a.ID,
+				Name:         a.Name,
+				Description:  a.Description,
+				Price:        a.Price,
+				Category:     a.Category,
+				ImageURL:     a.ImageURL,
+				Tags:         a.Tags,
+				Availability: a.Availability,
+				Stock:        int(a.Stock),
 			},
 		)
 	}

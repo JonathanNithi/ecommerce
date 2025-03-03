@@ -7,7 +7,7 @@ import (
 )
 
 type Service interface {
-	PostProduct(ctx context.Context, name, description string, price float64) (*Product, error)
+	PostProduct(ctx context.Context, name, description string, price float64, category string, imageUrl string, tags []string, stock uint64) (*Product, error)
 	GetProduct(ctx context.Context, id string) (*Product, error)
 	GetProducts(ctx context.Context, skip uint64, take uint64) ([]Product, error)
 	GetProductsByIDs(ctx context.Context, ids []string) ([]Product, error)
@@ -15,10 +15,15 @@ type Service interface {
 }
 
 type Product struct {
-	ID          string  `json:"id"`
-	Name        string  `json:"name"`
-	Description string  `json:"description"`
-	Price       float64 `json:"price"`
+	ID           string   `json:"id"`
+	Name         string   `json:"name"`
+	Description  string   `json:"description"`
+	Price        float64  `json:"price"`
+	Category     string   `json:"category"`
+	ImageURL     string   `json:"image_url"`
+	Tags         []string `json:"tags"`
+	Availability bool     `json:"availability"`
+	Stock        uint64   `json:"stock"`
 }
 
 type catalogService struct {
@@ -29,12 +34,25 @@ func NewService(r Repository) Service {
 	return &catalogService{r}
 }
 
-func (s *catalogService) PostProduct(ctx context.Context, name, description string, price float64) (*Product, error) {
+func (s *catalogService) PostProduct(ctx context.Context, name, description string, price float64, category string, imageUrl string, tags []string, stock uint64) (*Product, error) {
+	//logic to check if stock is above 0 and if so set availability to true
+	var availability bool
+	if stock > 0 {
+		availability = true
+	} else {
+		availability = false
+	}
+
 	p := &Product{
-		Name:        name,
-		Description: description,
-		Price:       price,
-		ID:          ksuid.New().String(),
+		Name:         name,
+		Description:  description,
+		Price:        price,
+		ID:           ksuid.New().String(),
+		Category:     category,
+		ImageURL:     imageUrl,
+		Tags:         tags,
+		Availability: availability,
+		Stock:        stock,
 	}
 	if err := s.repository.PutProduct(ctx, *p); err != nil {
 		return nil, err

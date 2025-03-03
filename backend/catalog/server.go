@@ -30,16 +30,21 @@ func ListenGRPC(s Service, port int) error {
 }
 
 func (s *grpcServer) PostProduct(ctx context.Context, r *pb.PostProductRequest) (*pb.PostProductResponse, error) {
-	p, err := s.service.PostProduct(ctx, r.Name, r.Description, r.Price)
+	p, err := s.service.PostProduct(ctx, r.Name, r.Description, r.Price, r.Category, r.ImageUrl, r.Tags, r.Stock)
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
 	return &pb.PostProductResponse{Product: &pb.Product{
-		Id:          p.ID,
-		Name:        p.Name,
-		Description: p.Description,
-		Price:       p.Price,
+		Id:           p.ID,
+		Name:         p.Name,
+		Description:  p.Description,
+		Price:        p.Price,
+		Category:     p.Category,
+		ImageUrl:     p.ImageURL,
+		Tags:         p.Tags,
+		Availability: p.Availability,
+		Stock:        p.Stock,
 	}}, nil
 }
 
@@ -51,10 +56,15 @@ func (s *grpcServer) GetProduct(ctx context.Context, r *pb.GetProductRequest) (*
 	}
 	return &pb.GetProductResponse{
 		Product: &pb.Product{
-			Id:          p.ID,
-			Name:        p.Name,
-			Description: p.Description,
-			Price:       p.Price,
+			Id:           p.ID,
+			Name:         p.Name,
+			Description:  p.Description,
+			Price:        p.Price,
+			Category:     p.Category,
+			ImageUrl:     p.ImageURL,
+			Tags:         p.Tags,
+			Availability: p.Availability,
+			Stock:        p.Stock,
 		},
 	}, nil
 }
@@ -79,10 +89,15 @@ func (s *grpcServer) GetProducts(ctx context.Context, r *pb.GetProductsRequest) 
 		products = append(
 			products,
 			&pb.Product{
-				Id:          p.ID,
-				Name:        p.Name,
-				Description: p.Description,
-				Price:       p.Price,
+				Id:           p.ID,
+				Name:         p.Name,
+				Description:  p.Description,
+				Price:        p.Price,
+				Category:     p.Category,
+				ImageUrl:     p.ImageURL,
+				Tags:         p.Tags,
+				Availability: p.Availability,
+				Stock:        p.Stock,
 			},
 		)
 	}
