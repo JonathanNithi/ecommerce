@@ -48,11 +48,22 @@ message GetProductsResponse {
     repeated Product products = 1;
 }
 
+message DeductStockRequest {
+    string id = 1;
+    uint64 quantity = 2;
+}
+
+message DeductStockResponse {
+    Product product = 1;
+}
+
 service CatalogService {
     rpc PostProduct (PostProductRequest) returns (PostProductResponse) {
     }
     rpc GetProduct (GetProductRequest) returns (GetProductResponse) {
     }
     rpc GetProducts (GetProductsRequest) returns (GetProductsResponse) {
+    }
+    rpc DeductStock (DeductStockRequest) returns (DeductStockResponse) {
     }
 }

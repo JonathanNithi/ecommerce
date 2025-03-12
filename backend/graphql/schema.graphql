@@ -77,6 +77,8 @@ input OrderProductInput {
 
 input OrderInput {
   accountId: String!
+  accessToken: String!
+  refreshToken: String!
   products: [OrderProductInput!]!
 }
 

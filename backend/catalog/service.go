@@ -12,6 +12,7 @@ type Service interface {
 	GetProducts(ctx context.Context, skip uint64, take uint64) ([]Product, error)
 	GetProductsByIDs(ctx context.Context, ids []string) ([]Product, error)
 	SearchProducts(ctx context.Context, query string, skip uint64, take uint64) ([]Product, error)
+	DeductStock(ctx context.Context, productID string, quantity uint64) error
 }
 
 type Product struct {
@@ -80,4 +81,8 @@ func (s *catalogService) SearchProducts(ctx context.Context, query string, skip 
 		take = 100
 	}
 	return s.repository.SearchProducts(ctx, query, skip, take)
+}
+
+func (s *catalogService) DeductStock(ctx context.Context, productID string, quantity uint64) error {
+	return s.repository.DeductStock(ctx, productID, quantity)
 }

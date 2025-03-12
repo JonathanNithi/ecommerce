@@ -110,3 +110,16 @@ func (c *Client) GetProducts(ctx context.Context, skip uint64, take uint64, ids 
 	}
 	return products, nil
 }
+
+// create a method DeductStock to deduct stock from the product
+func (c *Client) DeductStock(ctx context.Context, id string, quantity uint64) error {
+	// Ensure DeductStock method is defined in the pb package
+	_, err := c.service.DeductStock(
+		ctx,
+		&pb.DeductStockRequest{
+			Id:       id,
+			Quantity: quantity,
+		},
+	)
+	return err
+}

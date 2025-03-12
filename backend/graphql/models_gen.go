@@ -33,8 +33,10 @@ type Order struct {
 }
 
 type OrderInput struct {
-	AccountID string               `json:"accountId"`
-	Products  []*OrderProductInput `json:"products"`
+	AccountID    string               `json:"accountId"`
+	AccessToken  string               `json:"accessToken"`
+	RefreshToken string               `json:"refreshToken"`
+	Products     []*OrderProductInput `json:"products"`
 }
 
 type OrderProductInput struct {

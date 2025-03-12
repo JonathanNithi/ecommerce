@@ -22,6 +22,7 @@ type Repository interface {
 	ListProducts(ctx context.Context, skip uint64, take uint64) ([]Product, error)
 	ListProductsWithIDs(ctx context.Context, ids []string) ([]Product, error)
 	SearchProducts(ctx context.Context, query string, skip uint64, take uint64) ([]Product, error)
+	DeductStock(ctx context.Context, id string, newStock uint64) error
 }
 
 type elasticRepository struct {
@@ -354,4 +355,47 @@ func (r *elasticRepository) SearchProducts(ctx context.Context, query string, sk
 	}
 
 	return products, nil
+}
+
+func (r *elasticRepository) DeductStock(ctx context.Context, id string, newStock uint64) error {
+	// Step 1: Get the existing product by ID
+	product, err := r.GetProductByID(ctx, id)
+	if err != nil {
+		if err == ErrNotFound {
+			return fmt.Errorf("product with ID %s not found", id)
+		}
+		return fmt.Errorf("error retrieving product: %v", err)
+	}
+
+	fmt.Println(product)
+	// Step 2: Update the stock field in the product document
+	productDoc := productDocument{
+		Stock: product.Stock - newStock, // Update the stock
+	}
+
+	// Step 3: Marshal the updated product document to JSON
+	productDocJSON, err := json.Marshal(productDoc)
+	if err != nil {
+		return fmt.Errorf("error marshaling updated product document: %v", err)
+	}
+
+	// Step 4: Index the updated product document back into Elasticsearch
+	indexReq := esapi.IndexRequest{
+		Index:      "catalog",
+		DocumentID: id,
+		Body:       strings.NewReader(string(productDocJSON)),
+		Refresh:    "true", // Ensure the change is immediately visible
+	}
+
+	res, err := indexReq.Do(ctx, r.client)
+	if err != nil {
+		return fmt.Errorf("error executing update request: %v", err)
+	}
+	defer res.Body.Close()
+
+	if res.IsError() {
+		return fmt.Errorf("error updating product: status=%s, response=%s", res.Status(), res.String())
+	}
+
+	return nil
 }

@@ -103,3 +103,13 @@ func (s *grpcServer) GetProducts(ctx context.Context, r *pb.GetProductsRequest) 
 	}
 	return &pb.GetProductsResponse{Products: products}, nil
 }
+
+// create a method DeductStock to deduct stock from the product
+func (s *grpcServer) DeductStock(ctx context.Context, r *pb.DeductStockRequest) (*pb.DeductStockResponse, error) {
+	err := s.service.DeductStock(ctx, r.Id, r.Quantity)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	return &pb.DeductStockResponse{}, nil
+}

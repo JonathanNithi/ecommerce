@@ -30,6 +30,7 @@ func (c *Client) Close() {
 func (c *Client) PostOrder(
 	ctx context.Context,
 	accountID string,
+	accessToken, refreshToken string,
 	products []OrderedProduct,
 ) (*Order, error) {
 	protoProducts := []*pb.PostOrderRequest_OrderProduct{}
@@ -42,8 +43,10 @@ func (c *Client) PostOrder(
 	r, err := c.service.PostOrder(
 		ctx,
 		&pb.PostOrderRequest{
-			AccountId: accountID,
-			Products:  protoProducts,
+			AccountId:    accountID,
+			AccessToken:  accessToken,
+			RefreshToken: refreshToken,
+			Products:     protoProducts,
 		},
 	)
 	if err != nil {

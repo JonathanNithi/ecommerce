@@ -57,7 +57,7 @@ func (s *grpcServer) PostOrder(
 	r *pb.PostOrderRequest,
 ) (*pb.PostOrderResponse, error) {
 	// Check if account exists - I need to provide access token and refresh token
-	_, err := s.accountClient.GetAccount(ctx, r.AccountId, "", "")
+	_, err := s.accountClient.GetAccount(ctx, r.AccountId, r.AccessToken, r.RefreshToken)
 	if err != nil {
 		log.Println("Error getting account: ", err)
 		return nil, errors.New("account not found")
@@ -101,6 +101,15 @@ func (s *grpcServer) PostOrder(
 	if err != nil {
 		log.Println("Error posting order: ", err)
 		return nil, errors.New("could not post order")
+	}
+
+	//deduct the quantity from the stock
+	for _, p := range products {
+		err = s.catalogClient.DeductStock(ctx, p.ID, uint64(p.Quantity))
+		if err != nil {
+			log.Println("Error deducting stock: ", err)
+			return nil, errors.New("could not deduct stock")
+		}
 	}
 
 	// Make response order
