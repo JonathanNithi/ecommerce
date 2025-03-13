@@ -60,7 +60,7 @@ func (r *elasticRepository) PutProduct(ctx context.Context, p Product) error {
 	searchQuery := map[string]interface{}{
 		"query": map[string]interface{}{
 			"term": map[string]interface{}{
-				"name.keyword": p.Name, // Normalize the query term
+				"name.enum": p.Name, // Normalize the query term
 			},
 		},
 		"size": 1,
