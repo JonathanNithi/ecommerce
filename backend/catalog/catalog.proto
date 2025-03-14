@@ -12,7 +12,7 @@ message Product {
     string image_url = 6;
     repeated string tags = 7;
     bool availability = 8;
-    uint64 stock = 9;
+    int64 stock = 9;
 }
 
 message PostProductRequest {
@@ -22,7 +22,7 @@ message PostProductRequest {
     string category = 4;         
     string image_url = 5;        
     repeated string tags = 6;    
-    uint64 stock = 7;            
+    int64 stock = 7;            
 }
 
 message PostProductResponse {
@@ -50,7 +50,7 @@ message GetProductsResponse {
 
 message DeductStockRequest {
     string id = 1;
-    uint64 quantity = 2;
+    int64 quantity = 2;
 }
 
 message DeductStockResponse {

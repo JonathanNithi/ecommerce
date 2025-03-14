@@ -25,7 +25,7 @@ func (c *Client) Close() {
 	c.conn.Close()
 }
 
-func (c *Client) PostProduct(ctx context.Context, name, description string, price float64, category string, imageUrl string, tags []string, stock uint64) (*Product, error) {
+func (c *Client) PostProduct(ctx context.Context, name, description string, price float64, category string, imageUrl string, tags []string, stock int64) (*Product, error) {
 	// Make the request to the service
 	r, err := c.service.PostProduct(
 		ctx,
@@ -112,7 +112,7 @@ func (c *Client) GetProducts(ctx context.Context, skip uint64, take uint64, ids 
 }
 
 // create a method DeductStock to deduct stock from the product
-func (c *Client) DeductStock(ctx context.Context, id string, quantity uint64) error {
+func (c *Client) DeductStock(ctx context.Context, id string, quantity int64) error {
 	// Ensure DeductStock method is defined in the pb package
 	_, err := c.service.DeductStock(
 		ctx,

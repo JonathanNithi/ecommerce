@@ -22,7 +22,7 @@ type Repository interface {
 	ListProducts(ctx context.Context, skip uint64, take uint64) ([]Product, error)
 	ListProductsWithIDs(ctx context.Context, ids []string) ([]Product, error)
 	SearchProducts(ctx context.Context, query string, skip uint64, take uint64) ([]Product, error)
-	DeductStock(ctx context.Context, id string, newStock uint64) error
+	DeductStock(ctx context.Context, id string, newStock int64) error
 }
 
 type elasticRepository struct {
@@ -37,7 +37,7 @@ type productDocument struct {
 	ImageURL     string   `json:"image_url"`
 	Tags         []string `json:"tags"`
 	Availability bool     `json:"availability"`
-	Stock        uint64   `json:"stock"`
+	Stock        int64    `json:"stock"`
 }
 
 func NewElasticRepository(url string) (Repository, error) {
@@ -105,7 +105,7 @@ func (r *elasticRepository) PutProduct(ctx context.Context, p Product) error {
 		ImageURL:     p.ImageURL,
 		Tags:         p.Tags,
 		Availability: p.Availability,
-		Stock:        p.Stock,
+		Stock:        int64(p.Stock),
 	}
 	docJSON, err := json.Marshal(doc)
 	if err != nil {
@@ -165,7 +165,7 @@ func (r *elasticRepository) GetProductByID(ctx context.Context, id string) (*Pro
 		ImageURL:     p.ImageURL,
 		Tags:         p.Tags,
 		Availability: p.Availability,
-		Stock:        uint64(p.Stock),
+		Stock:        p.Stock,
 	}, nil
 }
 
@@ -219,7 +219,7 @@ func (r *elasticRepository) ListProducts(ctx context.Context, skip, take uint64)
 			ImageURL:     p.ImageURL,
 			Tags:         p.Tags,
 			Availability: p.Availability,
-			Stock:        uint64(p.Stock),
+			Stock:        p.Stock,
 		})
 	}
 
@@ -283,7 +283,7 @@ func (r *elasticRepository) ListProductsWithIDs(ctx context.Context, ids []strin
 			ImageURL:     p.ImageURL,
 			Tags:         p.Tags,
 			Availability: p.Availability,
-			Stock:        uint64(p.Stock),
+			Stock:        p.Stock,
 		})
 	}
 
@@ -350,14 +350,14 @@ func (r *elasticRepository) SearchProducts(ctx context.Context, query string, sk
 			ImageURL:     p.ImageURL,
 			Tags:         p.Tags,
 			Availability: p.Availability,
-			Stock:        uint64(p.Stock),
+			Stock:        p.Stock,
 		})
 	}
 
 	return products, nil
 }
 
-func (r *elasticRepository) DeductStock(ctx context.Context, id string, newStock uint64) error {
+func (r *elasticRepository) DeductStock(ctx context.Context, id string, newStock int64) error {
 	// Step 1: Get the existing product by ID
 	product, err := r.GetProductByID(ctx, id)
 	if err != nil {
