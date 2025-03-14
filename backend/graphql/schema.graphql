@@ -43,7 +43,7 @@ type OrderedProduct {
 }
 
 type LoginResponse {
-  account: Account!
+  account_id: Account!
   accessToken: String!
   refreshToken: String!
 }
@@ -57,7 +57,7 @@ input AccountInput {
   first_name: String!
   last_name: String!
   email: String!
-  password_hash: String!
+  password: String!
 }
 
 input ProductInput {
@@ -71,12 +71,12 @@ input ProductInput {
 }
 
 input OrderProductInput {
-  id: String!
+  product_id: String!
   quantity: Int!
 }
 
 input OrderInput {
-  accountId: String!
+  account_id: String!
   accessToken: String!
   refreshToken: String!
   products: [OrderProductInput!]!

@@ -60,7 +60,7 @@ type ComplexityRoot struct {
 
 	LoginResponse struct {
 		AccessToken  func(childComplexity int) int
-		Account      func(childComplexity int) int
+		AccountID    func(childComplexity int) int
 		RefreshToken func(childComplexity int) int
 	}
 
@@ -195,12 +195,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.LoginResponse.AccessToken(childComplexity), true
 
-	case "LoginResponse.account":
-		if e.complexity.LoginResponse.Account == nil {
+	case "LoginResponse.account_id":
+		if e.complexity.LoginResponse.AccountID == nil {
 			break
 		}
 
-		return e.complexity.LoginResponse.Account(childComplexity), true
+		return e.complexity.LoginResponse.AccountID(childComplexity), true
 
 	case "LoginResponse.refreshToken":
 		if e.complexity.LoginResponse.RefreshToken == nil {
@@ -1394,8 +1394,8 @@ func (ec *executionContext) fieldContext_Account_role(_ context.Context, field g
 	return fc, nil
 }
 
-func (ec *executionContext) _LoginResponse_account(ctx context.Context, field graphql.CollectedField, obj *LoginResponse) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_LoginResponse_account(ctx, field)
+func (ec *executionContext) _LoginResponse_account_id(ctx context.Context, field graphql.CollectedField, obj *LoginResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_LoginResponse_account_id(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1408,7 +1408,7 @@ func (ec *executionContext) _LoginResponse_account(ctx context.Context, field gr
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Account, nil
+		return obj.AccountID, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1425,7 +1425,7 @@ func (ec *executionContext) _LoginResponse_account(ctx context.Context, field gr
 	return ec.marshalNAccount2ᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋbackendᚋgraphqlᚐAccount(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_LoginResponse_account(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_LoginResponse_account_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "LoginResponse",
 		Field:      field,
@@ -1780,8 +1780,8 @@ func (ec *executionContext) fieldContext_Mutation_login(ctx context.Context, fie
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "account":
-				return ec.fieldContext_LoginResponse_account(ctx, field)
+			case "account_id":
+				return ec.fieldContext_LoginResponse_account_id(ctx, field)
 			case "accessToken":
 				return ec.fieldContext_LoginResponse_accessToken(ctx, field)
 			case "refreshToken":
@@ -4908,7 +4908,7 @@ func (ec *executionContext) unmarshalInputAccountInput(ctx context.Context, obj 
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"first_name", "last_name", "email", "password_hash"}
+	fieldsInOrder := [...]string{"first_name", "last_name", "email", "password"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -4936,13 +4936,13 @@ func (ec *executionContext) unmarshalInputAccountInput(ctx context.Context, obj 
 				return it, err
 			}
 			it.Email = data
-		case "password_hash":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("password_hash"))
+		case "password":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("password"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.PasswordHash = data
+			it.Password = data
 		}
 	}
 
@@ -4956,15 +4956,15 @@ func (ec *executionContext) unmarshalInputOrderInput(ctx context.Context, obj an
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"accountId", "accessToken", "refreshToken", "products"}
+	fieldsInOrder := [...]string{"account_id", "accessToken", "refreshToken", "products"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "accountId":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("accountId"))
+		case "account_id":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("account_id"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
@@ -5004,20 +5004,20 @@ func (ec *executionContext) unmarshalInputOrderProductInput(ctx context.Context,
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "quantity"}
+	fieldsInOrder := [...]string{"product_id", "quantity"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "id":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+		case "product_id":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("product_id"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.ID = data
+			it.ProductID = data
 		case "quantity":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("quantity"))
 			data, err := ec.unmarshalNInt2int(ctx, v)
@@ -5253,8 +5253,8 @@ func (ec *executionContext) _LoginResponse(ctx context.Context, sel ast.Selectio
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("LoginResponse")
-		case "account":
-			out.Values[i] = ec._LoginResponse_account(ctx, field, obj)
+		case "account_id":
+			out.Values[i] = ec._LoginResponse_account_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}

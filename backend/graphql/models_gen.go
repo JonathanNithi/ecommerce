@@ -10,14 +10,14 @@ import (
 )
 
 type AccountInput struct {
-	FirstName    string `json:"first_name"`
-	LastName     string `json:"last_name"`
-	Email        string `json:"email"`
-	PasswordHash string `json:"password_hash"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Email     string `json:"email"`
+	Password  string `json:"password"`
 }
 
 type LoginResponse struct {
-	Account      *Account `json:"account"`
+	AccountID    *Account `json:"account_id"`
 	AccessToken  string   `json:"accessToken"`
 	RefreshToken string   `json:"refreshToken"`
 }
@@ -33,15 +33,15 @@ type Order struct {
 }
 
 type OrderInput struct {
-	AccountID    string               `json:"accountId"`
+	AccountID    string               `json:"account_id"`
 	AccessToken  string               `json:"accessToken"`
 	RefreshToken string               `json:"refreshToken"`
 	Products     []*OrderProductInput `json:"products"`
 }
 
 type OrderProductInput struct {
-	ID       string `json:"id"`
-	Quantity int    `json:"quantity"`
+	ProductID string `json:"product_id"`
+	Quantity  int    `json:"quantity"`
 }
 
 type OrderedProduct struct {

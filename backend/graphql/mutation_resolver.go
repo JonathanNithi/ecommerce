@@ -21,7 +21,7 @@ func (r *mutationResolver) CreateAccount(ctx context.Context, in AccountInput) (
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
 	//password without hashing will be sent to service where it will be hashed
-	a, err := r.server.accountClient.PostAccount(ctx, in.FirstName, in.LastName, in.Email, in.PasswordHash)
+	a, err := r.server.accountClient.PostAccount(ctx, in.FirstName, in.LastName, in.Email, in.Password)
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -69,7 +69,7 @@ func (r *mutationResolver) CreateOrder(ctx context.Context, in OrderInput) (*Ord
 			return nil, ErrInvalidParameter
 		}
 		products = append(products, order.OrderedProduct{
-			ID:       p.ID,
+			ID:       p.ProductID,
 			Quantity: uint32(p.Quantity),
 		})
 	}
@@ -99,7 +99,7 @@ func (r *mutationResolver) Login(ctx context.Context, email string, password str
 
 	// Return the Account along with AccessToken and RefreshToken
 	return &LoginResponse{
-		Account: &Account{
+		AccountID: &Account{
 			ID:           account.ID,
 			FirstName:    account.FirstName,
 			LastName:     account.LastName,
