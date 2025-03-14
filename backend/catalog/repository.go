@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/elastic/go-elasticsearch/v8"
@@ -133,17 +134,20 @@ func (r *elasticRepository) PutProduct(ctx context.Context, p Product) error {
 }
 
 func (r *elasticRepository) GetProductByID(ctx context.Context, id string) (*Product, error) {
+	// Step 1: Create a GetRequest to fetch the document by ID
 	req := esapi.GetRequest{
 		Index:      "catalog",
 		DocumentID: id,
 	}
 
+	// Step 2: Execute the request
 	res, err := req.Do(ctx, r.client)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error executing GetRequest: %v", err)
 	}
 	defer res.Body.Close()
 
+	// Step 3: Handle errors (e.g., document not found)
 	if res.IsError() {
 		if res.StatusCode == 404 {
 			return nil, ErrNotFound
@@ -151,21 +155,28 @@ func (r *elasticRepository) GetProductByID(ctx context.Context, id string) (*Pro
 		return nil, fmt.Errorf("error fetching document: %s", res.String())
 	}
 
-	var p productDocument
-	if err := json.NewDecoder(res.Body).Decode(&p); err != nil {
-		return nil, err
+	// Step 4: Parse the response body
+	var getResponse struct {
+		Source productDocument `json:"_source"`
+	}
+	if err := json.NewDecoder(res.Body).Decode(&getResponse); err != nil {
+		return nil, fmt.Errorf("error decoding response body: %v", err)
 	}
 
+	// Step 5: Log the product details (for debugging)
+	log.Println(getResponse.Source)
+
+	// Step 6: Map the productDocument to the Product struct
 	return &Product{
 		ID:           id,
-		Name:         p.Name,
-		Description:  p.Description,
-		Price:        p.Price,
-		Category:     p.Category,
-		ImageURL:     p.ImageURL,
-		Tags:         p.Tags,
-		Availability: p.Availability,
-		Stock:        p.Stock,
+		Name:         getResponse.Source.Name,
+		Description:  getResponse.Source.Description,
+		Price:        getResponse.Source.Price,
+		Category:     getResponse.Source.Category,
+		ImageURL:     getResponse.Source.ImageURL,
+		Tags:         getResponse.Source.Tags,
+		Availability: getResponse.Source.Availability,
+		Stock:        getResponse.Source.Stock,
 	}, nil
 }
 
@@ -357,7 +368,7 @@ func (r *elasticRepository) SearchProducts(ctx context.Context, query string, sk
 	return products, nil
 }
 
-func (r *elasticRepository) DeductStock(ctx context.Context, id string, newStock int64) error {
+func (r *elasticRepository) DeductStock(ctx context.Context, id string, quantity int64) error {
 	// Step 1: Get the existing product by ID
 	product, err := r.GetProductByID(ctx, id)
 	if err != nil {
@@ -367,27 +378,44 @@ func (r *elasticRepository) DeductStock(ctx context.Context, id string, newStock
 		return fmt.Errorf("error retrieving product: %v", err)
 	}
 
-	fmt.Println(product)
-	// Step 2: Update the stock field in the product document
-	productDoc := productDocument{
-		Stock: product.Stock - newStock, // Update the stock
+	log.Println(product)
+	log.Println("now err")
+	log.Println(err)
+	// Step 2: Check if the requested quantity exceeds the available stock
+	if quantity > product.Stock {
+		return fmt.Errorf("no stock. required quantity %d exceeds available stock %d. try again later", quantity, product.Stock)
 	}
 
-	// Step 3: Marshal the updated product document to JSON
-	productDocJSON, err := json.Marshal(productDoc)
+	// Step 3: Calculate the new stock and update availability
+	newStock := product.Stock - quantity
+	availability := true
+	if newStock == 0 {
+		availability = false
+	}
+
+	// Step 4: Prepare the update payload
+	updatePayload := map[string]interface{}{
+		"doc": map[string]interface{}{
+			"Stock":        newStock,
+			"Availability": availability,
+		},
+	}
+
+	// Step 5: Marshal the update payload to JSON
+	updatePayloadJSON, err := json.Marshal(updatePayload)
 	if err != nil {
-		return fmt.Errorf("error marshaling updated product document: %v", err)
+		return fmt.Errorf("error marshaling update payload: %v", err)
 	}
 
-	// Step 4: Index the updated product document back into Elasticsearch
-	indexReq := esapi.IndexRequest{
+	// Step 6: Perform a partial update using UpdateRequest
+	updateReq := esapi.UpdateRequest{
 		Index:      "catalog",
 		DocumentID: id,
-		Body:       strings.NewReader(string(productDocJSON)),
+		Body:       strings.NewReader(string(updatePayloadJSON)),
 		Refresh:    "true", // Ensure the change is immediately visible
 	}
 
-	res, err := indexReq.Do(ctx, r.client)
+	res, err := updateReq.Do(ctx, r.client)
 	if err != nil {
 		return fmt.Errorf("error executing update request: %v", err)
 	}
