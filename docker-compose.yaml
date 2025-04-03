@@ -1,7 +1,9 @@
-version: '3.8'
+version: '3.7'
 services:
   next-app:
-    build: .
+    build:
+      context: .
+      dockerfile: app.dockerfile  # Specify the correct Dockerfile name
     ports:
       - "3000:3000"
     environment:
