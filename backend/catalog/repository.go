@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/elastic/go-elasticsearch/v8"
 	"github.com/elastic/go-elasticsearch/v8/esapi"
@@ -14,6 +15,7 @@ import (
 
 var (
 	ErrNotFound = errors.New("entity not found")
+	indexName   = "catalog"
 )
 
 type Repository interface {
@@ -43,12 +45,96 @@ type productDocument struct {
 
 func NewElasticRepository(url string) (Repository, error) {
 	cfg := elasticsearch.Config{
-		Addresses: []string{url},
+		Addresses:     []string{url},
+		RetryOnStatus: []int{502, 503, 504, 429},
+		RetryBackoff:  func(i int) time.Duration { return time.Duration(i) * 100 * time.Millisecond },
+		MaxRetries:    5,
 	}
 	client, err := elasticsearch.NewClient(cfg)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error creating Elasticsearch client: %w", err)
 	}
+
+	// Add a short timeout context for initialization steps
+	initCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	// Check if the index exists
+	existsReq := esapi.IndicesExistsRequest{
+		Index: []string{indexName},
+	}
+
+	res, err := existsReq.Do(initCtx, client)
+	if err != nil {
+		return nil, fmt.Errorf("error checking if index '%s' exists: %w", indexName, err)
+	}
+	// Defer closing the response body *after* checking for nil
+	if res != nil {
+		defer res.Body.Close()
+	}
+
+	// If the index doesn't exist (404 Not Found), create it
+	if res.StatusCode == 404 {
+		log.Printf("Index '%s' not found, attempting to create...", indexName)
+
+		createBody := strings.NewReader(fmt.Sprintf(`{
+			"settings": {
+				"number_of_shards": 1,
+				"number_of_replicas": 0
+			},
+			"mappings": {
+				"properties": {
+					"name": {
+						"type": "text",
+						"fields": {
+							"keyword": {
+								"type": "keyword",
+								"ignore_above": 256
+							},
+							"enum": {
+								"type": "keyword",
+								"ignore_above": 256
+							}
+						}
+					},
+					"description": { "type": "text" },
+					"price": { "type": "float" },
+					"category": { "type": "keyword" },
+					"imageURL": { "type": "keyword" },
+					"tags": { "type": "keyword" },
+					"availability": { "type": "boolean" },
+					"stock": { "type": "integer" }
+				}
+			}
+		}`))
+
+		// Simple creation without specific mappings/settings:
+		createReq := esapi.IndicesCreateRequest{
+			Index: indexName,
+			Body:  createBody,
+		}
+
+		createRes, err := createReq.Do(initCtx, client)
+		if err != nil {
+			return nil, fmt.Errorf("error creating index '%s': %w", indexName, err)
+		}
+		if createRes != nil {
+			defer createRes.Body.Close()
+		}
+
+		if createRes.IsError() {
+			return nil, fmt.Errorf("error response during index '%s' creation: %s", indexName, createRes.String())
+		}
+		log.Printf("Index '%s' created successfully.", indexName)
+
+	} else if res.IsError() {
+		// Handle other errors during the existence check
+		return nil, fmt.Errorf("error checking index '%s' existence: %s", indexName, res.String())
+	} else {
+		// Index already exists
+		log.Printf("Index '%s' already exists.", indexName)
+	}
+
 	return &elasticRepository{client}, nil
 }
 
