@@ -1,0 +1,144 @@
+version: "3.8" 
+
+services:
+  # --- Backend Services (from backend-docker-compose.yaml) ---
+  account:
+    build:
+      # Adjust context relative to the combined docker-compose.yml
+      context: ./backend
+      dockerfile: ./account/app.dockerfile
+    depends_on:
+      - account_db
+    environment:
+      DATABASE_URL: postgres://postgres:root@account_db/account_db?sslmode=disable
+      SECRET_KEY: ${SECRET_KEY} 
+    restart: on-failure
+    ports:
+      - "8080"
+      # - "2345:2345" 
+
+  catalog:
+    build:
+      context: ./backend
+      dockerfile: ./catalog/app.dockerfile
+    depends_on:
+      - catalog_db
+    environment:
+      # Use the service name and internal port for Elasticsearch
+      DATABASE_URL: http://catalog_db:9200
+    restart: on-failure
+    ports:
+      - "8080" 
+      # - "2346:2345" 
+
+  order:
+    build:
+      context: ./backend
+      dockerfile: ./order/app.dockerfile
+    depends_on:
+      - order_db
+    environment:
+      DATABASE_URL: postgres://postgres:root@order_db/order_db?sslmode=disable
+      ACCOUNT_SERVICE_URL: http://account:8080 
+      CATALOG_SERVICE_URL: http://catalog:8080 
+    restart: on-failure
+    ports:
+      - "8080" 
+      # - "2347:2345" 
+
+  graphql:
+    build:
+      context: ./backend
+      dockerfile: ./graphql/app.dockerfile
+    ports:
+      - "8000:8080"
+      # - "2348:2345" 
+    depends_on:
+      - account
+      - catalog
+      - order
+    environment:
+      ACCOUNT_SERVICE_URL: http://account:8080 
+      CATALOG_SERVICE_URL: http://catalog:8080 
+      ORDER_SERVICE_URL: http://order:8080   
+    restart: on-failure
+
+
+  next-app: # Changed service name slightly for clarity, was 'next-app'
+    build:
+      context: ./frontend
+      dockerfile: app.dockerfile 
+    ports:
+      - "3000:3000"
+    depends_on:
+      - graphql 
+    environment:
+      INTERNAL_GRAPHQL_ENDPOINT: http://graphql:8080/graphql 
+      NEXT_PUBLIC_GRAPHQL_ENDPOINT: http://localhost:8000/graphql 
+      # NODE_ENV: production # Already set in standard Next.js Dockerfiles, but can be explicit
+
+  account_db:
+    build:
+      context: ./backend/account 
+      dockerfile: ./db.dockerfile 
+    environment:
+      POSTGRES_DB: account_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root 
+    ports:
+      - "5431:5432" # Map host port 5431 to container port 5432
+    restart: unless-stopped
+    #volumes: # Optional: Add volume for persistence
+     # - account_db_data:/var/lib/postgresql/data
+
+  catalog_db:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.17.1
+    container_name: elasticsearch_catalog # Optional: give it a fixed name
+    environment:
+      ES_JAVA_OPTS: -Xms1g -Xmx1g
+      discovery.type: single-node
+      xpack.security.enabled: "false" # For development only
+    ports:
+      - "9200:9200" # Map host port 9200 to container port 9200
+    #volumes: # Optional: Add volume for persistence
+      #- catalog_db_data:/usr/share/elasticsearch/data
+    ulimits: # Recommended for Elasticsearch
+      memlock:
+        soft: -1
+        hard: -1
+
+  order_db:
+    build:
+      context: ./backend/order 
+      dockerfile: ./db.dockerfile 
+    environment:
+      POSTGRES_DB: order_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root 
+    ports:
+      - "5430:5432" 
+    restart: unless-stopped
+    #volumes: # Optional: Add volume for persistence
+      #- order_db_data:/var/lib/postgresql/data
+
+  # --- Other Services (Kibana) ---
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.17.1
+    container_name: kibana_catalog 
+    environment:
+      ELASTICSEARCH_HOSTS: '["http://catalog_db:9200"]' 
+    ports:
+      - "5601:5601"
+    depends_on:
+      - catalog_db 
+
+# Define persistent volumes (optional but recommended for databases)
+# volumes:
+#   account_db_data:
+#   catalog_db_data:
+#   order_db_data:
+
+# You could also explicitly define the default network, but it's usually not necessary
+# networks:
+#  default:
+#    driver: bridge
