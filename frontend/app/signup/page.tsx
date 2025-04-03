@@ -9,6 +9,8 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import Navbar from "@/components/navbar/Navbar"
+import Footer from "@/components/footer/Footer"
 
 export default function SignUp() {
   const router = useRouter()
@@ -171,130 +173,134 @@ export default function SignUp() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1 text-center">
-          <Link href="/" className="mx-auto block">
-            <h1 className="text-3xl font-bold text-blue-600">E-Market</h1>
-          </Link>
-          <CardTitle className="text-2xl mt-6">Create an account</CardTitle>
-          <CardDescription>Enter your information to create an account</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {formError && <div className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-500">{formError}</div>}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label htmlFor="firstName" className="text-sm font-medium leading-none">
-                  First name
-                </label>
-                <Input
-                  id="firstName"
-                  name="firstName"
-                  placeholder="John"
-                  value={formData.firstName}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  required
-                  maxLength={100}
-                  className={`w-full ${errors.firstName && touched.firstName ? "border-red-500 focus-visible:ring-red-500" : ""}`}
-                  aria-invalid={!!errors.firstName}
-                  aria-describedby={errors.firstName ? "firstName-error" : undefined}
-                />
-                {errors.firstName && touched.firstName && (
-                  <p id="firstName-error" className="text-sm text-red-500 mt-1">
-                    {errors.firstName}
-                  </p>
-                )}
-              </div>
-              <div className="space-y-2">
-                <label htmlFor="lastName" className="text-sm font-medium leading-none">
-                  Last name
-                </label>
-                <Input
-                  id="lastName"
-                  name="lastName"
-                  placeholder="Doe"
-                  value={formData.lastName}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  required
-                  maxLength={100}
-                  className={`w-full ${errors.lastName && touched.lastName ? "border-red-500 focus-visible:ring-red-500" : ""}`}
-                  aria-invalid={!!errors.lastName}
-                  aria-describedby={errors.lastName ? "lastName-error" : undefined}
-                />
-                {errors.lastName && touched.lastName && (
-                  <p id="lastName-error" className="text-sm text-red-500 mt-1">
-                    {errors.lastName}
-                  </p>
-                )}
-              </div>
-            </div>
-            <div className="space-y-2">
-              <label htmlFor="email" className="text-sm font-medium leading-none">
-                Email
-              </label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="name@example.com"
-                value={formData.email}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                required
-                className={`w-full ${errors.email && touched.email ? "border-red-500 focus-visible:ring-red-500" : ""}`}
-                aria-invalid={!!errors.email}
-                aria-describedby={errors.email ? "email-error" : undefined}
-              />
-              {errors.email && touched.email && (
-                <p id="email-error" className="text-sm text-red-500 mt-1">
-                  {errors.email}
-                </p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <label htmlFor="password" className="text-sm font-medium leading-none">
-                Password
-              </label>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                placeholder="••••••••"
-                value={formData.password}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                required
-                className={`w-full ${errors.password && touched.password ? "border-red-500 focus-visible:ring-red-500" : ""}`}
-                aria-invalid={!!errors.password}
-                aria-describedby={errors.password ? "password-error" : undefined}
-              />
-              {errors.password && touched.password && (
-                <p id="password-error" className="text-sm text-red-500 mt-1">
-                  {errors.password}
-                </p>
-              )}
-            </div>
-            <Button
-              type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700"
-              disabled={isLoading || !isFormValid()}
-            >
-              {isLoading ? "Creating account..." : "Sign Up"}
-            </Button>
-          </form>
-        </CardContent>
-        <CardFooter>
-          <div className="w-full text-center text-sm">
-            Already have an account?{" "}
-            <Link href="/signin" className="text-blue-600 hover:text-blue-500">
-              Sign in
+    <div>
+      <Navbar />
+      <div className="flex pt-32 items-center justify-center bg-background px-4 pb-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="space-y-1 text-center">
+            <Link href="/" className="mx-auto block">
+              <h1 className="text-3xl font-bold text-blue-600">E-Market</h1>
             </Link>
-          </div>
-        </CardFooter>
-      </Card>
+            <CardTitle className="text-2xl mt-6">Create an account</CardTitle>
+            <CardDescription>Enter your information to create an account</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {formError && <div className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-500">{formError}</div>}
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label htmlFor="firstName" className="text-sm font-medium leading-none">
+                    First name
+                  </label>
+                  <Input
+                    id="firstName"
+                    name="firstName"
+                    placeholder="John"
+                    value={formData.firstName}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    required
+                    maxLength={100}
+                    className={`w-full ${errors.firstName && touched.firstName ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                    aria-invalid={!!errors.firstName}
+                    aria-describedby={errors.firstName ? "firstName-error" : undefined}
+                  />
+                  {errors.firstName && touched.firstName && (
+                    <p id="firstName-error" className="text-sm text-red-500 mt-1">
+                      {errors.firstName}
+                    </p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="lastName" className="text-sm font-medium leading-none">
+                    Last name
+                  </label>
+                  <Input
+                    id="lastName"
+                    name="lastName"
+                    placeholder="Doe"
+                    value={formData.lastName}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    required
+                    maxLength={100}
+                    className={`w-full ${errors.lastName && touched.lastName ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                    aria-invalid={!!errors.lastName}
+                    aria-describedby={errors.lastName ? "lastName-error" : undefined}
+                  />
+                  {errors.lastName && touched.lastName && (
+                    <p id="lastName-error" className="text-sm text-red-500 mt-1">
+                      {errors.lastName}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="email" className="text-sm font-medium leading-none">
+                  Email
+                </label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="name@example.com"
+                  value={formData.email}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  required
+                  className={`w-full ${errors.email && touched.email ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                  aria-invalid={!!errors.email}
+                  aria-describedby={errors.email ? "email-error" : undefined}
+                />
+                {errors.email && touched.email && (
+                  <p id="email-error" className="text-sm text-red-500 mt-1">
+                    {errors.email}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="password" className="text-sm font-medium leading-none">
+                  Password
+                </label>
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={formData.password}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  required
+                  className={`w-full ${errors.password && touched.password ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                  aria-invalid={!!errors.password}
+                  aria-describedby={errors.password ? "password-error" : undefined}
+                />
+                {errors.password && touched.password && (
+                  <p id="password-error" className="text-sm text-red-500 mt-1">
+                    {errors.password}
+                  </p>
+                )}
+              </div>
+              <Button
+                type="submit"
+                className="w-full bg-blue-600 hover:bg-blue-700"
+                disabled={isLoading || !isFormValid()}
+              >
+                {isLoading ? "Creating account..." : "Sign Up"}
+              </Button>
+            </form>
+          </CardContent>
+          <CardFooter>
+            <div className="w-full text-center text-sm">
+              Already have an account?{" "}
+              <Link href="/signin" className="text-blue-600 hover:text-blue-500">
+                Sign in
+              </Link>
+            </div>
+          </CardFooter>
+        </Card>
+      </div>
+      <Footer />
     </div>
   )
 }
