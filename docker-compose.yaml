@@ -1,7 +1,6 @@
 version: "3.7" 
 
 services:
-  # --- Backend Services (from backend-docker-compose.yaml) ---
   account:
     build:
       # Adjust context relative to the combined docker-compose.yml

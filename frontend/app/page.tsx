@@ -1,48 +1,45 @@
 "use client";
 
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import Navbar from "@/components/navbar/Navbar";
 import { Card, CardContent } from "@/components/ui/card";
 import Footer from "@/components/footer/Footer";
-
+import { ApolloProvider } from "@apollo/client";
+import { useMemo } from "react";
+import { createApolloClient, useGetProducts } from "@/graphql/queries/product-queries";
+import { Product } from "@/types/products"; // Import the Product interface
 
 export default function Home() {
-  // This would normally come from BACKEND
-  const featuredProducts = [
-    {
-      id: 1,
-      name: "Minimalist Desk Lamp",
-      price: "49.99",
-      image: "/placeholder.svg?height=400&width=400",
-    },
-    {
-      id: 2,
-      name: "Modern Coffee Table",
-      price: "199.99",
-      image: "/placeholder.svg?height=400&width=400",
-    },
-    {
-      id: 3,
-      name: "Ceramic Vase Set",
-      price: "79.99",
-      image: "/placeholder.svg?height=400&width=400",
-    },
-    {
-      id: 4,
-      name: "Wool Throw Blanket",
-      price: "89.99",
-      image: "/placeholder.svg?height=400&width=400",
-    },
-  ]
+  const client = useMemo(() => createApolloClient(), []);
+
+  return (
+    <ApolloProvider client={client}>
+      <HomePageContent />
+    </ApolloProvider>
+  );
+}
+
+function HomePageContent() {
+  const { loading, error, data } = useGetProducts();
+
+  if (loading) {
+    return <div>Loading products...</div>;
+  }
+
+  if (error) {
+    console.error("Error fetching products:", error);
+    return <div>Error loading products.</div>;
+  }
+
+  const products: Product[] = data?.products || []; // Explicitly type the products array
 
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
 
-      <main className="flex-1 pt-16 md:pt-16 "> {/* Add padding-top to ensure content is below the fixed header */}
+      <main className="flex-1 pt-16 md:pt-16 ">
         <section className="relative bg-[url('/images/homepage.jpeg')] bg-cover bg-center h-screen flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/40" /> {/* Dark overlay for better text readability */}
+          <div className="absolute inset-0 bg-black/40" />
           <div className="container relative flex min-h-[70vh] flex-col items-center justify-center gap-4 text-center">
             <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl md:text-6xl">
               Sri Lanka's favorite online shopping destination
@@ -60,12 +57,12 @@ export default function Home() {
             </p>
           </div>
           <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {featuredProducts.map((product) => (
+            {products.map((product) => ( // TypeScript can now infer the type of 'product'
               <Link key={product.id} href={`#product-${product.id}`}>
                 <Card className="overflow-hidden transition-all hover:shadow-md">
                   <div className="aspect-square bg-blue-50">
                     <img
-                      src={product.image || "/placeholder.svg"}
+                      src={product.imageUrl || "/placeholder.svg"}
                       alt={product.name}
                       className="h-full w-full object-cover object-center"
                     />
