@@ -11,7 +11,7 @@ type Service interface {
 	GetProduct(ctx context.Context, id string) (*Product, error)
 	GetProducts(ctx context.Context, skip uint64, take uint64) ([]Product, error)
 	GetProductsByIDs(ctx context.Context, ids []string) ([]Product, error)
-	SearchProducts(ctx context.Context, query string, skip uint64, take uint64) ([]Product, error)
+	SearchProducts(ctx context.Context, query string, skip uint64, take uint64, category string) ([]Product, error)
 	DeductStock(ctx context.Context, productID string, quantity int64) error
 }
 
@@ -76,11 +76,11 @@ func (s *catalogService) GetProductsByIDs(ctx context.Context, ids []string) ([]
 	return s.repository.ListProductsWithIDs(ctx, ids)
 }
 
-func (s *catalogService) SearchProducts(ctx context.Context, query string, skip uint64, take uint64) ([]Product, error) {
+func (s *catalogService) SearchProducts(ctx context.Context, query string, skip uint64, take uint64, category string) ([]Product, error) {
 	if take > 100 || (skip == 0 && take == 0) {
 		take = 100
 	}
-	return s.repository.SearchProducts(ctx, query, skip, take)
+	return s.repository.SearchProducts(ctx, query, skip, take, category)
 }
 
 func (s *catalogService) DeductStock(ctx context.Context, productID string, quantity int64) error {

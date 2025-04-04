@@ -16,6 +16,25 @@ type AppConfig struct {
 	OrderURL   string `envconfig:"ORDER_SERVICE_URL"`
 }
 
+// CorsMiddleware adds CORS headers to the response
+func CorsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Set CORS headers
+		w.Header().Set("Access-Control-Allow-Origin", "*") // Allow your Next.js frontend origin
+		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+
+		// Handle preflight requests
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		// Call the next handler
+		next.ServeHTTP(w, r)
+	})
+}
+
 func main() {
 	var cfg AppConfig
 	err := envconfig.Process("", &cfg)
@@ -29,8 +48,14 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// Create the GraphQL handler
+	graphqlHandler := handler.GraphQL(s.ToExecutableSchema())
+
+	// Wrap the GraphQL handler with the CORS middleware
+	corsHandler := CorsMiddleware(graphqlHandler)
+
 	// Set up the routes
-	http.Handle("/graphql", handler.GraphQL(s.ToExecutableSchema()))
+	http.Handle("/graphql", corsHandler)
 	http.Handle("/playground", playground.Handler("Playground", "/graphql"))
 
 	// Start the server on port 8080

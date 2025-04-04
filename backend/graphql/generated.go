@@ -101,7 +101,7 @@ type ComplexityRoot struct {
 
 	Query struct {
 		Accounts func(childComplexity int, pagination *PaginationInput, id *string, accessToken string, refreshToken string) int
-		Products func(childComplexity int, pagination *PaginationInput, query *string, id *string) int
+		Products func(childComplexity int, pagination *PaginationInput, query *string, id *string, category *string) int
 	}
 }
 
@@ -117,7 +117,7 @@ type MutationResolver interface {
 }
 type QueryResolver interface {
 	Accounts(ctx context.Context, pagination *PaginationInput, id *string, accessToken string, refreshToken string) ([]*Account, error)
-	Products(ctx context.Context, pagination *PaginationInput, query *string, id *string) ([]*Product, error)
+	Products(ctx context.Context, pagination *PaginationInput, query *string, id *string, category *string) ([]*Product, error)
 }
 
 type executableSchema struct {
@@ -417,7 +417,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Products(childComplexity, args["pagination"].(*PaginationInput), args["query"].(*string), args["id"].(*string)), true
+		return e.complexity.Query.Products(childComplexity, args["pagination"].(*PaginationInput), args["query"].(*string), args["id"].(*string), args["category"].(*string)), true
 
 	}
 	return 0, false
@@ -900,6 +900,11 @@ func (ec *executionContext) field_Query_products_args(ctx context.Context, rawAr
 		return nil, err
 	}
 	args["id"] = arg2
+	arg3, err := ec.field_Query_products_argsCategory(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["category"] = arg3
 	return args, nil
 }
 func (ec *executionContext) field_Query_products_argsPagination(
@@ -949,6 +954,24 @@ func (ec *executionContext) field_Query_products_argsID(
 
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
 	if tmp, ok := rawArgs["id"]; ok {
+		return ec.unmarshalOString2ᚖstring(ctx, tmp)
+	}
+
+	var zeroVal *string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_products_argsCategory(
+	ctx context.Context,
+	rawArgs map[string]any,
+) (*string, error) {
+	if _, ok := rawArgs["category"]; !ok {
+		var zeroVal *string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("category"))
+	if tmp, ok := rawArgs["category"]; ok {
 		return ec.unmarshalOString2ᚖstring(ctx, tmp)
 	}
 
@@ -2758,7 +2781,7 @@ func (ec *executionContext) _Query_products(ctx context.Context, field graphql.C
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Products(rctx, fc.Args["pagination"].(*PaginationInput), fc.Args["query"].(*string), fc.Args["id"].(*string))
+		return ec.resolvers.Query().Products(rctx, fc.Args["pagination"].(*PaginationInput), fc.Args["query"].(*string), fc.Args["id"].(*string), fc.Args["category"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)

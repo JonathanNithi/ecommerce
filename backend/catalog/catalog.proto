@@ -42,6 +42,7 @@ message GetProductsRequest {
     uint64 take = 2;
     repeated string ids = 3;
     string query = 4;
+    string category = 5;
 }
 
 message GetProductsResponse {

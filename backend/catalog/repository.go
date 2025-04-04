@@ -24,7 +24,7 @@ type Repository interface {
 	GetProductByID(ctx context.Context, id string) (*Product, error)
 	ListProducts(ctx context.Context, skip uint64, take uint64) ([]Product, error)
 	ListProductsWithIDs(ctx context.Context, ids []string) ([]Product, error)
-	SearchProducts(ctx context.Context, query string, skip uint64, take uint64) ([]Product, error)
+	SearchProducts(ctx context.Context, query string, skip uint64, take uint64, category string) ([]Product, error)
 	DeductStock(ctx context.Context, id string, newStock int64) error
 }
 
@@ -387,16 +387,30 @@ func (r *elasticRepository) ListProductsWithIDs(ctx context.Context, ids []strin
 	return products, nil
 }
 
-func (r *elasticRepository) SearchProducts(ctx context.Context, query string, skip, take uint64) ([]Product, error) {
+func (r *elasticRepository) SearchProducts(ctx context.Context, query string, skip, take uint64, category string) ([]Product, error) {
 	searchQuery := map[string]interface{}{
 		"from": skip,
 		"size": take,
 		"query": map[string]interface{}{
-			"multi_match": map[string]interface{}{
-				"query":  query,
-				"fields": []string{"name", "description"},
+			"bool": map[string]interface{}{
+				"must": []map[string]interface{}{
+					{
+						"multi_match": map[string]interface{}{
+							"query":  query,
+							"fields": []string{"name", "description"},
+						},
+					},
+				},
 			},
 		},
+	}
+
+	if category != "" {
+		searchQuery["query"].(map[string]interface{})["bool"].(map[string]interface{})["filter"] = map[string]interface{}{
+			"term": map[string]interface{}{
+				"category": category,
+			},
+		}
 	}
 
 	queryJSON, err := json.Marshal(searchQuery)
@@ -464,9 +478,6 @@ func (r *elasticRepository) DeductStock(ctx context.Context, id string, quantity
 		return fmt.Errorf("error retrieving product: %v", err)
 	}
 
-	log.Println(product)
-	log.Println("now err")
-	log.Println(err)
 	// Step 2: Check if the requested quantity exceeds the available stock
 	if quantity > product.Stock {
 		return fmt.Errorf("no stock. required quantity %d exceeds available stock %d. try again later", quantity, product.Stock)

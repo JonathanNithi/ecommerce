@@ -73,7 +73,7 @@ func (s *grpcServer) GetProducts(ctx context.Context, r *pb.GetProductsRequest) 
 	var res []Product
 	var err error
 	if r.Query != "" {
-		res, err = s.service.SearchProducts(ctx, r.Query, r.Skip, r.Take)
+		res, err = s.service.SearchProducts(ctx, r.Query, r.Skip, r.Take, r.Category)
 	} else if len(r.Ids) != 0 {
 		res, err = s.service.GetProductsByIDs(ctx, r.Ids)
 	} else {

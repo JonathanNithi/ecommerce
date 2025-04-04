@@ -81,14 +81,15 @@ func (c *Client) GetProduct(ctx context.Context, id string) (*Product, error) {
 	}, nil
 }
 
-func (c *Client) GetProducts(ctx context.Context, skip uint64, take uint64, ids []string, query string) ([]Product, error) {
+func (c *Client) GetProducts(ctx context.Context, skip uint64, take uint64, ids []string, query string, category string) ([]Product, error) {
 	r, err := c.service.GetProducts(
 		ctx,
 		&pb.GetProductsRequest{
-			Ids:   ids,
-			Skip:  skip,
-			Take:  take,
-			Query: query,
+			Ids:      ids,
+			Skip:     skip,
+			Take:     take,
+			Query:    query,
+			Category: category,
 		},
 	)
 	if err != nil {
