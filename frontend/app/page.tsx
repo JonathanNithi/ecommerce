@@ -6,7 +6,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import Footer from "@/components/footer/Footer";
 import { ApolloProvider } from "@apollo/client";
 import { useMemo } from "react";
-import { createApolloClient, useGetProducts } from "@/graphql/queries/product-queries";
+import { useGetProducts } from "@/graphql/queries/product-queries";
+import { createApolloClient } from "@/lib/create-apollo-client";
 import { Product } from "@/types/products"; // Import the Product interface
 
 export default function Home() {

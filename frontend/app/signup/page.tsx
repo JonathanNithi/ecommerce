@@ -1,16 +1,18 @@
 "use client"
 
-import type React from "react"
-
-import Link from "next/link"
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import Navbar from "@/components/navbar/Navbar"
-import Footer from "@/components/footer/Footer"
+import type React from "react";
+import Link from "next/link";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import Navbar from "@/components/navbar/Navbar";
+import Footer from "@/components/footer/Footer";
+import { CREATE_ACCOUNT_MUTATION, CreateAccountInput, CreateAccountPayload } from "@/graphql/mutation/account-mutation"; // Adjust the import path
+import { useMutation } from '@apollo/client'; // Import Apollo's useMutation
+import { ApolloClient, InMemoryCache } from '@apollo/client'; // Import Apollo Client
+import { createApolloClient } from '@/lib/create-apollo-client'; 
 
 export default function SignUp() {
   const router = useRouter()
@@ -139,38 +141,44 @@ export default function SignUp() {
     )
   }
 
+  // Using Apollo Client's useMutation hook
+  const client = createApolloClient(); // Initialize the Apollo Client instance
+  const [createAccountMutation, { data: mutationData, loading: mutationLoading, error: mutationError }] = useMutation<CreateAccountPayload, { account: CreateAccountInput }>(CREATE_ACCOUNT_MUTATION, {
+    client, // Pass the Apollo Client instance
+    onCompleted: (data) => {
+      console.log("Account created successfully:", data);
+      router.push("/signin");
+      setIsLoading(false);
+    },
+    onError: (err) => {
+      console.error("Error creating account:", err);
+      setFormError("An error occurred while creating your account. Please try again.");
+      setIsLoading(false);
+    },
+  });
+
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    // Mark all fields as touched to trigger validation
-    setTouched({
-      firstName: true,
-      lastName: true,
-      email: true,
-      password: true,
-    })
+    setTouched({ firstName: true, lastName: true, email: true, password: true });
 
-    // Check if form is valid
     if (!isFormValid()) {
-      return
+      return;
     }
 
-    setIsLoading(true)
-    setFormError("")
+    setIsLoading(true);
+    setFormError("");
 
-    try {
-      // In a real app, you would call your API to create a user account
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+    const accountInput: CreateAccountInput = {
+      first_name: formData.firstName,
+      last_name: formData.lastName,
+      email: formData.email,
+      password: formData.password, // In a real app, you should hash this on the backend!
+    };
 
-      // For demo purposes, we'll just redirect to the sign-in page
-      router.push("/signin")
-    } catch (err) {
-      setFormError("An error occurred while creating your account. Please try again.")
-    } finally {
-      setIsLoading(false)
-    }
-  }
+    createAccountMutation({ variables: { account: accountInput } });
+  };
 
   return (
     <div>
@@ -284,7 +292,7 @@ export default function SignUp() {
               <Button
                 type="submit"
                 className="w-full bg-blue-600 hover:bg-blue-700"
-                disabled={isLoading || !isFormValid()}
+                disabled={isLoading || mutationLoading || !isFormValid()}
               >
                 {isLoading ? "Creating account..." : "Sign Up"}
               </Button>
