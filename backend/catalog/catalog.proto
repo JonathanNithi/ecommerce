@@ -3,6 +3,21 @@ package pb;
 
 option go_package = "./";
 
+enum SortDirection {
+    ASC = 0;
+    DESC = 1;
+}
+
+enum ProductSortField {
+    NAME = 0;
+    PRICE = 1;
+}
+
+message ProductSortInput {
+    ProductSortField field = 1;
+    SortDirection direction = 2;
+}
+
 message Product {
     string id = 1;
     string name = 2;
@@ -16,13 +31,13 @@ message Product {
 }
 
 message PostProductRequest {
-    string name = 1;             
-    string description = 2;      
-    double price = 3;            
-    string category = 4;         
-    string image_url = 5;        
-    repeated string tags = 6;    
-    int64 stock = 7;            
+    string name = 1;
+    string description = 2;
+    double price = 3;
+    string category = 4;
+    string image_url = 5;
+    repeated string tags = 6;
+    int64 stock = 7;
 }
 
 message PostProductResponse {
@@ -43,6 +58,7 @@ message GetProductsRequest {
     repeated string ids = 3;
     string query = 4;
     string category = 5;
+    ProductSortInput sort = 6;
 }
 
 message GetProductsResponse {
@@ -59,12 +75,8 @@ message DeductStockResponse {
 }
 
 service CatalogService {
-    rpc PostProduct (PostProductRequest) returns (PostProductResponse) {
-    }
-    rpc GetProduct (GetProductRequest) returns (GetProductResponse) {
-    }
-    rpc GetProducts (GetProductsRequest) returns (GetProductsResponse) {
-    }
-    rpc DeductStock (DeductStockRequest) returns (DeductStockResponse) {
-    }
+    rpc PostProduct (PostProductRequest) returns (PostProductResponse) {}
+    rpc GetProduct (GetProductRequest) returns (GetProductResponse) {}
+    rpc GetProducts (GetProductsRequest) returns (GetProductsResponse) {}
+    rpc DeductStock (DeductStockRequest) returns (DeductStockResponse) {}
 }

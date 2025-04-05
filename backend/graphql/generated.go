@@ -101,7 +101,7 @@ type ComplexityRoot struct {
 
 	Query struct {
 		Accounts func(childComplexity int, pagination *PaginationInput, id *string, accessToken string, refreshToken string) int
-		Products func(childComplexity int, pagination *PaginationInput, query *string, id *string, category *string) int
+		Products func(childComplexity int, pagination *PaginationInput, query *string, id *string, category *string, sort *ProductSortInput) int
 	}
 }
 
@@ -117,7 +117,7 @@ type MutationResolver interface {
 }
 type QueryResolver interface {
 	Accounts(ctx context.Context, pagination *PaginationInput, id *string, accessToken string, refreshToken string) ([]*Account, error)
-	Products(ctx context.Context, pagination *PaginationInput, query *string, id *string, category *string) ([]*Product, error)
+	Products(ctx context.Context, pagination *PaginationInput, query *string, id *string, category *string, sort *ProductSortInput) ([]*Product, error)
 }
 
 type executableSchema struct {
@@ -417,7 +417,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Products(childComplexity, args["pagination"].(*PaginationInput), args["query"].(*string), args["id"].(*string), args["category"].(*string)), true
+		return e.complexity.Query.Products(childComplexity, args["pagination"].(*PaginationInput), args["query"].(*string), args["id"].(*string), args["category"].(*string), args["sort"].(*ProductSortInput)), true
 
 	}
 	return 0, false
@@ -432,6 +432,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputOrderProductInput,
 		ec.unmarshalInputPaginationInput,
 		ec.unmarshalInputProductInput,
+		ec.unmarshalInputProductSortInput,
 	)
 	first := true
 
@@ -905,6 +906,11 @@ func (ec *executionContext) field_Query_products_args(ctx context.Context, rawAr
 		return nil, err
 	}
 	args["category"] = arg3
+	arg4, err := ec.field_Query_products_argsSort(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["sort"] = arg4
 	return args, nil
 }
 func (ec *executionContext) field_Query_products_argsPagination(
@@ -976,6 +982,24 @@ func (ec *executionContext) field_Query_products_argsCategory(
 	}
 
 	var zeroVal *string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_products_argsSort(
+	ctx context.Context,
+	rawArgs map[string]any,
+) (*ProductSortInput, error) {
+	if _, ok := rawArgs["sort"]; !ok {
+		var zeroVal *ProductSortInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("sort"))
+	if tmp, ok := rawArgs["sort"]; ok {
+		return ec.unmarshalOProductSortInput2ᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋbackendᚋgraphqlᚐProductSortInput(ctx, tmp)
+	}
+
+	var zeroVal *ProductSortInput
 	return zeroVal, nil
 }
 
@@ -2781,7 +2805,7 @@ func (ec *executionContext) _Query_products(ctx context.Context, field graphql.C
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Products(rctx, fc.Args["pagination"].(*PaginationInput), fc.Args["query"].(*string), fc.Args["id"].(*string), fc.Args["category"].(*string))
+		return ec.resolvers.Query().Products(rctx, fc.Args["pagination"].(*PaginationInput), fc.Args["query"].(*string), fc.Args["id"].(*string), fc.Args["category"].(*string), fc.Args["sort"].(*ProductSortInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5157,6 +5181,40 @@ func (ec *executionContext) unmarshalInputProductInput(ctx context.Context, obj 
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputProductSortInput(ctx context.Context, obj any) (ProductSortInput, error) {
+	var it ProductSortInput
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"field", "direction"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "field":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("field"))
+			data, err := ec.unmarshalNProductSortField2githubᚗcomᚋJonathanNithiᚋecommerceᚋbackendᚋgraphqlᚐProductSortField(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Field = data
+		case "direction":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("direction"))
+			data, err := ec.unmarshalNSortDirection2githubᚗcomᚋJonathanNithiᚋecommerceᚋbackendᚋgraphqlᚐSortDirection(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Direction = data
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -6292,6 +6350,16 @@ func (ec *executionContext) unmarshalNProductInput2githubᚗcomᚋJonathanNithi�
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNProductSortField2githubᚗcomᚋJonathanNithiᚋecommerceᚋbackendᚋgraphqlᚐProductSortField(ctx context.Context, v any) (ProductSortField, error) {
+	var res ProductSortField
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNProductSortField2githubᚗcomᚋJonathanNithiᚋecommerceᚋbackendᚋgraphqlᚐProductSortField(ctx context.Context, sel ast.SelectionSet, v ProductSortField) graphql.Marshaler {
+	return v
+}
+
 func (ec *executionContext) unmarshalNRole2githubᚗcomᚋJonathanNithiᚋecommerceᚋbackendᚋgraphqlᚐRole(ctx context.Context, v any) (Role, error) {
 	var res Role
 	err := res.UnmarshalGQL(v)
@@ -6299,6 +6367,16 @@ func (ec *executionContext) unmarshalNRole2githubᚗcomᚋJonathanNithiᚋecomme
 }
 
 func (ec *executionContext) marshalNRole2githubᚗcomᚋJonathanNithiᚋecommerceᚋbackendᚋgraphqlᚐRole(ctx context.Context, sel ast.SelectionSet, v Role) graphql.Marshaler {
+	return v
+}
+
+func (ec *executionContext) unmarshalNSortDirection2githubᚗcomᚋJonathanNithiᚋecommerceᚋbackendᚋgraphqlᚐSortDirection(ctx context.Context, v any) (SortDirection, error) {
+	var res SortDirection
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNSortDirection2githubᚗcomᚋJonathanNithiᚋecommerceᚋbackendᚋgraphqlᚐSortDirection(ctx context.Context, sel ast.SelectionSet, v SortDirection) graphql.Marshaler {
 	return v
 }
 
@@ -6661,6 +6739,14 @@ func (ec *executionContext) marshalOProduct2ᚖgithubᚗcomᚋJonathanNithiᚋec
 		return graphql.Null
 	}
 	return ec._Product(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOProductSortInput2ᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋbackendᚋgraphqlᚐProductSortInput(ctx context.Context, v any) (*ProductSortInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputProductSortInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOString2ᚕstringᚄ(ctx context.Context, v any) ([]string, error) {

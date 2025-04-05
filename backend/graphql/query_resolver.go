@@ -4,6 +4,8 @@ import (
 	"context"
 	"log"
 	"time"
+
+	"github.com/JonathanNithi/ecommerce/backend/catalog/pb"
 )
 
 type queryResolver struct {
@@ -62,7 +64,7 @@ func (r *queryResolver) Accounts(ctx context.Context, pagination *PaginationInpu
 	return accounts, nil
 }
 
-func (r *queryResolver) Products(ctx context.Context, pagination *PaginationInput, query *string, id *string, category *string) ([]*Product, error) {
+func (r *queryResolver) Products(ctx context.Context, pagination *PaginationInput, query *string, id *string, category *string, sort *ProductSortInput) ([]*Product, error) {
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
 
@@ -99,7 +101,16 @@ func (r *queryResolver) Products(ctx context.Context, pagination *PaginationInpu
 	if category != nil {
 		categoryValue = *category
 	}
-	productList, err := r.server.catalogClient.GetProducts(ctx, skip, take, nil, q, categoryValue)
+
+	var sortBy *pb.ProductSortInput
+	if sort != nil {
+		sortBy = &pb.ProductSortInput{
+			Field:     pb.ProductSortField(pb.ProductSortField_value[sort.Field.String()]),
+			Direction: pb.SortDirection(pb.SortDirection_value[sort.Direction.String()]),
+		}
+	}
+
+	productList, err := r.server.catalogClient.GetProducts(ctx, skip, take, nil, q, categoryValue, sortBy)
 	if err != nil {
 		log.Println(err)
 		return nil, err

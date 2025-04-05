@@ -68,7 +68,7 @@ func (s *grpcServer) PostOrder(
 	for _, p := range r.Products {
 		productIDs = append(productIDs, p.ProductId)
 	}
-	orderedProducts, err := s.catalogClient.GetProducts(ctx, 0, 0, productIDs, "", "")
+	orderedProducts, err := s.catalogClient.GetProducts(ctx, 0, 0, productIDs, "", "", nil)
 	if err != nil {
 		log.Println("Error getting products: ", err)
 		return nil, errors.New("products not found")
@@ -159,7 +159,7 @@ func (s *grpcServer) GetOrdersForAccount(
 	for id := range productIDMap {
 		productIDs = append(productIDs, id)
 	}
-	products, err := s.catalogClient.GetProducts(ctx, 0, 0, productIDs, "", "")
+	products, err := s.catalogClient.GetProducts(ctx, 0, 0, productIDs, "", "", nil)
 	if err != nil {
 		log.Println("Error getting account products: ", err)
 		return nil, err

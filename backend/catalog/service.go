@@ -3,15 +3,16 @@ package catalog
 import (
 	"context"
 
+	"github.com/JonathanNithi/ecommerce/backend/catalog/pb"
 	"github.com/segmentio/ksuid"
 )
 
 type Service interface {
 	PostProduct(ctx context.Context, name, description string, price float64, category string, imageUrl string, tags []string, stock int64) (*Product, error)
 	GetProduct(ctx context.Context, id string) (*Product, error)
-	GetProducts(ctx context.Context, skip uint64, take uint64) ([]Product, error)
+	GetProducts(ctx context.Context, skip uint64, take uint64, sort *pb.ProductSortInput) ([]Product, error)
 	GetProductsByIDs(ctx context.Context, ids []string) ([]Product, error)
-	SearchProducts(ctx context.Context, query string, skip uint64, take uint64, category string) ([]Product, error)
+	SearchProducts(ctx context.Context, query string, skip uint64, take uint64, category string, sort *pb.ProductSortInput) ([]Product, error)
 	DeductStock(ctx context.Context, productID string, quantity int64) error
 }
 
@@ -65,22 +66,22 @@ func (s *catalogService) GetProduct(ctx context.Context, id string) (*Product, e
 	return s.repository.GetProductByID(ctx, id)
 }
 
-func (s *catalogService) GetProducts(ctx context.Context, skip uint64, take uint64) ([]Product, error) {
+func (s *catalogService) GetProducts(ctx context.Context, skip uint64, take uint64, sort *pb.ProductSortInput) ([]Product, error) {
 	if take > 100 || (skip == 0 && take == 0) {
 		take = 100
 	}
-	return s.repository.ListProducts(ctx, skip, take)
+	return s.repository.ListProducts(ctx, skip, take, sort)
 }
 
 func (s *catalogService) GetProductsByIDs(ctx context.Context, ids []string) ([]Product, error) {
 	return s.repository.ListProductsWithIDs(ctx, ids)
 }
 
-func (s *catalogService) SearchProducts(ctx context.Context, query string, skip uint64, take uint64, category string) ([]Product, error) {
+func (s *catalogService) SearchProducts(ctx context.Context, query string, skip uint64, take uint64, category string, sort *pb.ProductSortInput) ([]Product, error) {
 	if take > 100 || (skip == 0 && take == 0) {
 		take = 100
 	}
-	return s.repository.SearchProducts(ctx, query, skip, take, category)
+	return s.repository.SearchProducts(ctx, query, skip, take, category, sort)
 }
 
 func (s *catalogService) DeductStock(ctx context.Context, productID string, quantity int64) error {

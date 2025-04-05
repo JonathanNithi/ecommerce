@@ -72,13 +72,23 @@ func (s *grpcServer) GetProduct(ctx context.Context, r *pb.GetProductRequest) (*
 func (s *grpcServer) GetProducts(ctx context.Context, r *pb.GetProductsRequest) (*pb.GetProductsResponse, error) {
 	var res []Product
 	var err error
+
+	var sortBy *pb.ProductSortInput
+	if r.Sort != nil {
+		sortBy = r.Sort
+	}
+
 	if r.Query != "" {
-		res, err = s.service.SearchProducts(ctx, r.Query, r.Skip, r.Take, r.Category)
+		// Assuming your service layer has a SearchProducts that now accepts sort
+		res, err = s.service.SearchProducts(ctx, r.Query, r.Skip, r.Take, r.Category, sortBy)
 	} else if len(r.Ids) != 0 {
+		// Assuming your service layer can fetch by IDs without explicit sorting
 		res, err = s.service.GetProductsByIDs(ctx, r.Ids)
 	} else {
-		res, err = s.service.GetProducts(ctx, r.Skip, r.Take)
+		// Assuming your service layer's GetProducts now accepts sort
+		res, err = s.service.GetProducts(ctx, r.Skip, r.Take, sortBy)
 	}
+
 	if err != nil {
 		log.Println(err)
 		return nil, err

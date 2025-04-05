@@ -5,6 +5,21 @@ enum Role {
   admin
 }
 
+enum SortDirection {
+  ASC
+  DESC
+}
+
+enum ProductSortField {
+  name
+  price
+}
+
+input ProductSortInput {
+  field: ProductSortField!
+  direction: SortDirection!
+}
+
 type Account {
   id: String!
   first_name: String!
@@ -24,7 +39,7 @@ type Product {
   imageUrl: String!
   tags: [String!]
   availability: Boolean!
-  stock: Int!    
+  stock: Int!
 }
 
 type Order {
@@ -92,5 +107,5 @@ type Mutation {
 
 type Query {
   accounts(pagination: PaginationInput, id: String, accessToken: String!, refreshToken: String!): [Account!]!
-  products(pagination: PaginationInput, query: String, id: String, category: String): [Product!]!
+  products(pagination: PaginationInput, query: String, id: String, category: String, sort: ProductSortInput): [Product!]!
 }

@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/JonathanNithi/ecommerce/backend/catalog/pb"
 	"github.com/elastic/go-elasticsearch/v8"
 	"github.com/elastic/go-elasticsearch/v8/esapi"
 )
@@ -22,9 +23,9 @@ type Repository interface {
 	Close()
 	PutProduct(ctx context.Context, p Product) error
 	GetProductByID(ctx context.Context, id string) (*Product, error)
-	ListProducts(ctx context.Context, skip uint64, take uint64) ([]Product, error)
+	ListProducts(ctx context.Context, skip uint64, take uint64, sort *pb.ProductSortInput) ([]Product, error)
 	ListProductsWithIDs(ctx context.Context, ids []string) ([]Product, error)
-	SearchProducts(ctx context.Context, query string, skip uint64, take uint64, category string) ([]Product, error)
+	SearchProducts(ctx context.Context, query string, skip uint64, take uint64, category string, sort *pb.ProductSortInput) ([]Product, error)
 	DeductStock(ctx context.Context, id string, newStock int64) error
 }
 
@@ -266,16 +267,46 @@ func (r *elasticRepository) GetProductByID(ctx context.Context, id string) (*Pro
 	}, nil
 }
 
-func (r *elasticRepository) ListProducts(ctx context.Context, skip, take uint64) ([]Product, error) {
+func (r *elasticRepository) ListProducts(ctx context.Context, skip, take uint64, sort *pb.ProductSortInput) ([]Product, error) {
+	query := fmt.Sprintf(`{
+		"from": %d,
+		"size": %d,
+		"query": {
+			"match_all": {}
+		}`, skip, take)
+
+	if sort != nil {
+		sortField := ""
+		switch sort.Field {
+		case pb.ProductSortField_NAME:
+			sortField = "name.keyword" // Assuming you have a "name.keyword" field for exact string sorting in Elasticsearch
+		case pb.ProductSortField_PRICE:
+			sortField = "price"
+		default:
+			// Handle default sorting or error if the field is not supported
+			sortField = "_id" // Default to sorting by document ID
+		}
+
+		sortDirection := "asc"
+		if sort.Direction == pb.SortDirection_DESC {
+			sortDirection = "desc"
+		}
+
+		query += fmt.Sprintf(`,
+		"sort": [
+			{
+				"%s": {
+					"order": "%s"
+				}
+			}
+		]`, sortField, sortDirection)
+	}
+
+	query += `}`
+
 	req := esapi.SearchRequest{
 		Index: []string{"catalog"},
-		Body: strings.NewReader(fmt.Sprintf(`{
-			"from": %d,
-			"size": %d,
-			"query": {
-				"match_all": {}
-			}
-		}`, skip, take)),
+		Body:  strings.NewReader(query),
 	}
 
 	res, err := req.Do(ctx, r.client)
@@ -387,7 +418,7 @@ func (r *elasticRepository) ListProductsWithIDs(ctx context.Context, ids []strin
 	return products, nil
 }
 
-func (r *elasticRepository) SearchProducts(ctx context.Context, query string, skip, take uint64, category string) ([]Product, error) {
+func (r *elasticRepository) SearchProducts(ctx context.Context, query string, skip, take uint64, category string, sort *pb.ProductSortInput) ([]Product, error) {
 	searchQuery := map[string]interface{}{
 		"from": skip,
 		"size": take,
@@ -406,9 +437,51 @@ func (r *elasticRepository) SearchProducts(ctx context.Context, query string, sk
 	}
 
 	if category != "" {
-		searchQuery["query"].(map[string]interface{})["bool"].(map[string]interface{})["filter"] = map[string]interface{}{
-			"term": map[string]interface{}{
-				"category": category,
+		if _, ok := searchQuery["query"].(map[string]interface{})["bool"].(map[string]interface{})["filter"]; !ok {
+			searchQuery["query"].(map[string]interface{})["bool"].(map[string]interface{})["filter"] = map[string]interface{}{
+				"term": map[string]interface{}{
+					"category": category,
+				},
+			}
+		} else {
+			// If a filter already exists, add a "must" clause with the new filter
+			mustFilters := searchQuery["query"].(map[string]interface{})["bool"].(map[string]interface{})["filter"]
+			searchQuery["query"].(map[string]interface{})["bool"].(map[string]interface{})["filter"] = map[string]interface{}{
+				"bool": map[string]interface{}{
+					"must": []interface{}{
+						mustFilters,
+						map[string]interface{}{
+							"term": map[string]interface{}{
+								"category": category,
+							},
+						},
+					},
+				},
+			}
+		}
+	}
+
+	if sort != nil {
+		sortField := ""
+		switch sort.Field {
+		case pb.ProductSortField_NAME:
+			sortField = "name.keyword"
+		case pb.ProductSortField_PRICE:
+			sortField = "price"
+		default:
+			sortField = "_id" // Default sorting
+		}
+
+		sortDirection := "asc"
+		if sort.Direction == pb.SortDirection_DESC {
+			sortDirection = "desc"
+		}
+
+		searchQuery["sort"] = []map[string]interface{}{
+			{
+				sortField: map[string]interface{}{
+					"order": sortDirection,
+				},
 			},
 		}
 	}
