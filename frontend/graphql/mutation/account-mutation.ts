@@ -2,7 +2,7 @@
 import { gql } from '@apollo/client';
 
 export const CREATE_ACCOUNT_MUTATION = gql`
-  mutation CreateAccount($account: CreateAccountInput!) {
+  mutation CreateAccount($account: AccountInput!) {
     createAccount(account: $account) {
       first_name
       last_name
@@ -14,7 +14,7 @@ export const CREATE_ACCOUNT_MUTATION = gql`
 `;
 
 // Define the input type for better type safety
-export interface CreateAccountInput {
+export interface AccountInput {
   first_name: string;
   last_name: string;
   email: string;

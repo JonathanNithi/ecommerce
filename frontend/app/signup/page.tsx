@@ -9,9 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import Navbar from "@/components/navbar/Navbar";
 import Footer from "@/components/footer/Footer";
-import { CREATE_ACCOUNT_MUTATION, CreateAccountInput, CreateAccountPayload } from "@/graphql/mutation/account-mutation"; // Adjust the import path
+import { CREATE_ACCOUNT_MUTATION, AccountInput, CreateAccountPayload } from "@/graphql/mutation/account-mutation"; // Adjust the import path
 import { useMutation } from '@apollo/client'; // Import Apollo's useMutation
-import { ApolloClient, InMemoryCache } from '@apollo/client'; // Import Apollo Client
 import { createApolloClient } from '@/lib/create-apollo-client'; 
 
 export default function SignUp() {
@@ -143,7 +142,7 @@ export default function SignUp() {
 
   // Using Apollo Client's useMutation hook
   const client = createApolloClient(); // Initialize the Apollo Client instance
-  const [createAccountMutation, { data: mutationData, loading: mutationLoading, error: mutationError }] = useMutation<CreateAccountPayload, { account: CreateAccountInput }>(CREATE_ACCOUNT_MUTATION, {
+  const [createAccountMutation, { data: mutationData, loading: mutationLoading, error: mutationError }] = useMutation<CreateAccountPayload, { account: AccountInput }>(CREATE_ACCOUNT_MUTATION, {
     client, // Pass the Apollo Client instance
     onCompleted: (data) => {
       console.log("Account created successfully:", data);
@@ -170,7 +169,7 @@ export default function SignUp() {
     setIsLoading(true);
     setFormError("");
 
-    const accountInput: CreateAccountInput = {
+    const accountInput: AccountInput = {
       first_name: formData.firstName,
       last_name: formData.lastName,
       email: formData.email,
