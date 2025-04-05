@@ -1,12 +1,12 @@
-import type React from "react"
-import "@/app/globals.css"
-import { ThemeProvider } from "@/components/theme-provider"
+import type React from "react";
+import "@/app/globals.css";
+import { ThemeProvider } from "@/components/theme-provider";
+import { AuthProvider } from "@/lib/auth-context"; 
 
 export const metadata = {
-  title: "MinimalBlue - Minimalist Products for Modern Living",
-  description: "Discover our curated collection of minimalist products designed for modern living.",
-    generator: 'v0.dev'
-}
+  title: "E-Market - Homepage of the best ecommerce platform",
+  description: "Find the best products at the best prices",
+};
 
 export default function RootLayout({
   children,
@@ -22,12 +22,13 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <AuthProvider> 
+            {children}
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>
-  )
+  );
 }
 
-
-import './globals.css'
+import './globals.css';
