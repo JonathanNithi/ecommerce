@@ -16,17 +16,20 @@ func (r *queryResolver) Accounts(ctx context.Context, pagination *PaginationInpu
 
 	// Get single
 	if id != nil {
-		r, err := r.server.accountClient.GetAccount(ctx, *id, accessToken, refreshToken)
+		acc, newAccessToken, newRefreshToken, err := r.server.accountClient.GetAccount(ctx, *id, accessToken, refreshToken)
 		if err != nil {
 			log.Println(err)
 			return nil, err
 		}
+
+		_ = newAccessToken
+		_ = newRefreshToken
 		return []*Account{{
-			ID:        r.ID,
-			FirstName: r.FirstName,
-			LastName:  r.LastName,
-			Email:     r.Email,
-			Role:      Role(r.Role),
+			ID:        acc.ID,
+			FirstName: acc.FirstName,
+			LastName:  acc.LastName,
+			Email:     acc.Email,
+			Role:      Role(acc.Role),
 		}}, nil
 	}
 
@@ -35,11 +38,14 @@ func (r *queryResolver) Accounts(ctx context.Context, pagination *PaginationInpu
 		skip, take = pagination.bounds()
 	}
 	//Get all
-	accountList, err := r.server.accountClient.GetAccounts(ctx, skip, take, accessToken, refreshToken)
+	accountList, newAccessToken, newRefreshToken, err := r.server.accountClient.GetAccounts(ctx, skip, take, accessToken, refreshToken)
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
+
+	_ = newAccessToken
+	_ = newRefreshToken
 
 	var accounts []*Account
 	for _, a := range accountList {
@@ -62,21 +68,21 @@ func (r *queryResolver) Products(ctx context.Context, pagination *PaginationInpu
 
 	// Get single
 	if id != nil {
-		r, err := r.server.catalogClient.GetProduct(ctx, *id)
+		prod, err := r.server.catalogClient.GetProduct(ctx, *id)
 		if err != nil {
 			log.Println(err)
 			return nil, err
 		}
 		return []*Product{{
-			ID:           r.ID,
-			Name:         r.Name,
-			Description:  r.Description,
-			Price:        r.Price,
-			Category:     r.Category,
-			ImageURL:     r.ImageURL,
-			Tags:         r.Tags,
-			Availability: r.Availability,
-			Stock:        int(r.Stock),
+			ID:           prod.ID,
+			Name:         prod.Name,
+			Description:  prod.Description,
+			Price:        prod.Price,
+			Category:     prod.Category,
+			ImageURL:     prod.ImageURL,
+			Tags:         prod.Tags,
+			Availability: prod.Availability,
+			Stock:        int(prod.Stock),
 		}}, nil
 	}
 

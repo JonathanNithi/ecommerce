@@ -68,25 +68,32 @@ func ValidateToken(tokenString string) (*Claims, error) {
 	return claims, nil
 }
 
-func (s *accountService) validateAndRegenerateToken(ctx context.Context, accessToken string, refreshToken string) (*Claims, error) {
-	// Validate the access token
-	claims, err := ValidateToken(accessToken)
-	if err != nil {
-		return nil, err
-	}
+func (s *accountService) validateAndRegenerateToken(ctx context.Context, accessToken string, refreshToken string) (newAccessToken string, newRefreshToken string, claims *Claims, err error) {
+	// Validate the access token (we might just check for expiry here)
+	accessClaims, accessErr := ValidateToken(accessToken)
 
 	// Validate the refresh token
-	_, err = ValidateToken(refreshToken)
-	if err != nil {
-		return nil, err
+	refreshClaims, refreshErr := ValidateToken(refreshToken)
+	if refreshErr != nil {
+		return "", "", nil, refreshErr // Refresh token is invalid, force re-login
 	}
 
-	// Regenerate the access token if it’s expired
-	if claims.ExpiresAt.Before(time.Now()) {
-		accessToken, err = GenerateAccessToken(claims.Username, claims.Role)
+	if accessErr != nil && accessErr == jwt.ErrTokenExpired {
+		// Access token is expired, use the refresh token to get a new one
+		newAccessToken, err = GenerateAccessToken(refreshClaims.Username, refreshClaims.Role)
 		if err != nil {
-			return nil, err
+			return "", "", nil, err
 		}
+		newRefreshToken, err = GenerateRefreshToken(refreshClaims.Username, refreshClaims.Role) // Optional: Rotate refresh token
+		if err != nil {
+			return "", "", nil, err
+		}
+		return newAccessToken, newRefreshToken, refreshClaims, nil
+	} else if accessErr != nil {
+		// Access token is invalid for other reasons
+		return "", "", nil, accessErr
 	}
-	return claims, nil
+
+	// Access token is still valid
+	return accessToken, refreshToken, accessClaims, nil
 }

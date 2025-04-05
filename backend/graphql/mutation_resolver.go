@@ -90,7 +90,7 @@ func (r *mutationResolver) Login(ctx context.Context, email string, password str
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
 
-	// Modify this line to expect the AccessToken and RefreshToken
+	// Capture all return values from accountClient.Login
 	account, accessToken, refreshToken, err := r.server.accountClient.Login(ctx, email, password)
 	if err != nil {
 		log.Println(err)
@@ -115,11 +115,15 @@ func (r *mutationResolver) SetAccountAsAdmin(ctx context.Context, accessToken st
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
 
-	a, err := r.server.accountClient.SetAccountAsAdmin(ctx, accessToken, refreshToken, userId)
+	// Capture all return values from accountClient.SetAccountAsAdmin
+	a, newAccessToken, newRefreshToken, err := r.server.accountClient.SetAccountAsAdmin(ctx, accessToken, refreshToken, userId)
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
+
+	_ = newAccessToken
+	_ = newRefreshToken
 
 	return &Account{
 		ID:           a.ID,

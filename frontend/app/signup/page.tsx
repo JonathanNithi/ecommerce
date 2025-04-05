@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import Navbar from "@/components/navbar/Navbar";
 import Footer from "@/components/footer/Footer";
 import { CREATE_ACCOUNT_MUTATION, AccountInput, CreateAccountPayload } from "@/graphql/mutation/account-mutation"; // Adjust the import path
-import { useMutation } from '@apollo/client'; // Import Apollo's useMutation
+import { useMutation } from '@apollo/client'; 
 import { createApolloClient } from '@/lib/create-apollo-client'; 
 
 export default function SignUp() {
@@ -173,7 +173,7 @@ export default function SignUp() {
       first_name: formData.firstName,
       last_name: formData.lastName,
       email: formData.email,
-      password: formData.password, // In a real app, you should hash this on the backend!
+      password: formData.password,
     };
 
     createAccountMutation({ variables: { account: accountInput } });
