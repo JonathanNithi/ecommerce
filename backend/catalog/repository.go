@@ -268,23 +268,27 @@ func (r *elasticRepository) GetProductByID(ctx context.Context, id string) (*Pro
 }
 
 func (r *elasticRepository) ListProducts(ctx context.Context, skip, take uint64, sort *pb.ProductSortInput) ([]Product, error) {
-	query := fmt.Sprintf(`{
-		"from": %d,
-		"size": %d,
-		"query": {
-			"match_all": {}
-		}`, skip, take)
-
+	query := map[string]interface{}{
+		"from": skip,
+		"size": take,
+		"query": map[string]interface{}{
+			"match_all": map[string]interface{}{},
+		},
+	}
+	if sort != nil {
+		log.Printf("ListProducts called with Sort Field: %s, Direction: %s", sort.Field, sort.Direction)
+	} else {
+		log.Println("ListProducts called with nil sort parameter.")
+	}
 	if sort != nil {
 		sortField := ""
 		switch sort.Field {
 		case pb.ProductSortField_NAME:
-			sortField = "name.keyword" // Assuming you have a "name.keyword" field for exact string sorting in Elasticsearch
+			sortField = "name.keyword"
 		case pb.ProductSortField_PRICE:
 			sortField = "price"
 		default:
-			// Handle default sorting or error if the field is not supported
-			sortField = "_id" // Default to sorting by document ID
+			sortField = "_id"
 		}
 
 		sortDirection := "asc"
@@ -292,21 +296,23 @@ func (r *elasticRepository) ListProducts(ctx context.Context, skip, take uint64,
 			sortDirection = "desc"
 		}
 
-		query += fmt.Sprintf(`,
-		"sort": [
+		query["sort"] = []map[string]interface{}{
 			{
-				"%s": {
-					"order": "%s"
-				}
-			}
-		]`, sortField, sortDirection)
+				sortField: map[string]interface{}{
+					"order": sortDirection,
+				},
+			},
+		}
 	}
 
-	query += `}`
+	queryJSON, err := json.Marshal(query)
+	if err != nil {
+		return nil, err
+	}
 
 	req := esapi.SearchRequest{
 		Index: []string{"catalog"},
-		Body:  strings.NewReader(query),
+		Body:  strings.NewReader(string(queryJSON)),
 	}
 
 	res, err := req.Do(ctx, r.client)

@@ -90,8 +90,8 @@ type Query struct {
 type ProductSortField string
 
 const (
-	ProductSortFieldName  ProductSortField = "name"
-	ProductSortFieldPrice ProductSortField = "price"
+	ProductSortFieldName  ProductSortField = "NAME"
+	ProductSortFieldPrice ProductSortField = "PRICE"
 )
 
 var AllProductSortField = []ProductSortField{

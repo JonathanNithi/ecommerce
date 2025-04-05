@@ -11,8 +11,8 @@ enum SortDirection {
 }
 
 enum ProductSortField {
-  name
-  price
+  NAME
+  PRICE
 }
 
 input ProductSortInput {
