@@ -493,8 +493,8 @@ func (r *elasticRepository) DeductStock(ctx context.Context, id string, quantity
 	// Step 4: Prepare the update payload
 	updatePayload := map[string]interface{}{
 		"doc": map[string]interface{}{
-			"Stock":        newStock,
-			"Availability": availability,
+			"stock":        newStock,
+			"availability": availability,
 		},
 	}
 

@@ -105,12 +105,14 @@ func (s *grpcServer) PostOrder(
 
 	//deduct the quantity from the stock
 	for _, p := range products {
+		log.Printf("Order Service: Deducting stock for product ID: %s, quantity: %d", p.ID, p.Quantity)
 		err = s.catalogClient.DeductStock(ctx, p.ID, int64(p.Quantity))
-		log.Println(err)
+		log.Printf("Order Service: DeductStock returned error for product ID %s: %v", p.ID, err)
 		if err != nil {
 			log.Println("Error deducting stock: ", err)
 			return nil, errors.New("could not deduct stock")
 		}
+		log.Printf("Order Service: Successfully attempted to deduct stock for product ID: %s", p.ID)
 	}
 
 	// Make response order
