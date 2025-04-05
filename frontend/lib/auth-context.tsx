@@ -1,6 +1,8 @@
+"use client";
+
 import React, { createContext, useState, useEffect, useCallback, useContext } from 'react';
 import Cookies from 'js-cookie';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation'; // Import from next/navigation
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -35,7 +37,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = useCallback(async (email: string, password: string): Promise<boolean> => {
     try {
-      const response = await fetch('http://localhost:8000/graphql', { // Adjust to your GraphQL endpoint or API route
+      const response = await fetch('http://localhost:8000/graphql', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -64,7 +66,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           data.data.login.refreshToken,
           data.data.login.account_id.id
         );
-        await router.push('/');
+        router.push('/');
         return true;
       } else {
         console.error('Login failed:', data?.errors || data?.data?.login);
@@ -78,7 +80,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = useCallback(async () => {
     clearAuthData();
-    await router.push('/login'); // Adjust to your login page path
+    await router.push('/login');
   }, [clearAuthData, router]);
 
   const refreshAccessToken = useCallback(async (): Promise<string | null> => {
@@ -89,7 +91,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     try {
-      const response = await fetch('http://localhost:8000/graphql', { // Adjust to your GraphQL endpoint or API route
+      const response = await fetch('http://localhost:8000/graphql', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
