@@ -1,20 +1,11 @@
 "use client"
 
+import type React from "react"
+
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { Filter, ChevronDown, Search } from "lucide-react"
-
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
   Pagination,
@@ -172,11 +163,18 @@ const categories = [...new Set(allProducts.map((product) => product.category))]
 
 // Sort options
 const sortOptions = [
-  { label: "Newest", value: "newest" },
   { label: "Price: Low to High", value: "price-asc" },
   { label: "Price: High to Low", value: "price-desc" },
   { label: "Name: A to Z", value: "name-asc" },
   { label: "Name: Z to A", value: "name-desc" },
+]
+
+// Add this constant for the items per page options
+const itemsPerPageOptions = [
+  { label: "12 per page", value: "12" },
+  { label: "25 per page", value: "25" },
+  { label: "50 per page", value: "50" },
+  { label: "100 per page", value: "100" },
 ]
 
 export default function ProductsPage() {
@@ -185,7 +183,9 @@ export default function ProductsPage() {
   const [sortBy, setSortBy] = useState("newest")
   const [currentPage, setCurrentPage] = useState(1)
   const [filteredProducts, setFilteredProducts] = useState<Product[]>(allProducts)
-  const productsPerPage = 12
+  const [productsPerPage, setProductsPerPage] = useState(12)
+  // Instead of the hardcoded value:
+  // const productsPerPage = 12
 
   // Filter and sort products when search, categories, or sort option changes
   useEffect(() => {
@@ -222,7 +222,7 @@ export default function ProductsPage() {
 
     setFilteredProducts(result)
     setCurrentPage(1) // Reset to first page when filters change
-  }, [searchQuery, selectedCategories, sortBy])
+  }, [searchQuery, selectedCategories, sortBy, productsPerPage])
 
   // Calculate pagination
   const indexOfLastProduct = currentPage * productsPerPage
@@ -248,7 +248,7 @@ export default function ProductsPage() {
     <div>
       <Navbar />
       <div className="min-h-screen bg-background">
-        <div className="container py-8 md:py-12">
+        <div className="container py-24">
           <div className="mb-8">
             <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">All Products</h1>
             <p className="mt-2 text-muted-foreground">
@@ -259,36 +259,6 @@ export default function ProductsPage() {
           {/* Filters and Search */}
           <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-              {/* Categories Filter */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="flex items-center gap-2">
-                    <Filter className="h-4 w-4" />
-                    Categories
-                    <ChevronDown className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56">
-                  <DropdownMenuLabel>Filter by Category</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  {categories.map((category) => (
-                    <DropdownMenuCheckboxItem
-                      key={category}
-                      checked={selectedCategories.includes(category)}
-                      onCheckedChange={() => toggleCategory(category)}
-                    >
-                      {category}
-                    </DropdownMenuCheckboxItem>
-                  ))}
-                  <DropdownMenuSeparator />
-                  <div className="px-2 py-1.5">
-                    <Button variant="ghost" size="sm" className="w-full text-xs" onClick={clearFilters}>
-                      Clear Filters
-                    </Button>
-                  </div>
-                </DropdownMenuContent>
-              </DropdownMenu>
-
               {/* Sort Options */}
               <div className="flex items-center gap-2">
                 <span className="text-sm text-muted-foreground">Sort by:</span>
@@ -305,53 +275,25 @@ export default function ProductsPage() {
                   </SelectContent>
                 </Select>
               </div>
-            </div>
 
-            {/* Search */}
-            <div className="relative w-full md:w-auto md:min-w-[300px]">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="Search products..."
-                className="pl-8 w-full"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+              {/* Items Per Page Dropdown */}
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">Show:</span>
+                <Select value={productsPerPage.toString()} onValueChange={(value) => setProductsPerPage(Number(value))}>
+                  <SelectTrigger className="w-[140px]">
+                    <SelectValue placeholder="Items per page" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {itemsPerPageOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
-
-          {/* Active Filters */}
-          {(selectedCategories.length > 0 || searchQuery) && (
-            <div className="mb-6 flex flex-wrap items-center gap-2">
-              <span className="text-sm text-muted-foreground">Active filters:</span>
-              {selectedCategories.map((category) => (
-                <Button
-                  key={category}
-                  variant="secondary"
-                  size="sm"
-                  className="h-7 rounded-full text-xs"
-                  onClick={() => toggleCategory(category)}
-                >
-                  {category} &times;
-                </Button>
-              ))}
-              {searchQuery && (
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="h-7 rounded-full text-xs"
-                  onClick={() => setSearchQuery("")}
-                >
-                  "{searchQuery}" &times;
-                </Button>
-              )}
-              {(selectedCategories.length > 0 || searchQuery) && (
-                <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={clearFilters}>
-                  Clear all
-                </Button>
-              )}
-            </div>
-          )}
 
           {/* Results Count */}
           <div className="mb-6">
