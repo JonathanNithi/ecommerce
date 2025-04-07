@@ -3,7 +3,7 @@ import { gql, useQuery } from "@apollo/client";
 import { useMemo } from "react";
 
 export const GET_PRODUCTS_PRODUCT_PAGE = gql`
-  query GetProducts($field: ProductSortField, $direction: SortDirection, $skip: Int, $take: Int) {
+  query GetProducts($field: ProductSortField!, $direction: SortDirection!, $skip: Int, $take: Int) {
     products(sort: { field: $field, direction: $direction }, pagination: { skip: $skip, take: $take }) {
       totalCount
       items {
