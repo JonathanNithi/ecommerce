@@ -184,8 +184,10 @@ export default function ProductsPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [filteredProducts, setFilteredProducts] = useState<Product[]>(allProducts)
   const [productsPerPage, setProductsPerPage] = useState(12)
-  // Instead of the hardcoded value:
-  // const productsPerPage = 12
+  // State to track quantity for each product
+  const [quantities, setQuantities] = useState<Record<number, number>>(
+    allProducts.reduce((acc, product) => ({ ...acc, [product.id]: 1 }), {}),
+  )
 
   // Filter and sort products when search, categories, or sort option changes
   useEffect(() => {
@@ -242,6 +244,26 @@ export default function ProductsPage() {
     setSearchQuery("")
     setSelectedCategories([])
     setSortBy("newest")
+  }
+
+  // Handle quantity change
+  const handleQuantityChange = (productId: number, value: number) => {
+    setQuantities((prev) => ({
+      ...prev,
+      [productId]: value,
+    }))
+  }
+
+  // Handle add to cart
+  const handleAddToCart = (e: React.MouseEvent, product: Product) => {
+    e.preventDefault() // Prevent navigation when clicking the button
+    e.stopPropagation() // Stop event from bubbling up
+
+    const quantity = quantities[product.id]
+    console.log(`Added ${quantity} of ${product.name} to cart`)
+
+    // Here you would add the product to your cart state/context
+    // For example: addToCart(product, quantity)
   }
 
   return (
@@ -306,28 +328,47 @@ export default function ProductsPage() {
           {currentProducts.length > 0 ? (
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
               {currentProducts.map((product) => (
-                <Link key={product.id} href={`/products/${product.id}`}>
-                  <Card className="overflow-hidden transition-all hover:shadow-md">
-                    <div className="aspect-square bg-blue-50">
-                      <img
-                        src={product.image || "/placeholder.svg"}
-                        alt={product.name}
-                        className="h-full w-full object-cover object-center"
-                      />
-                    </div>
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="font-medium">{product.name}</h3>
-                          <p className="mt-1 text-sm text-muted-foreground">${product.price}</p>
-                        </div>
-                        <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full">
-                          {product.category}
-                        </span>
+                <div key={product.id} className="relative group">
+                  <Link href={`/products/${product.id}`} className="block">
+                    <Card className="overflow-hidden transition-all hover:shadow-md h-full">
+                      <div className="aspect-square bg-blue-50">
+                        <img
+                          src={product.image || "/placeholder.svg"}
+                          alt={product.name}
+                          className="h-full w-full object-cover object-center"
+                        />
                       </div>
-                    </CardContent>
-                  </Card>
-                </Link>
+                      <CardContent className="p-4">
+                        <h3 className="font-medium">{product.name}</h3>
+                        <p className="mt-1 text-sm text-muted-foreground">${product.price}</p>
+
+                        {/* Add to Cart Section */}
+                        <div
+                          className="mt-4 flex items-center gap-2"
+                          onClick={(e) => e.preventDefault()} // Prevent navigation when interacting with these elements
+                        >
+                          <div className="flex items-center border rounded-md">
+                            <input
+                              type="number"
+                              min="1"
+                              value={quantities[product.id]}
+                              onChange={(e) => handleQuantityChange(product.id, Number.parseInt(e.target.value) || 1)}
+                              aria-label={`Quantity for ${product.name}`}
+                              className="w-12 h-9 text-center border-0 focus:ring-0 focus:outline-none"
+                              onClick={(e) => e.stopPropagation()} // Prevent navigation when clicking the input
+                            />
+                          </div>
+                          <Button
+                            className="flex-1 bg-blue-600 hover:bg-blue-700"
+                            onClick={(e) => handleAddToCart(e, product)}
+                          >
+                            Add to Cart
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                </div>
               ))}
             </div>
           ) : (
