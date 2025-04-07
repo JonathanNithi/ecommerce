@@ -53,7 +53,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({
               </div>
               <CardContent className="p-4">
                 <h3 className="font-medium">{product.name}</h3>
-                <p className="mt-1 text-sm text-muted-foreground">${product.price}</p>
+                <p className="mt-1 text-sm text-muted-foreground">Rs. {product.price}</p>
 
                 {/* Add to Cart Section */}
                 <div
