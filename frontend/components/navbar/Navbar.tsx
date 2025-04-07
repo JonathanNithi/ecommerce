@@ -1,16 +1,18 @@
-import React from 'react';
+// components/navbar/Navbar.tsx
+import React, { useState, useCallback } from 'react';
 import Link from 'next/link';
-import { useState } from "react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import CategoryDropdown from './category-dropdown';
-import SearchInput from './search-input';
+import SearchInput from './search-input'; // Make sure the path is correct
 import CartIcon from './cart-icon';
 import UserMenu from './user-menu';
 import { Menu } from 'lucide-react';
-import { useTheme } from 'next-themes'; // Import the useTheme hook
+import { useTheme } from 'next-themes';
+import { useRouter } from 'next/navigation';
 
 const Navbar: React.FC = () => {
-    const { theme } = useTheme(); // Get the current theme
+    const { theme } = useTheme();
+    const router = useRouter();
 
     // Dropdown menu items
     const categories = [
@@ -41,14 +43,21 @@ const Navbar: React.FC = () => {
         "Vegetables",
     ];
 
+
     const [isSignedIn, setIsSignedIn] = useState(false);
     const [isSearchVisible, setIsSearchVisible] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState(categories[0]);
 
-    // Toggle sign in status for demo purposes
     const toggleSignIn = () => {
         setIsSignedIn(!isSignedIn);
     };
+
+    const handleSearch = useCallback((query: string) => {
+        if (query.trim()) {
+            router.push(`/products?query=${encodeURIComponent(query)}`);
+        }
+    }, [router]);
+
     return (
         <div>
             <header className="z-50 border-b bg-background fixed top-0 left-0 w-full shadow-md">
@@ -67,7 +76,7 @@ const Navbar: React.FC = () => {
                             setSelectedCategory={setSelectedCategory}
                             categories={categories}
                         />
-                        <SearchInput />
+                        <SearchInput onSearch={handleSearch} /> {/* Pass the handleSearch function */}
                     </div>
                     <div className="flex items-center space-x-5">
                         <CartIcon />
@@ -77,14 +86,13 @@ const Navbar: React.FC = () => {
                     </div>
                 </div>
 
-
                 {isSearchVisible && <div className="md:hidden border-t p-4">
                     <CategoryDropdown
                         selectedCategory={selectedCategory}
                         setSelectedCategory={setSelectedCategory}
                         categories={categories}
                     />
-                    <SearchInput />
+                    <SearchInput onSearch={handleSearch} /> {/* Pass the handleSearch function here too */}
                 </div>}
             </header>
         </div>
