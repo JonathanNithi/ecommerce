@@ -22,7 +22,6 @@ import { Product } from "@/types/products";
 import { createApolloClient } from "@/lib/create-apollo-client";
 import { Button } from "@/components/ui/button";
 
-
 // Initialize Apollo Client using your function
 const client = createApolloClient();
 
@@ -46,8 +45,9 @@ export default function ProductsPage() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const searchQuery = searchParams.get('query') || '';
+    const categoryQuery = searchParams.get('category') || ''; // Get the category parameter
 
-    const [sortBy, setSortBy] = useState(sortOptions[0].value); // Default sort by price low to high
+    const [sortBy, setSortBy] = useState(sortOptions[0].value);
     const [currentPage, setCurrentPage] = useState(1);
     const [productsPerPage, setProductsPerPage] = useState(12);
 
@@ -56,16 +56,17 @@ export default function ProductsPage() {
     const sortDirection = currentSortOption?.direction;
 
     const { loading, error, data, refetch } = useQuery(
-        searchQuery ? SEARCH_PRODUCTS : GET_PRODUCTS_PRODUCT_PAGE,
+        searchQuery || categoryQuery ? SEARCH_PRODUCTS : GET_PRODUCTS_PRODUCT_PAGE,
         {
             client,
-            variables: searchQuery
+            variables: searchQuery || categoryQuery
                 ? {
                       field: sortField,
                       direction: sortDirection,
                       skip: (currentPage - 1) * productsPerPage,
                       take: productsPerPage,
-                      query: searchQuery,
+                      query: searchQuery || undefined, // Pass undefined if empty
+                      category: categoryQuery || undefined, // Pass undefined if empty
                   }
                 : {
                       field: sortField,
@@ -124,16 +125,19 @@ export default function ProductsPage() {
             direction: sortDirection,
             skip: (currentPage - 1) * productsPerPage,
             take: productsPerPage,
-            ...(searchQuery && { query: searchQuery }),
+            query: searchQuery || undefined,
+            category: categoryQuery || undefined,
         });
-    }, [sortBy, currentPage, productsPerPage, searchQuery, refetch, sortField, sortDirection]);
+    }, [sortBy, currentPage, productsPerPage, searchQuery, categoryQuery, refetch, sortField, sortDirection]);
 
     if (loading) return (
         <div>
             <Navbar />
             <div className="container py-24 min-h-screen">
                 <div className="text-center">
-                    <h1 className="text-2xl font-semibold mb-4">{searchQuery ? `Searching for "${searchQuery}"...` : "Loading Products..."}</h1>
+                    <h1 className="text-2xl font-semibold mb-4">{searchQuery || categoryQuery ? `Searching...` : "Loading Products..."}</h1>
+                    {searchQuery && <p className="text-muted-foreground">for "{searchQuery}"</p>}
+                    {categoryQuery && <p className="text-muted-foreground">in category "{categoryQuery}"</p>}
                 </div>
             </div>
             <Footer />
@@ -160,10 +164,10 @@ export default function ProductsPage() {
                     <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                         <div>
                             <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
-                                {searchQuery ? `Search Results for "${searchQuery}"` : "All Products"}
+                                {searchQuery ? `Search Results for "${searchQuery}"` : categoryQuery ? `Products in "${categoryQuery.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase())}"` : "All Products"}
                             </h1>
-                            {searchQuery && filteredProducts?.length === 0 && (
-                                <p className="mt-2 text-muted-foreground">No products found matching your search query.</p>
+                            {(searchQuery || categoryQuery) && filteredProducts?.length === 0 && (
+                                <p className="mt-2 text-muted-foreground">No products found matching your criteria.</p>
                             )}
                         </div>
                         <div className="flex items-center gap-4">
@@ -200,9 +204,9 @@ export default function ProductsPage() {
                                     </SelectContent>
                                 </Select>
                             </div>
-                            {searchQuery && (
+                            {(searchQuery || categoryQuery) && (
                                 <Button onClick={clearFilters} variant="outline" size="sm">
-                                    Clear Search
+                                    Clear Filters
                                 </Button>
                             )}
                         </div>

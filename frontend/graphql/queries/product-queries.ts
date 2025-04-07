@@ -34,8 +34,8 @@ export const GET_PRODUCT = gql`
 `;
 
 export const SEARCH_PRODUCTS = gql`
-  query SearchProducts($field: ProductSortField!, $direction: SortDirection!, $skip: Int, $take: Int, $query: String!) {
-    products(sort: { field: $field, direction: $direction }, pagination: { skip: $skip, take: $take }, query: $query) {
+  query SearchProducts($field: ProductSortField!, $direction: SortDirection!, $skip: Int, $take: Int, $query: String!, $category:String!) {
+    products(sort: { field: $field, direction: $direction }, pagination: { skip: $skip, take: $take }, query: $query, category: $category) {
       totalCount
       items {
         name

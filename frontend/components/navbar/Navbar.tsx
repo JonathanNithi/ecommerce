@@ -14,8 +14,8 @@ const Navbar: React.FC = () => {
     const { theme } = useTheme();
     const router = useRouter();
 
-    // Dropdown menu items
-    const categories = [
+    // User-friendly category names for the UI
+    const uiCategories = [
         "All Categories",
         "Auto Care",
         "Baby Products",
@@ -43,20 +43,65 @@ const Navbar: React.FC = () => {
         "Vegetables",
     ];
 
+    // Mapping of UI category name to backend slug
+    const categorySlugMap: Record<string, string> = {
+        "All Categories": "", 
+        "Auto Care": "auto_care",
+        "Baby Products": "baby_products",
+        "Bakery": "bakery",
+        "Beverages": "beverages",
+        "Cooking essentials": "cooking_essentials",
+        "Dairy": "dairy",
+        "Desserts Ingredients": "desserts_ingredients",
+        "Fashion": "fashion",
+        "Food cupboard": "food_cupboard",
+        "Frozen Food": "frozen_food",
+        "Fruits": "fruits",
+        "Gifting": "gifting",
+        "Health Beauty": "health_beauty",
+        "Household": "household",
+        "Meats": "meats",
+        "Party Shop": "party_shop",
+        "Pet Products": "pet_products",
+        "Rice": "rice",
+        "Seafood": "seafood",
+        "Seeds Spices": "seeds_spices",
+        "Snacks Confectionery": "snacks_confectionery",
+        "Stationary": "stationary",
+        "Tea Coffee": "tea_coffee",
+        "Vegetables": "vegetables",
+    };
 
     const [isSignedIn, setIsSignedIn] = useState(false);
     const [isSearchVisible, setIsSearchVisible] = useState(false);
-    const [selectedCategory, setSelectedCategory] = useState(categories[0]);
+    const [selectedCategoryUI, setSelectedCategoryUI] = useState(uiCategories[0]);
 
     const toggleSignIn = () => {
         setIsSignedIn(!isSignedIn);
     };
 
+    const handleCategoryChange = useCallback((categoryUI: string) => {
+        setSelectedCategoryUI(categoryUI);
+    }, []);
+
+    const getBackendCategorySlug = useCallback((categoryUI: string): string | undefined => {
+        return categorySlugMap[categoryUI];
+    }, [categorySlugMap]);
+
     const handleSearch = useCallback((query: string) => {
-        if (query.trim()) {
-            router.push(`/products?query=${encodeURIComponent(query)}`);
+        const backendCategorySlug = getBackendCategorySlug(selectedCategoryUI);
+        let url = `/products?query=${encodeURIComponent(query)}`;
+
+        if (backendCategorySlug && backendCategorySlug !== "all_categories") { // Adjust "all_categories" if needed
+            url += `&category=${encodeURIComponent(backendCategorySlug)}`;
+        } else if (!query.trim() && backendCategorySlug && backendCategorySlug !== "all_categories") {
+            url = `/products?category=${encodeURIComponent(backendCategorySlug)}`;
         }
-    }, [router]);
+
+        if (query.trim() || (backendCategorySlug && backendCategorySlug !== "all_categories")) {
+            router.push(url);
+        }
+    }, [router, getBackendCategorySlug, selectedCategoryUI]);
 
     return (
         <div>
@@ -72,9 +117,9 @@ const Navbar: React.FC = () => {
                     </div>
                     <div className="flex items-center flex-1 lg:flex-initial hidden md:flex lg:w-[500px] xl:w-[600px] 2xl:w-[800px]">
                         <CategoryDropdown
-                            selectedCategory={selectedCategory}
-                            setSelectedCategory={setSelectedCategory}
-                            categories={categories}
+                            selectedCategory={selectedCategoryUI}
+                            setSelectedCategory={handleCategoryChange}
+                            categories={uiCategories}
                         />
                         <SearchInput onSearch={handleSearch} /> {/* Pass the handleSearch function */}
                     </div>
@@ -88,9 +133,9 @@ const Navbar: React.FC = () => {
 
                 {isSearchVisible && <div className="md:hidden border-t p-4">
                     <CategoryDropdown
-                        selectedCategory={selectedCategory}
-                        setSelectedCategory={setSelectedCategory}
-                        categories={categories}
+                        selectedCategory={selectedCategoryUI}
+                        setSelectedCategory={handleCategoryChange}
+                        categories={uiCategories}
                     />
                     <SearchInput onSearch={handleSearch} /> {/* Pass the handleSearch function here too */}
                 </div>}
