@@ -79,6 +79,11 @@ type ProductInput struct {
 	Stock       int      `json:"stock"`
 }
 
+type ProductListResponse struct {
+	Items      []*Product `json:"items"`
+	TotalCount int        `json:"totalCount"`
+}
+
 type ProductSortInput struct {
 	Field     ProductSortField `json:"field"`
 	Direction SortDirection    `json:"direction"`

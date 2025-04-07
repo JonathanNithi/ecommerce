@@ -10,7 +10,7 @@ import (
 type Service interface {
 	PostProduct(ctx context.Context, name, description string, price float64, category string, imageUrl string, tags []string, stock int64) (*Product, error)
 	GetProduct(ctx context.Context, id string) (*Product, error)
-	GetProducts(ctx context.Context, skip uint64, take uint64, sort *pb.ProductSortInput) ([]Product, error)
+	GetProducts(ctx context.Context, skip uint64, take uint64, sort *pb.ProductSortInput) ([]Product, uint64, error)
 	GetProductsByIDs(ctx context.Context, ids []string) ([]Product, error)
 	SearchProducts(ctx context.Context, query string, skip uint64, take uint64, category string, sort *pb.ProductSortInput) ([]Product, error)
 	DeductStock(ctx context.Context, productID string, quantity int64) error
@@ -66,7 +66,7 @@ func (s *catalogService) GetProduct(ctx context.Context, id string) (*Product, e
 	return s.repository.GetProductByID(ctx, id)
 }
 
-func (s *catalogService) GetProducts(ctx context.Context, skip uint64, take uint64, sort *pb.ProductSortInput) ([]Product, error) {
+func (s *catalogService) GetProducts(ctx context.Context, skip uint64, take uint64, sort *pb.ProductSortInput) ([]Product, uint64, error) {
 	if take > 100 || (skip == 0 && take == 0) {
 		take = 100
 	}

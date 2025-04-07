@@ -72,6 +72,7 @@ func (s *grpcServer) GetProduct(ctx context.Context, r *pb.GetProductRequest) (*
 func (s *grpcServer) GetProducts(ctx context.Context, r *pb.GetProductsRequest) (*pb.GetProductsResponse, error) {
 	var res []Product
 	var err error
+	var count uint64
 
 	var sortBy *pb.ProductSortInput
 	if r.Sort != nil {
@@ -86,7 +87,7 @@ func (s *grpcServer) GetProducts(ctx context.Context, r *pb.GetProductsRequest) 
 		res, err = s.service.GetProductsByIDs(ctx, r.Ids)
 	} else {
 		// Assuming your service layer's GetProducts now accepts sort
-		res, err = s.service.GetProducts(ctx, r.Skip, r.Take, sortBy)
+		res, count, err = s.service.GetProducts(ctx, r.Skip, r.Take, sortBy)
 	}
 
 	if err != nil {
@@ -111,7 +112,7 @@ func (s *grpcServer) GetProducts(ctx context.Context, r *pb.GetProductsRequest) 
 			},
 		)
 	}
-	return &pb.GetProductsResponse{Products: products}, nil
+	return &pb.GetProductsResponse{Products: products, TotalCount: count}, nil
 }
 
 // create a method DeductStock to deduct stock from the product

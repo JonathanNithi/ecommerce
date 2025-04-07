@@ -63,6 +63,11 @@ type LoginResponse {
   refreshToken: String!
 }
 
+type ProductListResponse {
+  items: [Product!]!
+  totalCount: Int!
+}
+
 input PaginationInput {
   skip: Int
   take: Int
@@ -107,5 +112,5 @@ type Mutation {
 
 type Query {
   accounts(pagination: PaginationInput, id: String, accessToken: String!, refreshToken: String!): [Account!]!
-  products(pagination: PaginationInput, query: String, id: String, category: String, sort: ProductSortInput): [Product!]!
+  products(pagination: PaginationInput, query: String, id: String, category: String, sort: ProductSortInput): ProductListResponse!
 }

@@ -64,28 +64,31 @@ func (r *queryResolver) Accounts(ctx context.Context, pagination *PaginationInpu
 	return accounts, nil
 }
 
-func (r *queryResolver) Products(ctx context.Context, pagination *PaginationInput, query *string, id *string, category *string, sort *ProductSortInput) ([]*Product, error) {
+func (r *queryResolver) Products(ctx context.Context, pagination *PaginationInput, query *string, id *string, category *string, sort *ProductSortInput) (*ProductListResponse, error) {
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
 
-	// Get single
+	// Get single product (no total count needed here)
 	if id != nil {
 		prod, err := r.server.catalogClient.GetProduct(ctx, *id)
 		if err != nil {
 			log.Println(err)
 			return nil, err
 		}
-		return []*Product{{
-			ID:           prod.ID,
-			Name:         prod.Name,
-			Description:  prod.Description,
-			Price:        prod.Price,
-			Category:     prod.Category,
-			ImageURL:     prod.ImageURL,
-			Tags:         prod.Tags,
-			Availability: prod.Availability,
-			Stock:        int(prod.Stock),
-		}}, nil
+		return &ProductListResponse{
+			Items: []*Product{{
+				ID:           prod.ID,
+				Name:         prod.Name,
+				Description:  prod.Description,
+				Price:        prod.Price,
+				Category:     prod.Category,
+				ImageURL:     prod.ImageURL,
+				Tags:         prod.Tags,
+				Availability: prod.Availability,
+				Stock:        int(prod.Stock),
+			}},
+			TotalCount: 1, // For a single product, the total count is 1
+		}, nil
 	}
 
 	skip, take := uint64(0), uint64(0)
@@ -110,7 +113,7 @@ func (r *queryResolver) Products(ctx context.Context, pagination *PaginationInpu
 		}
 	}
 
-	productList, err := r.server.catalogClient.GetProducts(ctx, skip, take, nil, q, categoryValue, sortBy)
+	productList, totalCount, err := r.server.catalogClient.GetProducts(ctx, skip, take, nil, q, categoryValue, sortBy)
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -133,7 +136,10 @@ func (r *queryResolver) Products(ctx context.Context, pagination *PaginationInpu
 		)
 	}
 
-	return products, nil
+	return &ProductListResponse{
+		Items:      products,
+		TotalCount: int(totalCount), // Get the total count from the gRPC response
+	}, nil
 }
 
 func (p PaginationInput) bounds() (uint64, uint64) {

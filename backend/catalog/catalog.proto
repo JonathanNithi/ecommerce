@@ -63,6 +63,7 @@ message GetProductsRequest {
 
 message GetProductsResponse {
     repeated Product products = 1;
+    uint64 total_count = 2; 
 }
 
 message DeductStockRequest {

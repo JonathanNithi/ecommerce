@@ -81,7 +81,7 @@ func (c *Client) GetProduct(ctx context.Context, id string) (*Product, error) {
 	}, nil
 }
 
-func (c *Client) GetProducts(ctx context.Context, skip uint64, take uint64, ids []string, query string, category string, sortBy *pb.ProductSortInput) ([]Product, error) {
+func (c *Client) GetProducts(ctx context.Context, skip uint64, take uint64, ids []string, query string, category string, sortBy *pb.ProductSortInput) ([]Product, uint64, error) {
 	r, err := c.service.GetProducts(
 		ctx,
 		&pb.GetProductsRequest{
@@ -94,7 +94,7 @@ func (c *Client) GetProducts(ctx context.Context, skip uint64, take uint64, ids 
 		},
 	)
 	if err != nil {
-		return nil, err
+		return nil, 0, err // Return 0 for total count on error
 	}
 	products := []Product{}
 	for _, p := range r.Products {
@@ -110,7 +110,7 @@ func (c *Client) GetProducts(ctx context.Context, skip uint64, take uint64, ids 
 			Stock:        p.Stock,
 		})
 	}
-	return products, nil
+	return products, r.TotalCount, nil // Return the total count from the response
 }
 
 // create a method DeductStock to deduct stock from the product
