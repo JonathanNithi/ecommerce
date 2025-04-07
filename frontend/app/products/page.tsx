@@ -18,6 +18,10 @@ import Footer from "@/components/footer/Footer";
 import { useQuery } from "@apollo/client";
 import { GET_PRODUCTS_PRODUCT_PAGE, ProductSortField, SortDirection } from "@/graphql/queries/product-queries";
 import { Product } from "@/types/products";
+import { createApolloClient } from "@/lib/create-apollo-client";
+
+// Initialize Apollo Client using your function
+const client = createApolloClient();
 
 // Sort options
 const sortOptions = [
@@ -43,6 +47,7 @@ export default function ProductsPage() {
   const [productsPerPage, setProductsPerPage] = useState(12);
 
   const { loading, error, data } = useQuery(GET_PRODUCTS_PRODUCT_PAGE, {
+    client, // Use the client created by your function
     variables: {
       field: sortOptions.find((option) => option.value === sortBy)?.field,
       direction: sortOptions.find((option) => option.value === sortBy)?.direction,
@@ -61,6 +66,7 @@ export default function ProductsPage() {
   }, [sortBy, currentPage, productsPerPage]);
 
   const { refetch: refetchProducts } = useQuery(GET_PRODUCTS_PRODUCT_PAGE, {
+    client, // Use the client created by your function
     variables: {
       field: sortOptions.find((option) => option.value === sortBy)?.field,
       direction: sortOptions.find((option) => option.value === sortBy)?.direction,
