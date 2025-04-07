@@ -1,58 +1,60 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import Navbar from "@/components/navbar/Navbar"
-import Footer from "@/components/footer/Footer"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import Navbar from "@/components/navbar/Navbar";
+import Footer from "@/components/footer/Footer";
+import { Product } from "@/types/products";
+import { createApolloClient } from "@/lib/create-apollo-client";
+import { GET_PRODUCT } from "@/graphql/queries/product-queries";
+import { useQuery } from "@apollo/client";
 
-// Product type definition
-type Product = {
-  id: number
-  name: string
-  price: string
-  image: string
-  category: string
-  description?: string
-}
-
-// All products data (in a real app, this would come from an API)
-const allProducts: Product[] = [
-  {
-    id: 1,
-    name: "Minimalist Desk Lamp",
-    price: "49.99",
-    image: "/placeholder.svg?height=800&width=800",
-    category: "Lighting",
-    description:
-      "A sleek, minimalist desk lamp with adjustable brightness and color temperature. Perfect for your home office or bedside table.",
-  },
-  {
-    id: 2,
-    name: "Modern Coffee Table",
-    price: "199.99",
-    image: "/placeholder.svg?height=800&width=800",
-    category: "Furniture",
-    description:
-      "This modern coffee table features clean lines and a durable surface. The perfect centerpiece for your living room.",
-  },
-  {
-    id: 3,
-    name: "Ceramic Vase Set",
-    price: "79.99",
-    image: "/placeholder.svg?height=800&width=800",
-    category: "Decor",
-    description: "A set of three ceramic vases in varying sizes. Each piece is handcrafted with attention to detail.",
-  },
-  // Add more product descriptions as needed
-]
+// Initialize Apollo Client using your function
+const client = createApolloClient();
 
 export default function ProductDetailPage({ params }: { params: { id: string } }) {
-  const router = useRouter()
-  const productId = Number.parseInt(params.id)
-  const product = allProducts.find((p) => p.id === productId)
+  const router = useRouter();
+  const productId = Number.parseInt(params.id);
+  const [quantity, setQuantity] = useState(1);
 
-  const [quantity, setQuantity] = useState(1)
+  const { loading, error, data } = useQuery(GET_PRODUCT, {
+    client,
+    variables: { id: productId },
+  });
+
+  const product: Product | undefined = data?.product;
+
+  if (loading) {
+    return (
+      <div>
+        <Navbar />
+        <div className="container py-24 min-h-screen">
+          <div className="text-center">
+            <h1 className="text-3xl font-bold mb-4">Loading Product...</h1>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (error) {
+    console.error("Error fetching product:", error);
+    return (
+      <div>
+        <Navbar />
+        <div className="container py-24 min-h-screen">
+          <div className="text-center">
+            <h1 className="text-3xl font-bold mb-4">Error Loading Product</h1>
+            <p className="mb-6">There was an error fetching the product details.</p>
+            <Button onClick={() => router.push("/products")}>Back to Products</Button>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   if (!product) {
     return (
@@ -67,7 +69,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
         </div>
         <Footer />
       </div>
-    )
+    );
   }
 
   return (
@@ -77,13 +79,13 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
         <div className="flex flex-col md:grid md:grid-cols-2 gap-8">
           {/* Product Image - Hidden on mobile, visible on md and up */}
           <div className="bg-blue-50 rounded-lg overflow-hidden hidden md:block">
-            <img src={product.image || "/placeholder.svg"} alt={product.name} className="w-full h-auto object-cover" />
+            <img src={product.imageUrl || "/placeholder.svg"} alt={product.name} className="w-full h-auto object-cover" />
           </div>
 
           {/* Product Details */}
           <div className="flex flex-col">
             <h1 className="text-3xl font-bold">{product.name}</h1>
-            <div className="mt-2 text-blue-600 text-2xl font-semibold">${product.price}</div>
+            <div className="mt-2 text-blue-600 text-2xl font-semibold">Rs. {product.price}</div>
 
             <div className="mt-2">
               <span className="inline-flex px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
@@ -101,7 +103,10 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
             <div className="mt-8">
               <div className="flex items-center gap-4 mb-6">
                 <div className="flex items-center border rounded-md">
-                  <button className="px-3 py-2 border-r" onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}>
+                  <button
+                    className="px-3 py-2 border-r"
+                    onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
+                  >
                     -
                   </button>
                   <input
@@ -118,16 +123,20 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
                 <Button
                   className="flex-1 bg-blue-600 hover:bg-blue-700 h-10"
                   onClick={() => console.log(`Added ${quantity} of ${product.name} to cart`)}
+                  disabled={!product.availability}
                 >
                   Add to Cart
                 </Button>
+                {!product.availability && (
+                  <span className="text-red-500 text-sm">Out of Stock</span>
+                )}
               </div>
             </div>
 
             {/* Product Image - Visible only on mobile, between Add to Cart and Back button */}
             <div className="bg-blue-50 rounded-lg overflow-hidden my-6 md:hidden">
               <img
-                src={product.image || "/placeholder.svg"}
+                src={product.imageUrl || "/placeholder.svg"}
                 alt={product.name}
                 className="w-full h-auto object-cover"
               />
@@ -141,6 +150,5 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
       </div>
       <Footer />
     </div>
-  )
+  );
 }
-

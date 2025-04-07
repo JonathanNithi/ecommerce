@@ -8,7 +8,6 @@ import CartIcon from './cart-icon';
 import UserMenu from './user-menu';
 import { Menu } from 'lucide-react';
 
-
 const Navbar: React.FC = () => {
     
     // Dropdown menu items
@@ -63,7 +62,7 @@ const Navbar: React.FC = () => {
                     <div className="flex items-center space-x-5">
                         <CartIcon />
                         <ThemeToggle />
-                        <UserMenu isSignedIn={isSignedIn} toggleSignIn={toggleSignIn} />
+                        <UserMenu  />
                         <Menu className="h-6 w-6 cursor-pointer md:hidden" onClick={() => setIsSearchVisible(!isSearchVisible)} />
                     </div>
                 </div>

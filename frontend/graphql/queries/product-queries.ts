@@ -17,6 +17,20 @@ export const GET_PRODUCTS_PRODUCT_PAGE = gql`
   }
 `;
 
+export const GET_PRODUCT = gql`
+  query GetProduct($id: string!) { # Assuming your product ID is an integer
+    product(id: $id) {
+      id
+      name
+      price
+      availability
+      imageUrl
+      description 
+      category    
+    }
+  }
+`;
+
 // Define the enum types if they are not already defined elsewhere in your codebase
 // These should match your GraphQL schema definitions
 export enum ProductSortField {
