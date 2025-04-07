@@ -23,7 +23,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
     variables: { id: productId },
   });
 
-  const product: Product | undefined = data?.product;
+  const product: Product | undefined = data?.products?.items?.[0]; 
 
   if (loading) {
     return (
