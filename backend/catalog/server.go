@@ -81,10 +81,11 @@ func (s *grpcServer) GetProducts(ctx context.Context, r *pb.GetProductsRequest) 
 
 	if r.Query != "" {
 		// Assuming your service layer has a SearchProducts that now accepts sort
-		res, err = s.service.SearchProducts(ctx, r.Query, r.Skip, r.Take, r.Category, sortBy)
+		res, count, err = s.service.SearchProducts(ctx, r.Query, r.Skip, r.Take, r.Category, sortBy)
 	} else if len(r.Ids) != 0 {
 		// Assuming your service layer can fetch by IDs without explicit sorting
 		res, err = s.service.GetProductsByIDs(ctx, r.Ids)
+		count = 1 //ID matches with only one product
 	} else {
 		// Assuming your service layer's GetProducts now accepts sort
 		res, count, err = s.service.GetProducts(ctx, r.Skip, r.Take, sortBy)

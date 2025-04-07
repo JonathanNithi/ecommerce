@@ -25,7 +25,7 @@ type Repository interface {
 	GetProductByID(ctx context.Context, id string) (*Product, error)
 	ListProducts(ctx context.Context, skip uint64, take uint64, sort *pb.ProductSortInput) ([]Product, uint64, error)
 	ListProductsWithIDs(ctx context.Context, ids []string) ([]Product, error)
-	SearchProducts(ctx context.Context, query string, skip uint64, take uint64, category string, sort *pb.ProductSortInput) ([]Product, error)
+	SearchProducts(ctx context.Context, query string, skip uint64, take uint64, category string, sort *pb.ProductSortInput) ([]Product, uint64, error)
 	DeductStock(ctx context.Context, id string, newStock int64) error
 }
 
@@ -427,7 +427,7 @@ func (r *elasticRepository) ListProductsWithIDs(ctx context.Context, ids []strin
 	return products, nil
 }
 
-func (r *elasticRepository) SearchProducts(ctx context.Context, query string, skip, take uint64, category string, sort *pb.ProductSortInput) ([]Product, error) {
+func (r *elasticRepository) SearchProducts(ctx context.Context, query string, skip, take uint64, category string, sort *pb.ProductSortInput) ([]Product, uint64, error) {
 	searchQuery := map[string]interface{}{
 		"from": skip,
 		"size": take,
@@ -497,7 +497,7 @@ func (r *elasticRepository) SearchProducts(ctx context.Context, query string, sk
 
 	queryJSON, err := json.Marshal(searchQuery)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	req := esapi.SearchRequest{
@@ -507,31 +507,34 @@ func (r *elasticRepository) SearchProducts(ctx context.Context, query string, sk
 
 	res, err := req.Do(ctx, r.client)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer res.Body.Close()
 
 	if res.IsError() {
-		return nil, fmt.Errorf("error searching documents: %s", res.String())
+		return nil, 0, fmt.Errorf("error searching documents: %s", res.String())
 	}
 
 	var result map[string]interface{}
 	if err := json.NewDecoder(res.Body).Decode(&result); err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	products := []Product{}
-	hits := result["hits"].(map[string]interface{})["hits"].([]interface{})
-	for _, hit := range hits {
+	hits := result["hits"].(map[string]interface{})
+	hitsArray := hits["hits"].([]interface{})
+	totalHits := uint64(hits["total"].(map[string]interface{})["value"].(float64)) // Extract total count
+
+	for _, hit := range hitsArray {
 		source := hit.(map[string]interface{})["_source"]
 		sourceJSON, err := json.Marshal(source)
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 
 		var p productDocument
 		if err := json.Unmarshal(sourceJSON, &p); err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 
 		products = append(products, Product{
@@ -547,7 +550,7 @@ func (r *elasticRepository) SearchProducts(ctx context.Context, query string, sk
 		})
 	}
 
-	return products, nil
+	return products, totalHits, nil // Return products and total count
 }
 
 func (r *elasticRepository) DeductStock(ctx context.Context, id string, quantity int64) error {
