@@ -46,11 +46,15 @@ export default function ProductsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [productsPerPage, setProductsPerPage] = useState(12);
 
+  const currentSortOption = sortOptions.find((option) => option.value === sortBy);
+  const sortField = currentSortOption?.field;
+  const sortDirection = currentSortOption?.direction;
+
   const { loading, error, data } = useQuery(GET_PRODUCTS_PRODUCT_PAGE, {
     client, // Use the client created by your function
     variables: {
-      field: sortOptions.find((option) => option.value === sortBy)?.field,
-      direction: sortOptions.find((option) => option.value === sortBy)?.direction,
+      field: sortField,
+      direction: sortDirection,
       skip: (currentPage - 1) * productsPerPage,
       take: productsPerPage,
     },
@@ -68,8 +72,8 @@ export default function ProductsPage() {
   const { refetch: refetchProducts } = useQuery(GET_PRODUCTS_PRODUCT_PAGE, {
     client, // Use the client created by your function
     variables: {
-      field: sortOptions.find((option) => option.value === sortBy)?.field,
-      direction: sortOptions.find((option) => option.value === sortBy)?.direction,
+      field: sortField,
+      direction: sortDirection,
       skip: (currentPage - 1) * productsPerPage,
       take: productsPerPage,
     },
@@ -92,7 +96,12 @@ export default function ProductsPage() {
     setSortBy(sortOptions[0].value);
     setCurrentPage(1);
     setProductsPerPage(12);
-    refetchProducts({ field: sortOptions[0].field, direction: sortOptions[0].direction, skip: 0, take: 12 });
+    refetchProducts({
+      field: sortOptions[0].field,
+      direction: sortOptions[0].direction,
+      skip: 0,
+      take: 12,
+    });
   };
 
   // Handle sort by change
