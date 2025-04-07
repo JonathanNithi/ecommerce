@@ -5,20 +5,12 @@ import React from "react";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-
-// Product type definition (it's good to keep this consistent)
-type Product = {
-  id: number;
-  name: string;
-  price: string;
-  image: string;
-  category: string;
-};
+import { Product } from "@/types/products"; // Adjust the import path as necessary
 
 interface ProductGridProps {
   products: Product[];
-  quantities: Record<number, number>;
-  handleQuantityChange: (productId: number, value: number) => void;
+  quantities: Record<string, number>;
+  handleQuantityChange: (productId: string, value: number) => void;
   handleAddToCart: (e: React.MouseEvent, product: Product) => void;
   clearFilters?: () => void; // Optional clear filters function
 }
@@ -54,7 +46,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({
             <Card className="overflow-hidden transition-all hover:shadow-md h-full">
               <div className="aspect-square bg-blue-50">
                 <img
-                  src={product.image || "/placeholder.svg"}
+                  src={product.imageUrl || "/placeholder.svg"}
                   alt={product.name}
                   className="h-full w-full object-cover object-center"
                 />
