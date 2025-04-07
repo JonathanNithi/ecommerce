@@ -65,8 +65,8 @@ export default function ProductsPage() {
                       direction: sortDirection,
                       skip: (currentPage - 1) * productsPerPage,
                       take: productsPerPage,
-                      query: searchQuery || undefined, // Pass undefined if empty
-                      category: categoryQuery
+                      query: searchQuery || "",
+                      category: categoryQuery || ""
                   }
                 : {
                       field: sortField,
