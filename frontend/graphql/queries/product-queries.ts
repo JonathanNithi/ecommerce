@@ -20,13 +20,15 @@ export const GET_PRODUCTS_PRODUCT_PAGE = gql`
 export const GET_PRODUCT = gql`
   query GetProduct($id: String!) { # Assuming your product ID is an integer
     products(id: $id) {
-      id
-      name
-      price
-      availability
-      imageUrl
-      description 
-      category    
+      items {
+        id
+        name
+        price
+        availability
+        imageUrl
+        description 
+        category  
+      }  
     }
   }
 `;
