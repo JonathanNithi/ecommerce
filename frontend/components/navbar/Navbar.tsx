@@ -89,18 +89,18 @@ const Navbar: React.FC = () => {
     }, [categorySlugMap]);
 
     const handleSearch = useCallback((query: string) => {
-        const backendCategorySlug = getBackendCategorySlug(selectedCategoryUI);
         let url = `/products?query=${encodeURIComponent(query)}`;
-
-        if (backendCategorySlug && backendCategorySlug !== "all_categories") { // Adjust "all_categories" if needed
+        const backendCategorySlug = getBackendCategorySlug(selectedCategoryUI);
+    
+        if (backendCategorySlug && backendCategorySlug !== "") { // Check if the slug is not empty
             url += `&category=${encodeURIComponent(backendCategorySlug)}`;
-        } else if (!query.trim() && backendCategorySlug && backendCategorySlug !== "all_categories") {
-            url = `/products?category=${encodeURIComponent(backendCategorySlug)}`;
+        } else if (!query.trim() && backendCategorySlug === "") {
+            url = `/products`; // Navigate to /products with no category parameter
+        } else if (!query.trim()) {
+            url = `/products`; // Navigate to /products if no query and "All Categories"
         }
-
-        if (query.trim() || (backendCategorySlug && backendCategorySlug !== "all_categories")) {
-            router.push(url);
-        }
+    
+        router.push(url);
     }, [router, getBackendCategorySlug, selectedCategoryUI]);
 
     return (
