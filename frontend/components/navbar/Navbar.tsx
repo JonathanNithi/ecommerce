@@ -54,7 +54,7 @@ const Navbar: React.FC = () => {
             <header className="z-50 border-b bg-background fixed top-0 left-0 w-full shadow-md">
                 <div className=" z-50 shadow w-full px-2 md:px-4 flex h-16 items-center justify-between bg-background">
                     <div>
-                        <Link href="/" className="mr-4 text-xl font-bold text-blue-600">
+                        <Link href="/" className="mr-8 text-xl font-bold text-blue-600">
                             E-Market
                         </Link>
                         <Link href="/products" className="text-sm font-semibold transition-colors duration-300 ease-in-out" style={{ color: theme === 'dark' ? 'white' : 'black' }}>

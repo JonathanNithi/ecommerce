@@ -1,308 +1,306 @@
 "use client";
 
 import type React from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import ProductGrid from "@/components/product/product-grid";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
+    Pagination,
+    PaginationContent,
+    PaginationEllipsis,
+    PaginationItem,
+    PaginationLink,
+    PaginationNext,
+    PaginationPrevious,
 } from "@/components/ui/pagination";
 import Navbar from "@/components/navbar/Navbar";
 import Footer from "@/components/footer/Footer";
 import { useQuery } from "@apollo/client";
-import { GET_PRODUCTS_PRODUCT_PAGE, ProductSortField, SortDirection } from "@/graphql/queries/product-queries";
+import { GET_PRODUCTS_PRODUCT_PAGE, SEARCH_PRODUCTS, ProductSortField, SortDirection } from "@/graphql/queries/product-queries";
 import { Product } from "@/types/products";
 import { createApolloClient } from "@/lib/create-apollo-client";
+import { Button } from "@/components/ui/button";
+
 
 // Initialize Apollo Client using your function
 const client = createApolloClient();
 
 // Sort options
 const sortOptions = [
-  { label: "Price: Low to High", value: "price-asc", field: ProductSortField.PRICE, direction: SortDirection.ASC },
-  { label: "Price: High to Low", value: "price-desc", field: ProductSortField.PRICE, direction: SortDirection.DESC },
-  { label: "Name: A to Z", value: "name-asc", field: ProductSortField.NAME, direction: SortDirection.ASC },
-  { label: "Name: Z to A", value: "name-desc", field: ProductSortField.NAME, direction: SortDirection.DESC },
+    { label: "Price: Low to High", value: "price-asc", field: ProductSortField.PRICE, direction: SortDirection.ASC },
+    { label: "Price: High to Low", value: "price-desc", field: ProductSortField.PRICE, direction: SortDirection.DESC },
+    { label: "Name: A to Z", value: "name-asc", field: ProductSortField.NAME, direction: SortDirection.ASC },
+    { label: "Name: Z to A", value: "name-desc", field: ProductSortField.NAME, direction: SortDirection.DESC },
 ];
 
 // Add this constant for the items per page options
 const itemsPerPageOptions = [
-  { label: "12 per page", value: "12" },
-  { label: "25 per page", value: "25" },
-  { label: "50 per page", value: "50" },
-  { label: "100 per page", value: "100" },
+    { label: "12 per page", value: "12" },
+    { label: "25 per page", value: "25" },
+    { label: "50 per page", value: "50" },
+    { label: "100 per page", value: "100" },
 ];
 
 export default function ProductsPage() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [sortBy, setSortBy] = useState(sortOptions[0].value); // Default sort by price low to high
-  const [currentPage, setCurrentPage] = useState(1);
-  const [productsPerPage, setProductsPerPage] = useState(12);
+    const searchParams = useSearchParams();
+    const router = useRouter();
+    const searchQuery = searchParams.get('query') || '';
 
-  const currentSortOption = sortOptions.find((option) => option.value === sortBy);
-  const sortField = currentSortOption?.field;
-  const sortDirection = currentSortOption?.direction;
+    const [sortBy, setSortBy] = useState(sortOptions[0].value); // Default sort by price low to high
+    const [currentPage, setCurrentPage] = useState(1);
+    const [productsPerPage, setProductsPerPage] = useState(12);
 
-  const { loading, error, data } = useQuery(GET_PRODUCTS_PRODUCT_PAGE, {
-    client, // Use the client created by your function
-    variables: {
-      field: sortField,
-      direction: sortDirection,
-      skip: (currentPage - 1) * productsPerPage,
-      take: productsPerPage,
-    },
-  });
+    const currentSortOption = sortOptions.find((option) => option.value === sortBy);
+    const sortField = currentSortOption?.field;
+    const sortDirection = currentSortOption?.direction;
 
-  const filteredProducts = data?.products?.items as Product[] | undefined;
-  const totalProductsCount = data?.products?.totalCount;
-  const totalPages = totalProductsCount ? Math.ceil(totalProductsCount / productsPerPage) : 0;
-
-  // Update Apollo query when sorting or pagination changes
-  useEffect(() => {
-    refetchProducts();
-  }, [sortBy, currentPage, productsPerPage]);
-
-  const { refetch: refetchProducts } = useQuery(GET_PRODUCTS_PRODUCT_PAGE, {
-    client, // Use the client created by your function
-    variables: {
-      field: sortField,
-      direction: sortDirection,
-      skip: (currentPage - 1) * productsPerPage,
-      take: productsPerPage,
-    },
-    skip: true, // Don't run on initial load, useEffect will trigger it
-  });
-
-  // Toggle category selection (you'll need to adapt this if categories come from the backend)
-  const toggleCategory = (category: string) => {
-    setSelectedCategories((prev) =>
-      prev.includes(category) ? prev.filter((c) => c !== category) : [...prev, category],
+    const { loading, error, data, refetch } = useQuery(
+        searchQuery ? SEARCH_PRODUCTS : GET_PRODUCTS_PRODUCT_PAGE,
+        {
+            client,
+            variables: searchQuery
+                ? {
+                      field: sortField,
+                      direction: sortDirection,
+                      skip: (currentPage - 1) * productsPerPage,
+                      take: productsPerPage,
+                      query: searchQuery,
+                  }
+                : {
+                      field: sortField,
+                      direction: sortDirection,
+                      skip: (currentPage - 1) * productsPerPage,
+                      take: productsPerPage,
+                  },
+            skip: false,
+            notifyOnNetworkStatusChange: true,
+        }
     );
-    // You'll likely need to refetch products with category filters here
-    // refetchProducts({ category: selectedCategories.includes(category) ? selectedCategories.filter((c) => c !== category) : [...selectedCategories, category] });
-  };
 
-  // Clear all filters (you'll need to adapt this based on your backend filtering)
-  const clearFilters = () => {
-    setSearchQuery("");
-    setSelectedCategories([]);
-    setSortBy(sortOptions[0].value);
-    setCurrentPage(1);
-    setProductsPerPage(12);
-    refetchProducts({
-      field: sortOptions[0].field,
-      direction: sortOptions[0].direction,
-      skip: 0,
-      take: 12,
-    });
-  };
+    const filteredProducts = data?.products?.items as Product[] | undefined;
+    const totalProductsCount = data?.products?.totalCount;
+    const totalPages = totalProductsCount ? Math.ceil(totalProductsCount / productsPerPage) : 0;
 
-  // Handle sort by change
-  const handleSortByChange = (value: string) => {
-    setSortBy(value);
-    setCurrentPage(1); // Reset page on sort
-  };
+    const handleSortByChange = useCallback((value: string) => {
+        setSortBy(value);
+        setCurrentPage(1);
+    }, []);
 
-  // Handle items per page change
-  const handleItemsPerPageChange = (value: string) => {
-    setProductsPerPage(Number(value));
-    setCurrentPage(1); // Reset page on items per page change
-  };
+    const handleItemsPerPageChange = useCallback((value: string) => {
+        setProductsPerPage(Number(value));
+        setCurrentPage(1);
+    }, []);
 
-  // Basic search (you'll likely want to integrate this with your backend search)
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-    setCurrentPage(1); // Reset page on search
-    // You'll likely need to refetch products with the search query here
-    // refetchProducts({ query: e.target.value });
-  };
+    const handlePageChange = useCallback((page: number) => {
+        setCurrentPage(page);
+    }, []);
 
-  // Dummy quantity state (replace with your actual cart logic)
-  const [quantities, setQuantities] = useState<Record<string, number>>({});
+    const clearFilters = useCallback(() => {
+        router.push('/products'); // Navigate back to the base products page to clear query
+        setSortBy(sortOptions[0].value);
+        setCurrentPage(1);
+        setProductsPerPage(12);
+    }, [router]);
 
-  const handleQuantityChange = (productId: string, value: number) => {
-    setQuantities((prev) => ({ ...prev, [productId]: value }));
-  };
+    // Dummy quantity state (replace with your actual cart logic)
+    const [quantities, setQuantities] = useState<Record<string, number>>({});
 
-  const handleAddToCart = (e: React.MouseEvent, product: Product) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const quantity = quantities[product.id] || 1;
-    console.log(`Added ${quantity} of ${product.name} (ID: ${product.id}) to cart`);
-    // Implement your cart logic here
-  };
+    const handleQuantityChange = useCallback((productId: string, value: number) => {
+        setQuantities((prev) => ({ ...prev, [productId]: value }));
+    }, []);
 
-  if (loading) return <div>Loading products...</div>;
-  if (error) return <div>Error loading products: {error.message}</div>;
+    const handleAddToCart = useCallback((e: React.MouseEvent, product: Product) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const quantity = quantities[product.id] || 1;
+        console.log(`Added ${quantity} of ${product.name} (ID: ${product.id}) to cart`);
+        // Implement your cart logic here
+    }, []);
 
-  return (
-    <div>
-      <Navbar />
-      <div className="min-h-screen bg-background">
-        <div className="container py-24">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">All Products</h1>
-            <p className="mt-2 text-muted-foreground">
-              Browse our complete collection of minimalist products designed for modern living.
-            </p>
-          </div>
+    useEffect(() => {
+        refetch({
+            field: sortField,
+            direction: sortDirection,
+            skip: (currentPage - 1) * productsPerPage,
+            take: productsPerPage,
+            ...(searchQuery && { query: searchQuery }),
+        });
+    }, [sortBy, currentPage, productsPerPage, searchQuery, refetch, sortField, sortDirection]);
 
-          {/* Filters and Search (Basic search input added) */}
-          <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">Search:</span>
-                <input
-                  type="text"
-                  placeholder="Search products..."
-                  className="border rounded-md px-3 py-2 w-full sm:w-auto"
-                  value={searchQuery}
-                  onChange={handleSearchChange}
-                />
-              </div>
-
-              {/* Sort Options */}
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">Sort by:</span>
-                <Select value={sortBy} onValueChange={handleSortByChange}>
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Sort by" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {sortOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Items Per Page Dropdown */}
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">Show:</span>
-                <Select value={productsPerPage.toString()} onValueChange={handleItemsPerPageChange}>
-                  <SelectTrigger className="w-[140px]">
-                    <SelectValue placeholder="Items per page" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {itemsPerPageOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+    if (loading) return (
+        <div>
+            <Navbar />
+            <div className="container py-24 min-h-screen">
+                <div className="text-center">
+                    <h1 className="text-2xl font-semibold mb-4">{searchQuery ? `Searching for "${searchQuery}"...` : "Loading Products..."}</h1>
+                </div>
             </div>
-            <button onClick={clearFilters} className="text-sm text-blue-500 hover:underline">
-              Clear Filters
-            </button>
-          </div>
-
-          {/* Results Count */}
-          <div className="mb-6">
-            <p className="text-sm text-muted-foreground">
-              Showing {filteredProducts?.length || 0} of {totalProductsCount !== undefined ? totalProductsCount : '...'} products
-            </p>
-          </div>
-
-          {/* Products Grid */}
-          {filteredProducts && (
-            <ProductGrid
-              products={filteredProducts}
-              quantities={quantities}
-              handleQuantityChange={handleQuantityChange}
-              handleAddToCart={handleAddToCart}
-              clearFilters={clearFilters}
-            />
-          )}
-
-          {/* Pagination */}
-          {totalProductsCount !== undefined && totalProductsCount > productsPerPage && (
-            <Pagination className="mt-8">
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious
-                    href="#"
-                    onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
-                      e.preventDefault();
-                      if (currentPage > 1) setCurrentPage(currentPage - 1);
-                    }}
-                    className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
-                  />
-                </PaginationItem>
-
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  let pageNum: number | null = null;
-
-                  if (totalPages <= 5) {
-                    pageNum = i + 1;
-                  } else if (i === 0) {
-                    pageNum = 1;
-                  } else if (i === 4) {
-                    pageNum = totalPages;
-                  } else if (currentPage <= 2) {
-                    pageNum = i + 1;
-                  } else if (currentPage >= totalPages - 1) {
-                    pageNum = totalPages - 4 + i;
-                  } else {
-                    pageNum = currentPage - 1 + i;
-                  }
-
-                  if (totalPages > 5) {
-                    if ((i === 1 && currentPage > 3) || (i === 3 && currentPage < totalPages - 2)) {
-                      return (
-                        <PaginationItem key={`ellipsis-${i}`}>
-                          <PaginationEllipsis />
-                        </PaginationItem>
-                      );
-                    }
-                  }
-
-                  if (pageNum !== null) {
-                    return (
-                      <PaginationItem key={pageNum}>
-                        <PaginationLink
-                          href="#"
-                          onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
-                            e.preventDefault();
-                            setCurrentPage(pageNum as number);
-                          }}
-                          isActive={currentPage === pageNum}
-                        >
-                          {pageNum}
-                        </PaginationLink>
-                      </PaginationItem>
-                    );
-                  }
-
-                  return null;
-                })}
-
-                <PaginationItem>
-                  <PaginationNext
-                    href="#"
-                    onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
-                      e.preventDefault();
-                      if (currentPage < totalPages) setCurrentPage(currentPage + 1);
-                    }}
-                    className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
-          )}
+            <Footer />
         </div>
-      </div>
-      <Footer />
-    </div>
-  );
+    );
+    if (error) return (
+        <div>
+            <Navbar />
+            <div className="container py-24 min-h-screen">
+                <div className="text-center">
+                    <h1 className="text-2xl font-semibold mb-4">Error Loading Products</h1>
+                    <p className="text-red-500">{error.message}</p>
+                </div>
+            </div>
+            <Footer />
+        </div>
+    );
+
+    return (
+        <div>
+            <Navbar />
+            <div className="min-h-screen bg-background">
+                <div className="container py-24">
+                    <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                        <div>
+                            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
+                                {searchQuery ? `Search Results for "${searchQuery}"` : "All Products"}
+                            </h1>
+                            {searchQuery && filteredProducts?.length === 0 && (
+                                <p className="mt-2 text-muted-foreground">No products found matching your search query.</p>
+                            )}
+                        </div>
+                        <div className="flex items-center gap-4">
+                            {/* Sort Options */}
+                            <div className="flex items-center gap-2">
+                                <span className="text-sm text-muted-foreground">Sort by:</span>
+                                <Select value={sortBy} onValueChange={handleSortByChange}>
+                                    <SelectTrigger className="w-[180px]">
+                                        <SelectValue placeholder="Sort by" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {sortOptions.map((option) => (
+                                            <SelectItem key={option.value} value={option.value}>
+                                                {option.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            {/* Items Per Page Dropdown */}
+                            <div className="flex items-center gap-2">
+                                <span className="text-sm text-muted-foreground">Show:</span>
+                                <Select value={productsPerPage.toString()} onValueChange={handleItemsPerPageChange}>
+                                    <SelectTrigger className="w-[140px]">
+                                        <SelectValue placeholder="Items per page" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {itemsPerPageOptions.map((option) => (
+                                            <SelectItem key={option.value} value={option.value}>
+                                                {option.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            {searchQuery && (
+                                <Button onClick={clearFilters} variant="outline" size="sm">
+                                    Clear Search
+                                </Button>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Results Count */}
+                    <div className="mb-6">
+                        <p className="text-sm text-muted-foreground">
+                            Showing {filteredProducts?.length || 0} of {totalProductsCount !== undefined ? totalProductsCount : '...'} products
+                        </p>
+                    </div>
+
+                    {/* Products Grid */}
+                    {filteredProducts && (
+                        <ProductGrid
+                            products={filteredProducts}
+                            quantities={quantities}
+                            handleQuantityChange={handleQuantityChange}
+                            handleAddToCart={handleAddToCart}
+                        />
+                    )}
+
+                    {/* Pagination */}
+                    {totalProductsCount !== undefined && totalProductsCount > productsPerPage && (
+                        <Pagination className="mt-8">
+                            <PaginationContent>
+                                <PaginationItem>
+                                    <PaginationPrevious
+                                        href="#"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            if (currentPage > 1) handlePageChange(currentPage - 1);
+                                        }}
+                                        className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+                                    />
+                                </PaginationItem>
+                                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                                    let pageNum: number | null = null;
+
+                                    if (totalPages <= 5) {
+                                        pageNum = i + 1;
+                                    } else if (i === 0) {
+                                        pageNum = 1;
+                                    } else if (i === 4) {
+                                        pageNum = totalPages;
+                                    } else if (currentPage <= 2) {
+                                        pageNum = i + 1;
+                                    } else if (currentPage >= totalPages - 1) {
+                                        pageNum = totalPages - 4 + i;
+                                    } else {
+                                        pageNum = currentPage - 1 + i;
+                                    }
+
+                                    if (totalPages > 5) {
+                                        if ((i === 1 && currentPage > 3) || (i === 3 && currentPage < totalPages - 2)) {
+                                            return (
+                                                <PaginationItem key={`ellipsis-${i}`}>
+                                                    <PaginationEllipsis />
+                                                </PaginationItem>
+                                            );
+                                        }
+                                    }
+
+                                    if (pageNum !== null) {
+                                        return (
+                                            <PaginationItem key={pageNum}>
+                                                <PaginationLink
+                                                    href="#"
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        handlePageChange(pageNum as number);
+                                                    }}
+                                                    isActive={currentPage === pageNum}
+                                                >
+                                                    {pageNum}
+                                                </PaginationLink>
+                                            </PaginationItem>
+                                        );
+                                    }
+
+                                    return null;
+                                })}
+                                <PaginationItem>
+                                    <PaginationNext
+                                        href="#"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            if (currentPage < totalPages) handlePageChange(currentPage + 1);
+                                        }}
+                                        className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
+                                    />
+                                </PaginationItem>
+                            </PaginationContent>
+                        </Pagination>
+                    )}
+                </div>
+            </div>
+            <Footer />
+        </div>
+    );
 }
