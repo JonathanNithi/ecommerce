@@ -7,31 +7,38 @@ import SearchInput from './search-input';
 import CartIcon from './cart-icon';
 import UserMenu from './user-menu';
 import { Menu } from 'lucide-react';
+import { useTheme } from 'next-themes'; // Import the useTheme hook
 
 const Navbar: React.FC = () => {
-    
+    const { theme } = useTheme(); // Get the current theme
+
     // Dropdown menu items
     const categories = [
         "All Categories",
-        "Furniture",
-        "Lighting",
-        "Decor",
-        "Kitchen",
-        "Textiles",
-        "Storage",
-        "Bathroom",
-        "Outdoor",
-        "Office",
-        "Electronics",
-        "Appliances",
-        "Rugs",
-        "Mirrors",
-        "Art",
-        "Plants",
-        "Kids",
-        "Pets",
-        "Seasonal",
-        "Sale",
+        "Auto Care",
+        "Baby Products",
+        "Bakery",
+        "Beverages",
+        "Cooking essentials",
+        "Dairy",
+        "Desserts Ingredients",
+        "Fashion",
+        "Food cupboard",
+        "Frozen Food",
+        "Fruits",
+        "Gifting",
+        "Health Beauty",
+        "Household",
+        "Meats",
+        "Party Shop",
+        "Pet Products",
+        "Rice",
+        "Seafood",
+        "Seeds Spices",
+        "Snacks Confectionery",
+        "Stationary",
+        "Tea Coffee",
+        "Vegetables",
     ];
 
     const [isSignedIn, setIsSignedIn] = useState(false);
@@ -47,8 +54,11 @@ const Navbar: React.FC = () => {
             <header className="z-50 border-b bg-background fixed top-0 left-0 w-full shadow-md">
                 <div className=" z-50 shadow w-full px-2 md:px-4 flex h-16 items-center justify-between bg-background">
                     <div>
-                        <Link href="/" className="mr-6 text-xl font-bold text-blue-600">
+                        <Link href="/" className="mr-4 text-xl font-bold text-blue-600">
                             E-Market
+                        </Link>
+                        <Link href="/products" className="text-sm font-semibold transition-colors duration-300 ease-in-out" style={{ color: theme === 'dark' ? 'white' : 'black' }}>
+                            Products
                         </Link>
                     </div>
                     <div className="flex items-center flex-1 lg:flex-initial hidden md:flex lg:w-[500px] xl:w-[600px] 2xl:w-[800px]">
