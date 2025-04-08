@@ -1,6 +1,8 @@
 // account-queries.ts
 
 import { gql } from '@apollo/client';
+import { OrderedProduct } from '@/types/orders';
+import { Order } from '@/types/orders'; 
 
 export const GET_ACCOUNT_DETAILS = gql`
   query GetAccountDetails($id: String!, $refreshToken: String!, $accessToken: String!) {
@@ -28,16 +30,7 @@ export interface AccountDetailsResponse {
     first_name: string;
     last_name: string;
     email: string;
-    orders: {
-      id: string;
-      createdAt: string; 
-      totalPrice: number;
-      products: {
-        name: string;
-        quantity: number;
-        price: number;
-      }[];
-    }[];
+    orders: Order[];
   }; 
 }
 
