@@ -92,11 +92,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
     // Show success message
     setTimeout(() => {
       setIsAdding(false)
-      // You would use a toast notification here in a real app
       console.log(`Added ${quantity} of ${product.name} to cart`)
-
-      // Optionally navigate to cart
-      // router.push('/cart')
     }, 500)
   }
 
@@ -131,12 +127,6 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
             <div className="mt-8">
               <div className="flex items-center gap-4 mb-6">
                 <div className="flex items-center border rounded-md">
-                  <button
-                    className="px-3 py-2 border-r"
-                    onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
-                  >
-                    -
-                  </button>
                   <input
                     type="number"
                     min="1"
@@ -144,9 +134,6 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
                     onChange={(e) => setQuantity(Number.parseInt(e.target.value) || 1)}
                     className="w-12 h-10 text-center border-0 focus:ring-0 focus:outline-none"
                   />
-                  <button className="px-3 py-2 border-l" onClick={() => setQuantity((prev) => prev + 1)}>
-                    +
-                  </button>
                 </div>
                 <Button
                   className="flex-1 bg-blue-600 hover:bg-blue-700 h-10"
