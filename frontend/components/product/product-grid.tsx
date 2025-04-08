@@ -56,6 +56,8 @@ const ProductGrid: React.FC<ProductGridProps> = ({
                 <p className="mt-1 text-sm text-muted-foreground">Rs. {product.price}</p>
 
                 {/* Add to Cart Section */}
+              </CardContent>
+            </Link>
                 <div
                   className="mt-4 flex items-center gap-2"
                   onClick={(e) => e.preventDefault()} // Prevent navigation when interacting with these elements
@@ -74,7 +76,6 @@ const ProductGrid: React.FC<ProductGridProps> = ({
                       aria-label={`Quantity for ${product.name}`}
                       className="w-12 h-9 text-center border-0 focus:ring-0 focus:outline-none"
                       onClick={(e) => {
-                        console.log('Input clicked, stopping propagation');
                         e.stopPropagation()
                       }} // Prevent navigation when clicking the input
                     />
@@ -90,8 +91,6 @@ const ProductGrid: React.FC<ProductGridProps> = ({
                     Add to Cart
                   </Button>
                 </div>
-              </CardContent>
-            </Link>
           </Card>
         </div>
       ))}
