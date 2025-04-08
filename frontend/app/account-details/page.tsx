@@ -27,7 +27,6 @@ const AccountPage = () => {
           refreshToken: refreshToken!, // Use the refreshToken from your auth context
           accessToken: accessToken!, // Use the accessToken from your auth context
         },
-        skip: !accountId || !accessToken || !refreshToken, // Skip the query if auth data is missing
       }
     );
   

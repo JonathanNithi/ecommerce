@@ -26,6 +26,8 @@ export const GET_ACCOUNT_DETAILS = gql`
 export interface AccountDetailsResponse {
   accounts: {
     first_name: string;
+    last_name: string;
+    email: string;
     orders: {
       id: string;
       createdAt: string; 
