@@ -3,7 +3,7 @@
 import { gql } from '@apollo/client';
 
 export const GET_ACCOUNT_DETAILS = gql`
-  query GetAccountDetails($id: ID!, $refreshToken: String!, $accessToken: String!) {
+  query GetAccountDetails($id: String!, $refreshToken: String!, $accessToken: String!) {
     accounts(id: $id, refreshToken: $refreshToken, accessToken: $accessToken) {
       first_name
       last_name
