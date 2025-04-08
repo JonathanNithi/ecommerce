@@ -51,7 +51,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({
                   className="h-full w-full object-cover object-center"
                 />
               </div>
-              <CardContent className="p-4 pb-0">
+              <CardContent className="p-4">
                 <h3 className="font-medium">{product.name}</h3>
                 <p className="mt-1 text-sm text-muted-foreground">Rs. {product.price}</p>
 
@@ -73,7 +73,10 @@ const ProductGrid: React.FC<ProductGridProps> = ({
                       }
                       aria-label={`Quantity for ${product.name}`}
                       className="w-12 h-9 text-center border-0 focus:ring-0 focus:outline-none"
-                      onClick={(e) => e.stopPropagation()} // Prevent navigation when clicking the input
+                      onClick={(e) => {
+                        console.log('Input clicked, stopping propagation');
+                        e.stopPropagation()
+                      }} // Prevent navigation when clicking the input
                     />
                   </div>
                   <Button
