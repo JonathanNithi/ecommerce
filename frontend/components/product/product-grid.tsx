@@ -71,10 +71,10 @@ const ProductGrid: React.FC<ProductGridProps> = ({
                     onClick={(e) => e.stopPropagation()} // Prevent navigation when clicking the input
                   />
                 </div>
-                <Button className="flex-1 bg-blue-600 hover:bg-blue-700" onClick={(e) => {
-                  const input = document.getElementById(`quantity-${product.id}`) as HTMLInputElement
-                  const quantity = Number.parseInt(input.value) || 1
-                  handleAddToCart(e, product, quantity)
+                <Button className="flex-1 bg-blue-600 hover:bg-blue-700" 
+                onClick={(e) => {
+                  const quantity = quantities[product.id] || 1; // Get quantity from the state
+                  handleAddToCart(e, product, quantity);
                 }}
                 disabled={!product.availability}>
                   Add to Cart
