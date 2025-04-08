@@ -1,3 +1,5 @@
+// auth-context.tsx
+
 "use client";
 
 import React, { createContext, useState, useEffect, useCallback, useContext } from 'react';
@@ -7,6 +9,8 @@ import { useRouter } from 'next/navigation'; // Import from next/navigation
 interface AuthContextType {
   isAuthenticated: boolean;
   accountId: string | null;
+  accessToken: string | null; // Add accessToken
+  refreshToken: string | null; // Add refreshToken
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
   refreshAccessToken: () => Promise<string | null>;
@@ -17,6 +21,8 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [accountId, setAccountId] = useState<string | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(null); // Add accessToken state
+  const [refreshToken, setRefreshToken] = useState<string | null>(null); // Add refreshToken state
   const router = useRouter();
 
   const setAuthData = useCallback((accessToken: string, refreshToken: string, id: string) => {
@@ -25,6 +31,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     Cookies.set('accountId', id, { secure: true, sameSite: 'strict' });
     setIsAuthenticated(true);
     setAccountId(id);
+    setAccessToken(accessToken); // Set accessToken state
+    setRefreshToken(refreshToken); // Set refreshToken state
   }, []);
 
   const clearAuthData = useCallback(() => {
@@ -33,6 +41,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     Cookies.remove('accountId');
     setIsAuthenticated(false);
     setAccountId(null);
+    setAccessToken(null); // Clear accessToken state
+    setRefreshToken(null); // Clear refreshToken state
   }, []);
 
   const login = useCallback(async (email: string, password: string): Promise<boolean> => {
@@ -112,6 +122,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (data?.data?.refreshToken?.accessToken) {
         Cookies.set('accessToken', data.data.refreshToken.accessToken, { secure: true, sameSite: 'strict' });
+        setAccessToken(data.data.refreshToken.accessToken); // Update accessToken state
         return data.data.refreshToken.accessToken;
       } else {
         clearAuthData();
@@ -132,6 +143,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (accessToken && refreshToken && storedAccountId) {
       setIsAuthenticated(true);
       setAccountId(storedAccountId);
+      setAccessToken(accessToken); // Initialize accessToken state from cookie
+      setRefreshToken(refreshToken); // Initialize refreshToken state from cookie
       // Optionally, you can trigger an initial token refresh here
       // refreshAccessToken();
     }
@@ -140,6 +153,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const contextValue: AuthContextType = {
     isAuthenticated,
     accountId,
+    accessToken, // Include accessToken in the context value
+    refreshToken, // Include refreshToken in the context value
     login,
     logout,
     refreshAccessToken,
@@ -157,5 +172,5 @@ export const useAuth = (): AuthContextType => {
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
-  return context;
+  return context!; // Use non-null assertion here as we've checked for null
 };
