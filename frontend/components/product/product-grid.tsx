@@ -58,39 +58,29 @@ const ProductGrid: React.FC<ProductGridProps> = ({
                 {/* Add to Cart Section */}
               </CardContent>
             </Link>
-                <div
-                  className="mt-4 flex items-center gap-2"
-                  onClick={(e) => e.preventDefault()} // Prevent navigation when interacting with these elements
-                >
-                  <div className="flex items-center border rounded-md">
-                    <input
-                      type="number"
-                      min="1"
-                      value={quantities?.[product.id] || 1}
-                      onChange={(e) =>
-                        handleQuantityChange(
-                          product.id,
-                          Number.parseInt(e.target.value) || 1
-                        )
-                      }
-                      aria-label={`Quantity for ${product.name}`}
-                      className="w-12 h-9 text-center border-0 focus:ring-0 focus:outline-none"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                      }} // Prevent navigation when clicking the input
-                    />
-                  </div>
-                  <Button
-                    className="flex-1 bg-blue-600 hover:bg-blue-700"
-                    onClick={(e) => {
-                      const input = document.getElementById(`quantity-${product.id}`) as HTMLInputElement
-                      const quantity = Number.parseInt(input.value) || 1
-                      handleAddToCart(e, product, quantity)
-                    }}
-                  >
-                    Add to Cart
-                  </Button>
+            <CardContent className="p-4 pt-2">
+              <div className="mt-2 flex items-center gap-2">
+                <div className="flex items-center border rounded-md">
+                  <input
+                    type="number"
+                    min="1"
+                    value={quantities[product.id] || 1}
+                    onChange={(e) => handleQuantityChange(product.id, Number.parseInt(e.target.value) || 1)}
+                    aria-label={`Quantity for ${product.name}`}
+                    className="w-12 h-9 text-center border-0 focus:ring-0 focus:outline-none"
+                    onClick={(e) => e.stopPropagation()} // Prevent navigation when clicking the input
+                  />
                 </div>
+                <Button className="flex-1 bg-blue-600 hover:bg-blue-700" onClick={(e) => {
+                  const input = document.getElementById(`quantity-${product.id}`) as HTMLInputElement
+                  const quantity = Number.parseInt(input.value) || 1
+                  handleAddToCart(e, product, quantity)
+                }}
+                disabled={!product.availability}>
+                  Add to Cart
+                </Button>
+              </div>
+            </CardContent>
           </Card>
         </div>
       ))}
