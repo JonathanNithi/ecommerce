@@ -1,5 +1,3 @@
-"use client"
-
 import type React from "react"
 import { createContext, useContext, useState, useEffect } from "react"
 
@@ -21,6 +19,8 @@ type CartContextType = {
     clearCart: () => void
     itemCount: number
     subtotal: number
+    lastOrder: { id?: string } | null // Add lastOrder to the context type
+    setLastOrder: (order: { id?: string } | null) => void // Function to set lastOrder
 }
 
 // Create the context with a default value
@@ -32,6 +32,8 @@ const CartContext = createContext<CartContextType>({
     clearCart: () => { },
     itemCount: 0,
     subtotal: 0,
+    lastOrder: null,
+    setLastOrder: () => { },
 })
 
 // Custom hook to use the cart context
@@ -42,13 +44,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     // Initialize cart from localStorage if available
     const [items, setItems] = useState<CartItem[]>([])
     const [loaded, setLoaded] = useState(false)
+    const [lastOrder, setLastOrder] = useState<{ id?: string } | null>(null); // State for the last order
 
     // Load cart from localStorage on mount
     useEffect(() => {
         try {
             const storedCart = localStorage.getItem("cart")
             if (storedCart) {
-
                 setItems(JSON.parse(storedCart))
             }
         } catch (error) {
@@ -62,9 +64,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         if (loaded) {
             try {
-              localStorage.setItem("cart", JSON.stringify(items))
+                localStorage.setItem("cart", JSON.stringify(items))
             } catch (error) {
-              console.error("Failed to save cart to localStorage:", error)
+                console.error("Failed to save cart to localStorage:", error)
             }
         }
     }, [items, loaded])
@@ -124,6 +126,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 clearCart,
                 itemCount,
                 subtotal,
+                lastOrder,
+                setLastOrder,
             }}
         >
             {children}

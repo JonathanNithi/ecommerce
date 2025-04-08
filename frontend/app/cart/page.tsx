@@ -18,7 +18,7 @@ const client = createApolloClient()
 
 export default function CartPage() {
     const router = useRouter()
-    const { items, updateQuantity, removeItem, clearCart, subtotal } = useCart()
+    const { items, updateQuantity, removeItem, clearCart, subtotal, setLastOrder } = useCart() // Get setLastOrder
     const [isCheckingOut, setIsCheckingOut] = useState(false)
     const { isAuthenticated, accountId, accessToken, refreshToken } = useAuth() // Get auth info
     const [createOrder, { data: orderData, loading: orderLoading, error: orderError }] = useMutation(CREATE_ORDER_MUTATION, { client })
@@ -50,6 +50,7 @@ export default function CartPage() {
             const response = await createOrder({ variables: { order: orderInput } });
 
             if (response?.data?.createOrder?.id) {
+                setLastOrder({ id: response.data.createOrder.id }); // Store the order ID
                 clearCart();
                 router.push("/checkout/success");
             } else {
@@ -62,7 +63,7 @@ export default function CartPage() {
         } finally {
             setIsCheckingOut(false);
         }
-    }, [isAuthenticated, accountId, accessToken, refreshToken, items, clearCart, createOrder, router]);
+    }, [isAuthenticated, accountId, accessToken, refreshToken, items, clearCart, createOrder, router, setLastOrder]); // Added setLastOrder to dependencies
 
     useEffect(() => {
         if (orderError) {
