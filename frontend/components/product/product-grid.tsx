@@ -11,7 +11,7 @@ interface ProductGridProps {
   products: Product[];
   quantities: Record<string, number>;
   handleQuantityChange: (productId: string, value: number) => void;
-  handleAddToCart: (e: React.MouseEvent, product: Product) => void;
+  handleAddToCart: (e: React.MouseEvent, product: Product, quantity: number) => void;
   clearFilters?: () => void; // Optional clear filters function
 }
 
@@ -42,8 +42,8 @@ const ProductGrid: React.FC<ProductGridProps> = ({
     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
       {products.map((product) => (
         <div key={product.id} className="relative group">
-          <Link href={`/products/${product.id}`} className="block">
-            <Card className="overflow-hidden transition-all hover:shadow-md h-full">
+          <Card className="overflow-hidden transition-all hover:shadow-md h-full">
+            <Link href={`/products/${product.id}`} className="block">
               <div className="aspect-square bg-blue-50">
                 <img
                   src={product.imageUrl || "/placeholder.svg"}
@@ -51,7 +51,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({
                   className="h-full w-full object-cover object-center"
                 />
               </div>
-              <CardContent className="p-4">
+              <CardContent className="p-4 pb-0">
                 <h3 className="font-medium">{product.name}</h3>
                 <p className="mt-1 text-sm text-muted-foreground">Rs. {product.price}</p>
 
@@ -78,14 +78,18 @@ const ProductGrid: React.FC<ProductGridProps> = ({
                   </div>
                   <Button
                     className="flex-1 bg-blue-600 hover:bg-blue-700"
-                    onClick={(e) => handleAddToCart(e, product)}
+                    onClick={(e) => {
+                      const input = document.getElementById(`quantity-${product.id}`) as HTMLInputElement
+                      const quantity = Number.parseInt(input.value) || 1
+                      handleAddToCart(e, product, quantity)
+                    }}
                   >
                     Add to Cart
                   </Button>
                 </div>
               </CardContent>
-            </Card>
-          </Link>
+            </Link>
+          </Card>
         </div>
       ))}
     </div>

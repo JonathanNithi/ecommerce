@@ -1,7 +1,7 @@
 import type React from "react";
 import "@/app/globals.css";
-import { ThemeProvider } from "@/components/theme-provider";
-import { AuthProvider } from "@/lib/auth-context"; 
+import { Providers } from "@/components/providers";
+
 
 export const metadata = {
   title: "E-Market - Homepage of the best ecommerce platform",
@@ -16,19 +16,12 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <AuthProvider> 
-            {children}
-          </AuthProvider>
-        </ThemeProvider>
+
+        <Providers>
+          {children}
+        </Providers>
+
       </body>
     </html>
   );
 }
-
-import './globals.css';

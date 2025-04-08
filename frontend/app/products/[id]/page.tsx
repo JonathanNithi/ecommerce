@@ -9,6 +9,7 @@ import { Product } from "@/types/products";
 import { createApolloClient } from "@/lib/create-apollo-client";
 import { GET_PRODUCT } from "@/graphql/queries/product-queries";
 import { useQuery } from "@apollo/client";
+import { useCart } from "@/context/cart-context"
 
 // Initialize Apollo Client using your function
 const client = createApolloClient();
@@ -17,6 +18,8 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
   const router = useRouter();
   const productId = params.id;
   const [quantity, setQuantity] = useState(1);
+  const { addItem } = useCart()
+  const [isAdding, setIsAdding] = useState(false)
 
   const { loading, error, data } = useQuery(GET_PRODUCT, {
     client,
@@ -72,6 +75,31 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
     );
   }
 
+  const handleAddToCart = () => {
+    setIsAdding(true)
+
+    // Add item to cart
+    addItem(
+      {
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: product.imageUrl,
+      },
+      quantity,
+    )
+
+    // Show success message
+    setTimeout(() => {
+      setIsAdding(false)
+      // You would use a toast notification here in a real app
+      console.log(`Added ${quantity} of ${product.name} to cart`)
+
+      // Optionally navigate to cart
+      // router.push('/cart')
+    }, 500)
+  }
+
   return (
     <div>
       <Navbar />
@@ -122,10 +150,10 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
                 </div>
                 <Button
                   className="flex-1 bg-blue-600 hover:bg-blue-700 h-10"
-                  onClick={() => console.log(`Added ${quantity} of ${product.name} to cart`)}
-                  disabled={!product.availability}
+                  onClick={handleAddToCart}
+                  disabled={!product.availability || isAdding}
                 >
-                  Add to Cart
+                {isAdding ? "Adding..." : "Add to Cart"}
                 </Button>
                 {!product.availability && (
                   <span className="text-red-500 text-sm">Out of Stock</span>

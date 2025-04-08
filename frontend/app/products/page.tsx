@@ -21,6 +21,7 @@ import { GET_PRODUCTS_PRODUCT_PAGE, SEARCH_PRODUCTS, ProductSortField, SortDirec
 import { Product } from "@/types/products";
 import { createApolloClient } from "@/lib/create-apollo-client";
 import { Button } from "@/components/ui/button";
+import { useCart } from "@/context/cart-context"
 
 // Initialize Apollo Client using your function
 const client = createApolloClient();
@@ -46,7 +47,7 @@ export default function ProductsPage() {
     const router = useRouter();
     const searchQuery = searchParams.get('query') || '';
     const categoryQuery = searchParams.get('category') || ''; // Get the category parameter
-
+    const { addItem } = useCart()
     const [sortBy, setSortBy] = useState(sortOptions[0].value);
     const [currentPage, setCurrentPage] = useState(1);
     const [productsPerPage, setProductsPerPage] = useState(12);
@@ -111,10 +112,21 @@ export default function ProductsPage() {
         setQuantities((prev) => ({ ...prev, [productId]: value }));
     }, []);
 
-    const handleAddToCart = useCallback((e: React.MouseEvent, product: Product) => {
+    const handleAddToCart = useCallback((e: React.MouseEvent, product: Product, quantity: number) => {
         e.preventDefault();
         e.stopPropagation();
-        const quantity = quantities[product.id] || 1;
+        
+        // Add item to cart
+    addItem(
+      {
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: product.imageUrl,
+      },
+      quantity,
+    )
+        
         console.log(`Added ${quantity} of ${product.name} (ID: ${product.id}) to cart`);
         // Implement your cart logic here
     }, []);
