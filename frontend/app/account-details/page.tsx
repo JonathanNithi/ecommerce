@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useQuery } from '@apollo/client';
 import { GET_ACCOUNT_DETAILS, AccountDetailsResponse, AccountDetailsVars } from '@/graphql/queries/account-queries'; // Adjust the import path as needed
 import { useAuth } from '@/lib/auth-context'; // Assuming you have an auth context
@@ -14,10 +14,12 @@ const AccountPage = () => {
     const router = useRouter();
   
     // Redirect to signin if not authenticated
-    if (!isAuthenticated) {
-      router.push('/signin');
-      return null; // Prevent rendering the rest of the page
-    }
+    useEffect(() => {
+      // Only perform redirection on the client-side
+      if ( !isAuthenticated) {
+          router.push('/signin');
+      }
+  }, [isAuthenticated, router]);
   
     const { loading, error, data } = useQuery<AccountDetailsResponse, AccountDetailsVars>(
       GET_ACCOUNT_DETAILS,
