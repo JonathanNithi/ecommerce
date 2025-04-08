@@ -38,7 +38,7 @@ export interface AccountDetailsResponse {
         price: number;
       }[];
     }[];
-  }[]; 
+  }; 
 }
 
 // Define the TypeScript interface for the variables required by the query
