@@ -37,7 +37,7 @@ const UserMenu = () => {
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem>
-              <Link href="/profile" className="flex w-full">
+              <Link href="/account-details" className="flex w-full">
                 Account Details
               </Link>
             </DropdownMenuItem>
