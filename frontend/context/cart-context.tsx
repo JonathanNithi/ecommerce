@@ -8,8 +8,8 @@ export type CartItem = {
     price: number
     image: string
     quantity: number
-    imageUrl?: string 
-    description?: string
+    imageUrl: string 
+    description: string
 }
 
 // Define the cart context type
