@@ -114,7 +114,7 @@ func (c *Client) GetProducts(ctx context.Context, skip uint64, take uint64, ids 
 }
 
 // GetProductsByIDs fetches products by their IDs
-func (c *Client) GetProductsByIDs(ctx context.Context, ids []string) ([]Product, error) {
+func (c *Client) GetProductsById(ctx context.Context, ids []string) ([]Product, error) {
 	r, err := c.service.GetProductsById(
 		ctx,
 		&pb.GetProductsByIdRequest{

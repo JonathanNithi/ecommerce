@@ -147,7 +147,7 @@ func (r *queryResolver) ProductsByID(ctx context.Context, ids []string) ([]*Prod
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
 
-	productList, err := r.server.catalogClient.GetProductsByIDs(ctx, ids)
+	productList, err := r.server.catalogClient.GetProductsById(ctx, ids)
 	if err != nil {
 		log.Println(err)
 		return nil, err
