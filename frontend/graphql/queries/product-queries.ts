@@ -49,8 +49,8 @@ export const SEARCH_PRODUCTS = gql`
 `;
 
 export const GET_PRODUCTS_BY_IDS = gql`
-query GetProductsByIds {
-  productsById(id: [String!]!) {
+query GetProductsByIds($id: [String!]!) {
+  productsById(id: $id) {
     id
     availability
   }
