@@ -1,42 +1,56 @@
+// app/account-details/page.tsx
 "use client";
 
-import React, { useEffect, useState } from 'react'; // Import useState
-import { useQuery } from '@apollo/client';
-import { GET_ACCOUNT_DETAILS, AccountDetailsResponse, AccountDetailsVars } from '@/graphql/queries/account-queries';
-import { useAuth } from '@/lib/auth-context';
+import React, { useEffect } from 'react';
+import { useAuth } from '@/context/auth-context';
 import Navbar from '@/components/navbar/Navbar';
 import Footer from '@/components/footer/Footer';
 import { useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
+
+const AccountDetailsClient = dynamic(() => import('../../components/account-detail/account-details-client'), {
+    ssr: false,
+    loading: () => <p>Loading account details component...</p>,
+});
 
 const AccountPage = () => {
-    const { accountId, accessToken, refreshToken, isAuthenticated } = useAuth();
+    const { isAuthenticated, isAuthLoading } = useAuth(); // Get isAuthLoading
     const router = useRouter();
 
-    if (!isAuthenticated) {
-        router.push('/signin');
+    console.log('AccountPage - isAuthenticated:', isAuthenticated, 'isAuthLoading:', isAuthLoading);
+
+    useEffect(() => {
+        if (!isAuthenticated && !isAuthLoading) { // Only redirect if not loading AND not authenticated
+            console.log('AccountPage - Redirecting to /signin');
+            router.push('/signin');
+        } else {
+            console.log('AccountPage - User is authenticated or loading');
+        }
+    }, [isAuthenticated, isAuthLoading, router]);
+
+    // Show a loading state while authentication is being checked
+    if (isAuthLoading) {
+        return (
+            <div>
+                <Navbar />
+                <div className="container py-24 min-h-screen">
+                    <p>Checking authentication...</p>
+                </div>
+                <Footer />
+            </div>
+        );
     }
 
-    // Only call useQuery on the client-side when authenticated
-    const { loading, error, data } = useQuery<AccountDetailsResponse, AccountDetailsVars>(
-        GET_ACCOUNT_DETAILS,
-        {
-            variables: {
-                id: accountId!,
-                refreshToken: refreshToken!,
-                accessToken: accessToken!,
-            },
-        }
-    );
+    if (!isAuthenticated) {
+        return null; // Or a redirecting message
+    }
 
-    console.log('Account Details:', data);
-    console.log('Loading:', loading);
-    console.log('Error:', error);
     return (
         <div>
             <Navbar />
             <div className="container py-24 min-h-screen">
                 <h1 className="text-3xl font-bold mb-8">Your Account</h1>
-                
+                <AccountDetailsClient />
             </div>
             <Footer />
         </div>

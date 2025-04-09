@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { useCart } from "@/context/cart-context"
 import Navbar from "@/components/navbar/Navbar"
 import Footer from "@/components/footer/Footer"
-import { useAuth } from "@/lib/auth-context"
+import { useAuth } from "@/context/auth-context"
 import { createApolloClient } from "@/lib/create-apollo-client"
 import { useMutation } from "@apollo/client"
 import { CREATE_ORDER_MUTATION, OrderInput } from "@/graphql/mutation/order-mutation" // Import from order-mutation.ts

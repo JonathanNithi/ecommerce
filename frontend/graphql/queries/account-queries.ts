@@ -5,7 +5,7 @@ import { OrderedProduct } from '@/types/orders';
 import { Order } from '@/types/orders'; 
 
 export const GET_ACCOUNT_DETAILS = gql`
-  query GetAccountDetails($id: String!, $refreshToken: String!, $accessToken: String!) {
+  query GetAccountDetails($id: String, $refreshToken: String!, $accessToken: String!) {
     accounts(id: $id, refreshToken: $refreshToken, accessToken: $accessToken) {
       first_name
       last_name
@@ -30,8 +30,20 @@ export interface AccountDetailsResponse {
     first_name: string;
     last_name: string;
     email: string;
-    orders: Order[];
-  }; 
+    orders: {
+      id: string;
+      createdAt: string;
+      totalPrice: number;
+      products: {
+        name: string;
+        quantity: number;
+        price: number;
+        __typename?: 'OrderedProduct';
+      }[];
+      __typename?: 'Order';
+    }[];
+    __typename?: 'Account';
+  }[];
 }
 
 // Define the TypeScript interface for the variables required by the query

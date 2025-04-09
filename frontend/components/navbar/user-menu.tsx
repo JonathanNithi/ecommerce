@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { User } from "lucide-react";
 import Link from "next/link";
-import { useAuth } from "@/lib/auth-context"; // Import the useAuth hook
+import { useAuth } from "@/context/auth-context"; // Import the useAuth hook
 import { useRouter } from "next/navigation"; // Import useRouter for manual redirection
 
 const UserMenu = () => {
