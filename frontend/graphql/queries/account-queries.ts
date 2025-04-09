@@ -18,6 +18,7 @@ export const GET_ACCOUNT_DETAILS = gql`
           name
           quantity
           price
+          imageUrl
         }
       }
     }
