@@ -38,6 +38,7 @@ export interface AccountDetailsResponse {
         name: string;
         quantity: number;
         price: number;
+        imageUrl: string;
         __typename?: 'OrderedProduct';
       }[];
       __typename?: 'Order';
