@@ -236,7 +236,7 @@ const AccountDetailsClient = () => {
                                                             {/* You might have an imageUrl in your OrderedProduct type */}
                                                             <div className="w-20 h-20 bg-blue-50 rounded-md overflow-hidden flex-shrink-0">
                                                                 <img
-                                                                    src={"/placeholder.svg"} // Replace with actual image URL if available
+                                                                    src={item.imageUrl} // Replace with actual image URL if available
                                                                     alt={item.name || "Product Image"}
                                                                     className="w-full h-full object-cover"
                                                                 />
