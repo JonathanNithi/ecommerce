@@ -50,6 +50,7 @@ type OrderedProduct struct {
 	Description string  `json:"description"`
 	Price       float64 `json:"price"`
 	Quantity    int     `json:"quantity"`
+	ImageURL    string  `json:"imageUrl"`
 }
 
 type PaginationInput struct {

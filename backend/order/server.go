@@ -130,6 +130,7 @@ func (s *grpcServer) PostOrder(
 			Description: p.Description,
 			Price:       p.Price,
 			Quantity:    p.Quantity,
+			ImageUrl:    p.ImageUrl,
 		})
 	}
 	return &pb.PostOrderResponse{
@@ -195,6 +196,7 @@ func (s *grpcServer) GetOrdersForAccount(
 				Description: product.Description,
 				Price:       product.Price,
 				Quantity:    product.Quantity,
+				ImageUrl:    product.ImageUrl,
 			})
 		}
 

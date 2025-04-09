@@ -55,6 +55,7 @@ type OrderedProduct {
   description: String!
   price: Float!
   quantity: Int!
+  imageUrl: String!
 }
 
 type LoginResponse {
