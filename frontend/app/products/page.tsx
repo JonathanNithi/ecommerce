@@ -22,9 +22,10 @@ import { Product } from "@/types/products";
 import { createApolloClient } from "@/lib/create-apollo-client";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/cart-context"
+import { useApolloClient } from "@/context/apollo-client-context";
 
 // Initialize Apollo Client using your function
-const client = createApolloClient();
+const client = useApolloClient();
 
 // Sort options
 const sortOptions = [

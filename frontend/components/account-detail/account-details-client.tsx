@@ -6,10 +6,11 @@ import { useQuery } from '@apollo/client';
 import { GET_ACCOUNT_DETAILS, AccountDetailsResponse, AccountDetailsVars } from '@/graphql/queries/account-queries';
 import { useAuth } from '@/context/auth-context';
 import { createApolloClient } from '@/lib/create-apollo-client';
+import { useApolloClient } from "@/context/apollo-client-context";
 
 const AccountDetailsClient = () => {
     const { accountId, accessToken, refreshToken, isAuthenticated } = useAuth();
-    const client = createApolloClient();
+    const client = useApolloClient();
 
     if (!isAuthenticated || !accountId || !accessToken || !refreshToken) {
         return <p>Authentication data loading or missing...</p>;

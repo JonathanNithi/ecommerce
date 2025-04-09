@@ -12,6 +12,7 @@ import Footer from "@/components/footer/Footer";
 import { CREATE_ACCOUNT_MUTATION, AccountInput, CreateAccountPayload } from "@/graphql/mutation/account-mutation"; // Adjust the import path
 import { useMutation } from '@apollo/client'; 
 import { createApolloClient } from '@/lib/create-apollo-client'; 
+import { useApolloClient } from "@/context/apollo-client-context";
 
 export default function SignUp() {
   const router = useRouter()
@@ -141,7 +142,7 @@ export default function SignUp() {
   }
 
   // Using Apollo Client's useMutation hook
-  const client = createApolloClient(); // Initialize the Apollo Client instance
+  const client = useApolloClient(); // Initialize the Apollo Client instance
   const [createAccountMutation, { data: mutationData, loading: mutationLoading, error: mutationError }] = useMutation<CreateAccountPayload, { account: AccountInput }>(CREATE_ACCOUNT_MUTATION, {
     client, // Pass the Apollo Client instance
     onCompleted: (data) => {

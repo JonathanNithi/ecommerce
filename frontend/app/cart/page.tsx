@@ -11,10 +11,11 @@ import Footer from "@/components/footer/Footer"
 import { useAuth } from "@/context/auth-context"
 import { createApolloClient } from "@/lib/create-apollo-client"
 import { useMutation } from "@apollo/client"
-import { CREATE_ORDER_MUTATION, OrderInput } from "@/graphql/mutation/order-mutation" // Import from order-mutation.ts
+import { CREATE_ORDER_MUTATION, OrderInput } from "@/graphql/mutation/order-mutation" 
+import { useApolloClient } from '@/context/apollo-client-context';
 
 // Initialize Apollo Client
-const client = createApolloClient()
+const client = useApolloClient();
 
 export default function CartPage() {
     const router = useRouter()

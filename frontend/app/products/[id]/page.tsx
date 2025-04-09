@@ -10,9 +10,10 @@ import { createApolloClient } from "@/lib/create-apollo-client";
 import { GET_PRODUCT } from "@/graphql/queries/product-queries";
 import { useQuery } from "@apollo/client";
 import { useCart } from "@/context/cart-context"
+import { useApolloClient } from "@/context/apollo-client-context";
 
 // Initialize Apollo Client using your function
-const client = createApolloClient();
+const client = useApolloClient();
 
 export default function ProductDetailPage({ params }: { params: { id: string } }) {
   const router = useRouter();
