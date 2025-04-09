@@ -1,41 +1,41 @@
-"use client"
+"use client";
 
-import { useState, useCallback, useEffect } from "react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { Trash2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { useCart } from "@/context/cart-context"
-import Navbar from "@/components/navbar/Navbar"
-import Footer from "@/components/footer/Footer"
-import { useAuth } from "@/context/auth-context"
-import { createApolloClient } from "@/lib/create-apollo-client"
-import { useMutation } from "@apollo/client"
-import { CREATE_ORDER_MUTATION, OrderInput } from "@/graphql/mutation/order-mutation" 
-import { useApolloClient } from '@/context/apollo-client-context';
-
-// Initialize Apollo Client
-const client = useApolloClient();
+import { useState, useCallback, useEffect } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useCart } from "@/context/cart-context";
+import Navbar from "@/components/navbar/Navbar";
+import Footer from "@/components/footer/Footer";
+import { useAuth } from "@/context/auth-context"; // Corrected import path
+import { useMutation, gql } from "@apollo/client";
+import { CREATE_ORDER_MUTATION, OrderInput } from "@/graphql/mutation/order-mutation";
+import { useApolloClient } from "@/context/apollo-client-context"; // Corrected import path
 
 export default function CartPage() {
-    const router = useRouter()
-    const { items, updateQuantity, removeItem, clearCart, subtotal, setLastOrder } = useCart() // Get setLastOrder
-    const [isCheckingOut, setIsCheckingOut] = useState(false)
-    const { isAuthenticated, accountId, accessToken, refreshToken } = useAuth() // Get auth info
-    const [createOrder, { data: orderData, loading: orderLoading, error: orderError }] = useMutation(CREATE_ORDER_MUTATION, { client })
+    const router = useRouter();
+    const { items, updateQuantity, removeItem, clearCart, subtotal, setLastOrder } = useCart(); // Get setLastOrder
+    const [isCheckingOut, setIsCheckingOut] = useState(false);
+    const { isAuthenticated, accountId, accessToken, refreshToken } = useAuth(); // Get auth info
+    const client = useApolloClient(); // Get the client from the context
+    const [createOrder, { data: orderData, loading: orderLoading, error: orderError }] = useMutation(
+        CREATE_ORDER_MUTATION,
+        { client }
+    );
 
-    const shippingCost = 0 // Assume free shipping
-    const total = subtotal + shippingCost
+    const shippingCost = 0; // Assume free shipping
+    const total = subtotal + shippingCost;
 
     const handleCheckout = useCallback(async () => {
         if (!isAuthenticated || !accountId || !accessToken || !refreshToken) {
-            router.push("/signin") // Redirect to signin if not authenticated or missing data
-            return
+            router.push("/signin"); // Redirect to signin if not authenticated or missing data
+            return;
         }
 
-        setIsCheckingOut(true)
+        setIsCheckingOut(true);
 
-        const orderProducts = items.map(item => ({
+        const orderProducts = items.map((item) => ({
             product_id: item.id,
             quantity: item.quantity,
         }));
@@ -204,5 +204,5 @@ export default function CartPage() {
             </div>
             <Footer />
         </div>
-    )
+    );
 }

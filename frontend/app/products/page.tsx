@@ -19,13 +19,9 @@ import Footer from "@/components/footer/Footer";
 import { useQuery } from "@apollo/client";
 import { GET_PRODUCTS_PRODUCT_PAGE, SEARCH_PRODUCTS, ProductSortField, SortDirection } from "@/graphql/queries/product-queries";
 import { Product } from "@/types/products";
-import { createApolloClient } from "@/lib/create-apollo-client";
 import { Button } from "@/components/ui/button";
-import { useCart } from "@/context/cart-context"
+import { useCart } from "@/context/cart-context";
 import { useApolloClient } from "@/context/apollo-client-context";
-
-// Initialize Apollo Client using your function
-const client = useApolloClient();
 
 // Sort options
 const sortOptions = [
@@ -48,7 +44,7 @@ export default function ProductsPage() {
     const router = useRouter();
     const searchQuery = searchParams.get('query') || '';
     const categoryQuery = searchParams.get('category') || ''; // Get the category parameter
-    const { addItem } = useCart()
+    const { addItem } = useCart();
     const [sortBy, setSortBy] = useState(sortOptions[0].value);
     const [currentPage, setCurrentPage] = useState(1);
     const [productsPerPage, setProductsPerPage] = useState(12);
@@ -57,25 +53,27 @@ export default function ProductsPage() {
     const sortField = currentSortOption?.field;
     const sortDirection = currentSortOption?.direction;
 
+    const client = useApolloClient(); // Get the client inside the component
+
     const { loading, error, data, refetch } = useQuery(
         searchQuery || categoryQuery ? SEARCH_PRODUCTS : GET_PRODUCTS_PRODUCT_PAGE,
         {
-            client,
+            client, // Use the client obtained from the context
             variables: searchQuery || categoryQuery
                 ? {
-                      field: sortField,
-                      direction: sortDirection,
-                      skip: (currentPage - 1) * productsPerPage,
-                      take: productsPerPage,
-                      query: searchQuery || "",
-                      category: categoryQuery || ""
-                  }
+                    field: sortField,
+                    direction: sortDirection,
+                    skip: (currentPage - 1) * productsPerPage,
+                    take: productsPerPage,
+                    query: searchQuery || "",
+                    category: categoryQuery || ""
+                }
                 : {
-                      field: sortField,
-                      direction: sortDirection,
-                      skip: (currentPage - 1) * productsPerPage,
-                      take: productsPerPage,
-                  },
+                    field: sortField,
+                    direction: sortDirection,
+                    skip: (currentPage - 1) * productsPerPage,
+                    take: productsPerPage,
+                },
             skip: false,
             notifyOnNetworkStatusChange: true,
         }
@@ -116,21 +114,21 @@ export default function ProductsPage() {
     const handleAddToCart = useCallback((e: React.MouseEvent, product: Product, quantity: number) => {
         e.preventDefault();
         e.stopPropagation();
-        
+
         // Add item to cart
-    addItem(
-      {
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        image: product.imageUrl,
-      },
-      quantity,
-    )
-        
+        addItem(
+            {
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                image: product.imageUrl,
+            },
+            quantity,
+        );
+
         console.log(`Added ${quantity} of ${product.name} (ID: ${product.id}) to cart`);
         // Implement your cart logic here
-    }, []);
+    }, [addItem]);
 
     useEffect(() => {
         refetch({
