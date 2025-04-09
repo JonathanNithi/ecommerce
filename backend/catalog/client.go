@@ -113,6 +113,34 @@ func (c *Client) GetProducts(ctx context.Context, skip uint64, take uint64, ids 
 	return products, r.TotalCount, nil // Return the total count from the response
 }
 
+// GetProductsByIDs fetches products by their IDs
+func (c *Client) GetProductsByIDs(ctx context.Context, ids []string) ([]Product, error) {
+	r, err := c.service.GetProductsById(
+		ctx,
+		&pb.GetProductsByIdRequest{
+			Ids: ids,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+	products := []Product{}
+	for _, p := range r.Products {
+		products = append(products, Product{
+			ID:           p.Id,
+			Name:         p.Name,
+			Description:  p.Description,
+			Price:        p.Price,
+			Category:     p.Category,
+			ImageURL:     p.ImageUrl,
+			Tags:         p.Tags,
+			Availability: p.Availability,
+			Stock:        p.Stock,
+		})
+	}
+	return products, nil
+}
+
 // create a method DeductStock to deduct stock from the product
 func (c *Client) DeductStock(ctx context.Context, id string, quantity int64) error {
 	// Ensure DeductStock method is defined in the pb package

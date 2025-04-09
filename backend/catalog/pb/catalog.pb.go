@@ -583,7 +583,7 @@ func (x *GetProductsRequest) GetSort() *ProductSortInput {
 type GetProductsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Products      []*Product             `protobuf:"bytes,1,rep,name=products,proto3" json:"products,omitempty"`
-	TotalCount    uint64                 `protobuf:"varint,2,opt,name=total_count,json=totalCount,proto3" json:"total_count,omitempty"` // Add this line
+	TotalCount    uint64                 `protobuf:"varint,2,opt,name=total_count,json=totalCount,proto3" json:"total_count,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -632,6 +632,94 @@ func (x *GetProductsResponse) GetTotalCount() uint64 {
 	return 0
 }
 
+type GetProductsByIdRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Ids           []string               `protobuf:"bytes,1,rep,name=ids,proto3" json:"ids,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetProductsByIdRequest) Reset() {
+	*x = GetProductsByIdRequest{}
+	mi := &file_catalog_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetProductsByIdRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetProductsByIdRequest) ProtoMessage() {}
+
+func (x *GetProductsByIdRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_catalog_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetProductsByIdRequest.ProtoReflect.Descriptor instead.
+func (*GetProductsByIdRequest) Descriptor() ([]byte, []int) {
+	return file_catalog_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *GetProductsByIdRequest) GetIds() []string {
+	if x != nil {
+		return x.Ids
+	}
+	return nil
+}
+
+type GetProductsByIdResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Products      []*Product             `protobuf:"bytes,1,rep,name=products,proto3" json:"products,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetProductsByIdResponse) Reset() {
+	*x = GetProductsByIdResponse{}
+	mi := &file_catalog_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetProductsByIdResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetProductsByIdResponse) ProtoMessage() {}
+
+func (x *GetProductsByIdResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_catalog_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetProductsByIdResponse.ProtoReflect.Descriptor instead.
+func (*GetProductsByIdResponse) Descriptor() ([]byte, []int) {
+	return file_catalog_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *GetProductsByIdResponse) GetProducts() []*Product {
+	if x != nil {
+		return x.Products
+	}
+	return nil
+}
+
 type DeductStockRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -642,7 +730,7 @@ type DeductStockRequest struct {
 
 func (x *DeductStockRequest) Reset() {
 	*x = DeductStockRequest{}
-	mi := &file_catalog_proto_msgTypes[8]
+	mi := &file_catalog_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -654,7 +742,7 @@ func (x *DeductStockRequest) String() string {
 func (*DeductStockRequest) ProtoMessage() {}
 
 func (x *DeductStockRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_catalog_proto_msgTypes[8]
+	mi := &file_catalog_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -667,7 +755,7 @@ func (x *DeductStockRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeductStockRequest.ProtoReflect.Descriptor instead.
 func (*DeductStockRequest) Descriptor() ([]byte, []int) {
-	return file_catalog_proto_rawDescGZIP(), []int{8}
+	return file_catalog_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *DeductStockRequest) GetId() string {
@@ -693,7 +781,7 @@ type DeductStockResponse struct {
 
 func (x *DeductStockResponse) Reset() {
 	*x = DeductStockResponse{}
-	mi := &file_catalog_proto_msgTypes[9]
+	mi := &file_catalog_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -705,7 +793,7 @@ func (x *DeductStockResponse) String() string {
 func (*DeductStockResponse) ProtoMessage() {}
 
 func (x *DeductStockResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_catalog_proto_msgTypes[9]
+	mi := &file_catalog_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -718,7 +806,7 @@ func (x *DeductStockResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeductStockResponse.ProtoReflect.Descriptor instead.
 func (*DeductStockResponse) Descriptor() ([]byte, []int) {
-	return file_catalog_proto_rawDescGZIP(), []int{9}
+	return file_catalog_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *DeductStockResponse) GetProduct() *Product {
@@ -793,7 +881,14 @@ var file_catalog_proto_rawDesc = []byte{
 	0x0b, 0x2e, 0x70, 0x62, 0x2e, 0x50, 0x72, 0x6f, 0x64, 0x75, 0x63, 0x74, 0x52, 0x08, 0x70, 0x72,
 	0x6f, 0x64, 0x75, 0x63, 0x74, 0x73, 0x12, 0x1f, 0x0a, 0x0b, 0x74, 0x6f, 0x74, 0x61, 0x6c, 0x5f,
 	0x63, 0x6f, 0x75, 0x6e, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x04, 0x52, 0x0a, 0x74, 0x6f, 0x74,
-	0x61, 0x6c, 0x43, 0x6f, 0x75, 0x6e, 0x74, 0x22, 0x40, 0x0a, 0x12, 0x44, 0x65, 0x64, 0x75, 0x63,
+	0x61, 0x6c, 0x43, 0x6f, 0x75, 0x6e, 0x74, 0x22, 0x2a, 0x0a, 0x16, 0x47, 0x65, 0x74, 0x50, 0x72,
+	0x6f, 0x64, 0x75, 0x63, 0x74, 0x73, 0x42, 0x79, 0x49, 0x64, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
+	0x74, 0x12, 0x10, 0x0a, 0x03, 0x69, 0x64, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x09, 0x52, 0x03,
+	0x69, 0x64, 0x73, 0x22, 0x42, 0x0a, 0x17, 0x47, 0x65, 0x74, 0x50, 0x72, 0x6f, 0x64, 0x75, 0x63,
+	0x74, 0x73, 0x42, 0x79, 0x49, 0x64, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x27,
+	0x0a, 0x08, 0x70, 0x72, 0x6f, 0x64, 0x75, 0x63, 0x74, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b,
+	0x32, 0x0b, 0x2e, 0x70, 0x62, 0x2e, 0x50, 0x72, 0x6f, 0x64, 0x75, 0x63, 0x74, 0x52, 0x08, 0x70,
+	0x72, 0x6f, 0x64, 0x75, 0x63, 0x74, 0x73, 0x22, 0x40, 0x0a, 0x12, 0x44, 0x65, 0x64, 0x75, 0x63,
 	0x74, 0x53, 0x74, 0x6f, 0x63, 0x6b, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x0e, 0x0a,
 	0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64, 0x12, 0x1a, 0x0a,
 	0x08, 0x71, 0x75, 0x61, 0x6e, 0x74, 0x69, 0x74, 0x79, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52,
@@ -806,7 +901,7 @@ var file_catalog_proto_rawDesc = []byte{
 	0x00, 0x12, 0x08, 0x0a, 0x04, 0x44, 0x45, 0x53, 0x43, 0x10, 0x01, 0x2a, 0x27, 0x0a, 0x10, 0x50,
 	0x72, 0x6f, 0x64, 0x75, 0x63, 0x74, 0x53, 0x6f, 0x72, 0x74, 0x46, 0x69, 0x65, 0x6c, 0x64, 0x12,
 	0x08, 0x0a, 0x04, 0x4e, 0x41, 0x4d, 0x45, 0x10, 0x00, 0x12, 0x09, 0x0a, 0x05, 0x50, 0x52, 0x49,
-	0x43, 0x45, 0x10, 0x01, 0x32, 0x95, 0x02, 0x0a, 0x0e, 0x43, 0x61, 0x74, 0x61, 0x6c, 0x6f, 0x67,
+	0x43, 0x45, 0x10, 0x01, 0x32, 0xe3, 0x02, 0x0a, 0x0e, 0x43, 0x61, 0x74, 0x61, 0x6c, 0x6f, 0x67,
 	0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x40, 0x0a, 0x0b, 0x50, 0x6f, 0x73, 0x74, 0x50,
 	0x72, 0x6f, 0x64, 0x75, 0x63, 0x74, 0x12, 0x16, 0x2e, 0x70, 0x62, 0x2e, 0x50, 0x6f, 0x73, 0x74,
 	0x50, 0x72, 0x6f, 0x64, 0x75, 0x63, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x17,
@@ -819,12 +914,17 @@ var file_catalog_proto_rawDesc = []byte{
 	0x72, 0x6f, 0x64, 0x75, 0x63, 0x74, 0x73, 0x12, 0x16, 0x2e, 0x70, 0x62, 0x2e, 0x47, 0x65, 0x74,
 	0x50, 0x72, 0x6f, 0x64, 0x75, 0x63, 0x74, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a,
 	0x17, 0x2e, 0x70, 0x62, 0x2e, 0x47, 0x65, 0x74, 0x50, 0x72, 0x6f, 0x64, 0x75, 0x63, 0x74, 0x73,
-	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x40, 0x0a, 0x0b, 0x44, 0x65,
-	0x64, 0x75, 0x63, 0x74, 0x53, 0x74, 0x6f, 0x63, 0x6b, 0x12, 0x16, 0x2e, 0x70, 0x62, 0x2e, 0x44,
-	0x65, 0x64, 0x75, 0x63, 0x74, 0x53, 0x74, 0x6f, 0x63, 0x6b, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
-	0x74, 0x1a, 0x17, 0x2e, 0x70, 0x62, 0x2e, 0x44, 0x65, 0x64, 0x75, 0x63, 0x74, 0x53, 0x74, 0x6f,
-	0x63, 0x6b, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x42, 0x04, 0x5a, 0x02,
-	0x2e, 0x2f, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x4c, 0x0a, 0x0f, 0x47, 0x65,
+	0x74, 0x50, 0x72, 0x6f, 0x64, 0x75, 0x63, 0x74, 0x73, 0x42, 0x79, 0x49, 0x64, 0x12, 0x1a, 0x2e,
+	0x70, 0x62, 0x2e, 0x47, 0x65, 0x74, 0x50, 0x72, 0x6f, 0x64, 0x75, 0x63, 0x74, 0x73, 0x42, 0x79,
+	0x49, 0x64, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1b, 0x2e, 0x70, 0x62, 0x2e, 0x47,
+	0x65, 0x74, 0x50, 0x72, 0x6f, 0x64, 0x75, 0x63, 0x74, 0x73, 0x42, 0x79, 0x49, 0x64, 0x52, 0x65,
+	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x40, 0x0a, 0x0b, 0x44, 0x65, 0x64, 0x75,
+	0x63, 0x74, 0x53, 0x74, 0x6f, 0x63, 0x6b, 0x12, 0x16, 0x2e, 0x70, 0x62, 0x2e, 0x44, 0x65, 0x64,
+	0x75, 0x63, 0x74, 0x53, 0x74, 0x6f, 0x63, 0x6b, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a,
+	0x17, 0x2e, 0x70, 0x62, 0x2e, 0x44, 0x65, 0x64, 0x75, 0x63, 0x74, 0x53, 0x74, 0x6f, 0x63, 0x6b,
+	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x42, 0x04, 0x5a, 0x02, 0x2e, 0x2f,
+	0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -840,20 +940,22 @@ func file_catalog_proto_rawDescGZIP() []byte {
 }
 
 var file_catalog_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_catalog_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_catalog_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
 var file_catalog_proto_goTypes = []any{
-	(SortDirection)(0),          // 0: pb.SortDirection
-	(ProductSortField)(0),       // 1: pb.ProductSortField
-	(*ProductSortInput)(nil),    // 2: pb.ProductSortInput
-	(*Product)(nil),             // 3: pb.Product
-	(*PostProductRequest)(nil),  // 4: pb.PostProductRequest
-	(*PostProductResponse)(nil), // 5: pb.PostProductResponse
-	(*GetProductRequest)(nil),   // 6: pb.GetProductRequest
-	(*GetProductResponse)(nil),  // 7: pb.GetProductResponse
-	(*GetProductsRequest)(nil),  // 8: pb.GetProductsRequest
-	(*GetProductsResponse)(nil), // 9: pb.GetProductsResponse
-	(*DeductStockRequest)(nil),  // 10: pb.DeductStockRequest
-	(*DeductStockResponse)(nil), // 11: pb.DeductStockResponse
+	(SortDirection)(0),              // 0: pb.SortDirection
+	(ProductSortField)(0),           // 1: pb.ProductSortField
+	(*ProductSortInput)(nil),        // 2: pb.ProductSortInput
+	(*Product)(nil),                 // 3: pb.Product
+	(*PostProductRequest)(nil),      // 4: pb.PostProductRequest
+	(*PostProductResponse)(nil),     // 5: pb.PostProductResponse
+	(*GetProductRequest)(nil),       // 6: pb.GetProductRequest
+	(*GetProductResponse)(nil),      // 7: pb.GetProductResponse
+	(*GetProductsRequest)(nil),      // 8: pb.GetProductsRequest
+	(*GetProductsResponse)(nil),     // 9: pb.GetProductsResponse
+	(*GetProductsByIdRequest)(nil),  // 10: pb.GetProductsByIdRequest
+	(*GetProductsByIdResponse)(nil), // 11: pb.GetProductsByIdResponse
+	(*DeductStockRequest)(nil),      // 12: pb.DeductStockRequest
+	(*DeductStockResponse)(nil),     // 13: pb.DeductStockResponse
 }
 var file_catalog_proto_depIdxs = []int32{
 	1,  // 0: pb.ProductSortInput.field:type_name -> pb.ProductSortField
@@ -862,20 +964,23 @@ var file_catalog_proto_depIdxs = []int32{
 	3,  // 3: pb.GetProductResponse.product:type_name -> pb.Product
 	2,  // 4: pb.GetProductsRequest.sort:type_name -> pb.ProductSortInput
 	3,  // 5: pb.GetProductsResponse.products:type_name -> pb.Product
-	3,  // 6: pb.DeductStockResponse.product:type_name -> pb.Product
-	4,  // 7: pb.CatalogService.PostProduct:input_type -> pb.PostProductRequest
-	6,  // 8: pb.CatalogService.GetProduct:input_type -> pb.GetProductRequest
-	8,  // 9: pb.CatalogService.GetProducts:input_type -> pb.GetProductsRequest
-	10, // 10: pb.CatalogService.DeductStock:input_type -> pb.DeductStockRequest
-	5,  // 11: pb.CatalogService.PostProduct:output_type -> pb.PostProductResponse
-	7,  // 12: pb.CatalogService.GetProduct:output_type -> pb.GetProductResponse
-	9,  // 13: pb.CatalogService.GetProducts:output_type -> pb.GetProductsResponse
-	11, // 14: pb.CatalogService.DeductStock:output_type -> pb.DeductStockResponse
-	11, // [11:15] is the sub-list for method output_type
-	7,  // [7:11] is the sub-list for method input_type
-	7,  // [7:7] is the sub-list for extension type_name
-	7,  // [7:7] is the sub-list for extension extendee
-	0,  // [0:7] is the sub-list for field type_name
+	3,  // 6: pb.GetProductsByIdResponse.products:type_name -> pb.Product
+	3,  // 7: pb.DeductStockResponse.product:type_name -> pb.Product
+	4,  // 8: pb.CatalogService.PostProduct:input_type -> pb.PostProductRequest
+	6,  // 9: pb.CatalogService.GetProduct:input_type -> pb.GetProductRequest
+	8,  // 10: pb.CatalogService.GetProducts:input_type -> pb.GetProductsRequest
+	10, // 11: pb.CatalogService.GetProductsById:input_type -> pb.GetProductsByIdRequest
+	12, // 12: pb.CatalogService.DeductStock:input_type -> pb.DeductStockRequest
+	5,  // 13: pb.CatalogService.PostProduct:output_type -> pb.PostProductResponse
+	7,  // 14: pb.CatalogService.GetProduct:output_type -> pb.GetProductResponse
+	9,  // 15: pb.CatalogService.GetProducts:output_type -> pb.GetProductsResponse
+	11, // 16: pb.CatalogService.GetProductsById:output_type -> pb.GetProductsByIdResponse
+	13, // 17: pb.CatalogService.DeductStock:output_type -> pb.DeductStockResponse
+	13, // [13:18] is the sub-list for method output_type
+	8,  // [8:13] is the sub-list for method input_type
+	8,  // [8:8] is the sub-list for extension type_name
+	8,  // [8:8] is the sub-list for extension extendee
+	0,  // [0:8] is the sub-list for field type_name
 }
 
 func init() { file_catalog_proto_init() }
@@ -889,7 +994,7 @@ func file_catalog_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_catalog_proto_rawDesc,
 			NumEnums:      2,
-			NumMessages:   10,
+			NumMessages:   12,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

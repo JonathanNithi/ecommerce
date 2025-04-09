@@ -66,6 +66,14 @@ message GetProductsResponse {
     uint64 total_count = 2; 
 }
 
+message GetProductsByIdRequest {
+    repeated string ids = 1;
+}
+
+message GetProductsByIdResponse {
+    repeated Product products = 1;
+}
+
 message DeductStockRequest {
     string id = 1;
     int64 quantity = 2;
@@ -79,5 +87,6 @@ service CatalogService {
     rpc PostProduct (PostProductRequest) returns (PostProductResponse) {}
     rpc GetProduct (GetProductRequest) returns (GetProductResponse) {}
     rpc GetProducts (GetProductsRequest) returns (GetProductsResponse) {}
+    rpc GetProductsById (GetProductsByIdRequest) returns (GetProductsByIdResponse) {}
     rpc DeductStock (DeductStockRequest) returns (DeductStockResponse) {}
 }
