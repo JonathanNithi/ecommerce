@@ -186,6 +186,7 @@ func (s *grpcServer) GetOrdersForAccount(
 					product.Name = p.Name
 					product.Description = p.Description
 					product.Price = p.Price
+					product.ImageUrl = p.ImageURL
 					break
 				}
 			}
