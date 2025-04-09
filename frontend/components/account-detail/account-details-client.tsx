@@ -93,21 +93,6 @@ const AccountDetailsClient = () => {
     const accountDetailsData = data.accounts[0]; // Now 'accountDetailsData' is of type 'accountDetails'
     const orderHistory = accountDetailsData.orders || []; // 'orderHistory' is of type 'Order[]'
 
-    // Get status color based on order status (you might need to adjust based on your actual status values)
-    const getStatusColor = (status: string | null | undefined) => {
-        switch (status?.toLowerCase()) {
-            case "delivered":
-                return "bg-green-100 text-green-800";
-            case "processing":
-                return "bg-blue-100 text-blue-800";
-            case "shipped":
-                return "bg-purple-100 text-purple-800";
-            case "cancelled":
-                return "bg-red-100 text-red-800";
-            default:
-                return "bg-gray-100 text-gray-800";
-        }
-    };
 
     // View order details
     const viewOrderDetails = (order: Order) => { // Use the Order type here
@@ -123,7 +108,6 @@ const AccountDetailsClient = () => {
 
     return (
         <div>
-            <Navbar />
             <div className="container py-24 min-h-screen">
                 <div className="flex flex-col gap-8">
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -156,26 +140,22 @@ const AccountDetailsClient = () => {
                                         <CardTitle>Personal Information</CardTitle>
                                         <CardDescription>Your personal details</CardDescription>
                                     </div>
-                                    <Button variant="outline" size="sm" className="flex items-center gap-2">
-                                        <Edit size={16} />
-                                        <span>Edit</span>
-                                    </Button>
                                 </CardHeader>
                                 <CardContent className="grid gap-6">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        {accountDetailsData.firstName && (
+                                        {accountDetailsData.first_name && (
                                             <div className="space-y-4">
                                                 <div>
                                                     <h3 className="text-sm font-medium text-muted-foreground mb-2">First Name</h3>
-                                                    <p className="font-medium">{accountDetailsData.firstName}</p>
+                                                    <p className="font-medium">{accountDetailsData.first_name}</p>
                                                 </div>
                                             </div>
                                         )}
-                                        {accountDetailsData.lastName && (
+                                        {accountDetailsData.last_name && (
                                             <div className="space-y-4">
                                                 <div>
                                                     <h3 className="text-sm font-medium text-muted-foreground mb-2">Last Name</h3>
-                                                    <p className="font-medium">{accountDetailsData.lastName}</p>
+                                                    <p className="font-medium">{accountDetailsData.last_name}</p>
                                                 </div>
                                             </div>
                                         )}
@@ -189,7 +169,7 @@ const AccountDetailsClient = () => {
                                         )}
                                         {/* You might want to display a "Member Since" based on account creation if available */}
                                     </div>
-                                    <div className="border-t pt-6">
+                                    {/* <div className="border-t pt-6">
                                         <h3 className="font-medium mb-4">Account Actions</h3>
                                         <div className="flex flex-wrap gap-3">
                                             <Button variant="outline" size="sm">
@@ -202,7 +182,7 @@ const AccountDetailsClient = () => {
                                                 Delete Account
                                             </Button>
                                         </div>
-                                    </div>
+                                    </div> */}
                                 </CardContent>
                             </Card>
                         </TabsContent>
@@ -300,9 +280,7 @@ const AccountDetailsClient = () => {
                                                 </div>
                                             )}
 
-                                            <div className="flex justify-center pt-4">
-                                                <Button variant="outline">Download Invoice</Button> {/* Implement invoice download */}
-                                            </div>
+                                            
                                         </div>
                                     ) : (
                                         <div className="space-y-4">
@@ -357,7 +335,6 @@ const AccountDetailsClient = () => {
                     </Tabs>
                 </div>
             </div>
-            <Footer />
         </div>
     );
 };
