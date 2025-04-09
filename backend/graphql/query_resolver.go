@@ -4,6 +4,8 @@ import (
 	"context"
 	"log"
 	"time"
+
+	"github.com/JonathanNithi/ecommerce/backend/catalog/pb"
 )
 
 type queryResolver struct {
@@ -16,17 +18,20 @@ func (r *queryResolver) Accounts(ctx context.Context, pagination *PaginationInpu
 
 	// Get single
 	if id != nil {
-		r, err := r.server.accountClient.GetAccount(ctx, *id, accessToken, refreshToken)
+		acc, newAccessToken, newRefreshToken, err := r.server.accountClient.GetAccount(ctx, *id, accessToken, refreshToken)
 		if err != nil {
 			log.Println(err)
 			return nil, err
 		}
+
+		_ = newAccessToken
+		_ = newRefreshToken
 		return []*Account{{
-			ID:        r.ID,
-			FirstName: r.FirstName,
-			LastName:  r.LastName,
-			Email:     r.Email,
-			Role:      Role(r.Role),
+			ID:        acc.ID,
+			FirstName: acc.FirstName,
+			LastName:  acc.LastName,
+			Email:     acc.Email,
+			Role:      Role(acc.Role),
 		}}, nil
 	}
 
@@ -35,11 +40,14 @@ func (r *queryResolver) Accounts(ctx context.Context, pagination *PaginationInpu
 		skip, take = pagination.bounds()
 	}
 	//Get all
-	accountList, err := r.server.accountClient.GetAccounts(ctx, skip, take, accessToken, refreshToken)
+	accountList, newAccessToken, newRefreshToken, err := r.server.accountClient.GetAccounts(ctx, skip, take, accessToken, refreshToken)
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
+
+	_ = newAccessToken
+	_ = newRefreshToken
 
 	var accounts []*Account
 	for _, a := range accountList {
@@ -56,28 +64,31 @@ func (r *queryResolver) Accounts(ctx context.Context, pagination *PaginationInpu
 	return accounts, nil
 }
 
-func (r *queryResolver) Products(ctx context.Context, pagination *PaginationInput, query *string, id *string) ([]*Product, error) {
+func (r *queryResolver) Products(ctx context.Context, pagination *PaginationInput, query *string, id *string, category *string, sort *ProductSortInput) (*ProductListResponse, error) {
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
 
-	// Get single
+	// Get single product (no total count needed here)
 	if id != nil {
-		r, err := r.server.catalogClient.GetProduct(ctx, *id)
+		prod, err := r.server.catalogClient.GetProduct(ctx, *id)
 		if err != nil {
 			log.Println(err)
 			return nil, err
 		}
-		return []*Product{{
-			ID:           r.ID,
-			Name:         r.Name,
-			Description:  r.Description,
-			Price:        r.Price,
-			Category:     r.Category,
-			ImageURL:     r.ImageURL,
-			Tags:         r.Tags,
-			Availability: r.Availability,
-			Stock:        int(r.Stock),
-		}}, nil
+		return &ProductListResponse{
+			Items: []*Product{{
+				ID:           prod.ID,
+				Name:         prod.Name,
+				Description:  prod.Description,
+				Price:        prod.Price,
+				Category:     prod.Category,
+				ImageURL:     prod.ImageURL,
+				Tags:         prod.Tags,
+				Availability: prod.Availability,
+				Stock:        int(prod.Stock),
+			}},
+			TotalCount: 1, // For a single product, the total count is 1
+		}, nil
 	}
 
 	skip, take := uint64(0), uint64(0)
@@ -89,7 +100,20 @@ func (r *queryResolver) Products(ctx context.Context, pagination *PaginationInpu
 	if query != nil {
 		q = *query
 	}
-	productList, err := r.server.catalogClient.GetProducts(ctx, skip, take, nil, q)
+	categoryValue := ""
+	if category != nil {
+		categoryValue = *category
+	}
+
+	var sortBy *pb.ProductSortInput
+	if sort != nil {
+		sortBy = &pb.ProductSortInput{
+			Field:     pb.ProductSortField(pb.ProductSortField_value[sort.Field.String()]),
+			Direction: pb.SortDirection(pb.SortDirection_value[sort.Direction.String()]),
+		}
+	}
+
+	productList, totalCount, err := r.server.catalogClient.GetProducts(ctx, skip, take, nil, q, categoryValue, sortBy)
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -112,7 +136,10 @@ func (r *queryResolver) Products(ctx context.Context, pagination *PaginationInpu
 		)
 	}
 
-	return products, nil
+	return &ProductListResponse{
+		Items:      products,
+		TotalCount: int(totalCount), // Get the total count from the gRPC response
+	}, nil
 }
 
 func (p PaginationInput) bounds() (uint64, uint64) {

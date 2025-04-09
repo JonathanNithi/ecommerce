@@ -43,7 +43,7 @@ func (s *grpcServer) PostAccount(ctx context.Context, r *pb.PostAccountRequest) 
 }
 
 func (s *grpcServer) GetAccount(ctx context.Context, r *pb.GetAccountRequest) (*pb.GetAccountResponse, error) {
-	p, err := s.service.GetAccount(ctx, r.Id, r.AccessToken, r.RefreshToken)
+	p, newAccessToken, newRefreshToken, err := s.service.GetAccount(ctx, r.Id, r.AccessToken, r.RefreshToken)
 	if err != nil {
 		return nil, err
 	}
@@ -56,11 +56,13 @@ func (s *grpcServer) GetAccount(ctx context.Context, r *pb.GetAccountRequest) (*
 			PasswordHash: p.PasswordHash,
 			Role:         p.Role,
 		},
+		AccessToken:  newAccessToken,
+		RefreshToken: newRefreshToken,
 	}, nil
 }
 
 func (s *grpcServer) GetAccounts(ctx context.Context, r *pb.GetAccountsRequest) (*pb.GetAccountsResponse, error) {
-	res, err := s.service.GetAccounts(ctx, r.Skip, r.Take, r.AccessToken, r.RefreshToken)
+	res, newAccessToken, newRefreshToken, err := s.service.GetAccounts(ctx, r.Skip, r.Take, r.AccessToken, r.RefreshToken)
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +80,11 @@ func (s *grpcServer) GetAccounts(ctx context.Context, r *pb.GetAccountsRequest) 
 			},
 		)
 	}
-	return &pb.GetAccountsResponse{Accounts: accounts}, nil
+	return &pb.GetAccountsResponse{
+		Accounts:     accounts,
+		AccessToken:  newAccessToken,
+		RefreshToken: newRefreshToken,
+	}, nil
 }
 
 func (s *grpcServer) Login(ctx context.Context, r *pb.LoginRequest) (*pb.LoginResponse, error) {
@@ -121,7 +127,7 @@ func (s *grpcServer) RefreshToken(ctx context.Context, r *pb.RefreshTokenRequest
 }
 
 func (s *grpcServer) SetAccountAsAdmin(ctx context.Context, r *pb.SetAccountAsAdminRequest) (*pb.SetAccountAsAdminResponse, error) {
-	p, err := s.service.SetAccountAsAdmin(ctx, r.AccessToken, r.RefreshToken, r.Id)
+	p, newAccessToken, newRefreshToken, err := s.service.SetAccountAsAdmin(ctx, r.AccessToken, r.RefreshToken, r.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -134,5 +140,7 @@ func (s *grpcServer) SetAccountAsAdmin(ctx context.Context, r *pb.SetAccountAsAd
 			PasswordHash: p.PasswordHash,
 			Role:         p.Role,
 		},
+		AccessToken:  newAccessToken,
+		RefreshToken: newRefreshToken,
 	}, nil
 }

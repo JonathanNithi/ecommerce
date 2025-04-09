@@ -57,7 +57,7 @@ func (s *grpcServer) PostOrder(
 	r *pb.PostOrderRequest,
 ) (*pb.PostOrderResponse, error) {
 	// Check if account exists - I need to provide access token and refresh token
-	_, err := s.accountClient.GetAccount(ctx, r.AccountId, "", "")
+	_, _, _, err := s.accountClient.GetAccount(ctx, r.AccountId, r.AccessToken, r.RefreshToken)
 	if err != nil {
 		log.Println("Error getting account: ", err)
 		return nil, errors.New("account not found")
@@ -68,7 +68,7 @@ func (s *grpcServer) PostOrder(
 	for _, p := range r.Products {
 		productIDs = append(productIDs, p.ProductId)
 	}
-	orderedProducts, err := s.catalogClient.GetProducts(ctx, 0, 0, productIDs, "")
+	orderedProducts, _, err := s.catalogClient.GetProducts(ctx, 0, 0, productIDs, "", "", nil)
 	if err != nil {
 		log.Println("Error getting products: ", err)
 		return nil, errors.New("products not found")
@@ -101,6 +101,18 @@ func (s *grpcServer) PostOrder(
 	if err != nil {
 		log.Println("Error posting order: ", err)
 		return nil, errors.New("could not post order")
+	}
+
+	//deduct the quantity from the stock
+	for _, p := range products {
+		log.Printf("Order Service: Deducting stock for product ID: %s, quantity: %d", p.ID, p.Quantity)
+		err = s.catalogClient.DeductStock(ctx, p.ID, int64(p.Quantity))
+		log.Printf("Order Service: DeductStock returned error for product ID %s: %v", p.ID, err)
+		if err != nil {
+			log.Println("Error deducting stock: ", err)
+			return nil, errors.New("could not deduct stock")
+		}
+		log.Printf("Order Service: Successfully attempted to deduct stock for product ID: %s", p.ID)
 	}
 
 	// Make response order
@@ -147,7 +159,7 @@ func (s *grpcServer) GetOrdersForAccount(
 	for id := range productIDMap {
 		productIDs = append(productIDs, id)
 	}
-	products, err := s.catalogClient.GetProducts(ctx, 0, 0, productIDs, "")
+	products, _, err := s.catalogClient.GetProducts(ctx, 0, 0, productIDs, "", "", nil)
 	if err != nil {
 		log.Println("Error getting account products: ", err)
 		return nil, err

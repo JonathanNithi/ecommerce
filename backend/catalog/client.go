@@ -25,7 +25,7 @@ func (c *Client) Close() {
 	c.conn.Close()
 }
 
-func (c *Client) PostProduct(ctx context.Context, name, description string, price float64, category string, imageUrl string, tags []string, stock uint64) (*Product, error) {
+func (c *Client) PostProduct(ctx context.Context, name, description string, price float64, category string, imageUrl string, tags []string, stock int64) (*Product, error) {
 	// Make the request to the service
 	r, err := c.service.PostProduct(
 		ctx,
@@ -81,18 +81,20 @@ func (c *Client) GetProduct(ctx context.Context, id string) (*Product, error) {
 	}, nil
 }
 
-func (c *Client) GetProducts(ctx context.Context, skip uint64, take uint64, ids []string, query string) ([]Product, error) {
+func (c *Client) GetProducts(ctx context.Context, skip uint64, take uint64, ids []string, query string, category string, sortBy *pb.ProductSortInput) ([]Product, uint64, error) {
 	r, err := c.service.GetProducts(
 		ctx,
 		&pb.GetProductsRequest{
-			Ids:   ids,
-			Skip:  skip,
-			Take:  take,
-			Query: query,
+			Ids:      ids,
+			Skip:     skip,
+			Take:     take,
+			Query:    query,
+			Category: category,
+			Sort:     sortBy,
 		},
 	)
 	if err != nil {
-		return nil, err
+		return nil, 0, err // Return 0 for total count on error
 	}
 	products := []Product{}
 	for _, p := range r.Products {
@@ -108,5 +110,18 @@ func (c *Client) GetProducts(ctx context.Context, skip uint64, take uint64, ids 
 			Stock:        p.Stock,
 		})
 	}
-	return products, nil
+	return products, r.TotalCount, nil // Return the total count from the response
+}
+
+// create a method DeductStock to deduct stock from the product
+func (c *Client) DeductStock(ctx context.Context, id string, quantity int64) error {
+	// Ensure DeductStock method is defined in the pb package
+	_, err := c.service.DeductStock(
+		ctx,
+		&pb.DeductStockRequest{
+			Id:       id,
+			Quantity: quantity,
+		},
+	)
+	return err
 }

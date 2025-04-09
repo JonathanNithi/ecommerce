@@ -21,11 +21,13 @@ message Order {
 
 message PostOrderRequest {
     message OrderProduct {
-        string productId = 2;
-        uint32 quantity = 3;
+        string productId = 1;
+        uint32 quantity = 2;
     }
 
-    string accountId = 2;
+    string accountId = 1;
+    string accessToken = 2;
+    string refreshToken = 3;
     repeated OrderProduct products = 4;
 }
 

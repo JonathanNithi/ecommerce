@@ -46,7 +46,7 @@ func (c *Client) PostAccount(ctx context.Context, first_name string, last_name s
 	}, nil
 }
 
-func (c *Client) GetAccount(ctx context.Context, id string, accessToken string, refreshToken string) (*Account, error) {
+func (c *Client) GetAccount(ctx context.Context, id string, accessToken string, refreshToken string) (*Account, string, string, error) {
 	r, err := c.service.GetAccount(
 		ctx,
 		&pb.GetAccountRequest{Id: id,
@@ -54,17 +54,17 @@ func (c *Client) GetAccount(ctx context.Context, id string, accessToken string, 
 			RefreshToken: refreshToken},
 	)
 	if err != nil {
-		return nil, err
+		return nil, "", "", err
 	}
 	return &Account{
 		ID:        r.Account.Id,
 		FirstName: r.Account.FirstName,
 		LastName:  r.Account.LastName,
 		Email:     r.Account.Email,
-	}, nil
+	}, r.AccessToken, r.RefreshToken, nil
 }
 
-func (c *Client) GetAccounts(ctx context.Context, skip uint64, take uint64, accessToken string, refreshToken string) ([]Account, error) {
+func (c *Client) GetAccounts(ctx context.Context, skip uint64, take uint64, accessToken string, refreshToken string) ([]Account, string, string, error) {
 	r, err := c.service.GetAccounts(
 		ctx,
 		&pb.GetAccountsRequest{
@@ -75,7 +75,7 @@ func (c *Client) GetAccounts(ctx context.Context, skip uint64, take uint64, acce
 		},
 	)
 	if err != nil {
-		return nil, err
+		return nil, "", "", err
 	}
 	accounts := []Account{}
 	for _, a := range r.Accounts {
@@ -87,7 +87,7 @@ func (c *Client) GetAccounts(ctx context.Context, skip uint64, take uint64, acce
 			Role:      a.Role,
 		})
 	}
-	return accounts, nil
+	return accounts, r.AccessToken, r.RefreshToken, nil
 }
 
 func (c *Client) Login(ctx context.Context, email string, password string) (*Account, string, string, error) {
@@ -110,7 +110,7 @@ func (c *Client) Login(ctx context.Context, email string, password string) (*Acc
 	}, r.AccessToken, r.RefreshToken, nil
 }
 
-func (c *Client) SetAccountAsAdmin(ctx context.Context, accessToken string, refreshToken string, userId string) (*Account, error) {
+func (c *Client) SetAccountAsAdmin(ctx context.Context, accessToken string, refreshToken string, userId string) (*Account, string, string, error) {
 	r, err := c.service.SetAccountAsAdmin(
 		ctx,
 		&pb.SetAccountAsAdminRequest{
@@ -120,7 +120,7 @@ func (c *Client) SetAccountAsAdmin(ctx context.Context, accessToken string, refr
 		},
 	)
 	if err != nil {
-		return nil, err
+		return nil, "", "", err
 	}
 	return &Account{
 		ID:           r.Account.Id,
@@ -129,5 +129,5 @@ func (c *Client) SetAccountAsAdmin(ctx context.Context, accessToken string, refr
 		Email:        r.Account.Email,
 		PasswordHash: r.Account.PasswordHash,
 		Role:         r.Account.Role,
-	}, nil
+	}, r.AccessToken, r.RefreshToken, nil
 }

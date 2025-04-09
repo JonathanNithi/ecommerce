@@ -5,23 +5,28 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"strings"
+	"time"
 
+	"github.com/JonathanNithi/ecommerce/backend/catalog/pb"
 	"github.com/elastic/go-elasticsearch/v8"
 	"github.com/elastic/go-elasticsearch/v8/esapi"
 )
 
 var (
 	ErrNotFound = errors.New("entity not found")
+	indexName   = "catalog"
 )
 
 type Repository interface {
 	Close()
 	PutProduct(ctx context.Context, p Product) error
 	GetProductByID(ctx context.Context, id string) (*Product, error)
-	ListProducts(ctx context.Context, skip uint64, take uint64) ([]Product, error)
+	ListProducts(ctx context.Context, skip uint64, take uint64, sort *pb.ProductSortInput) ([]Product, uint64, error)
 	ListProductsWithIDs(ctx context.Context, ids []string) ([]Product, error)
-	SearchProducts(ctx context.Context, query string, skip uint64, take uint64) ([]Product, error)
+	SearchProducts(ctx context.Context, query string, skip uint64, take uint64, category string, sort *pb.ProductSortInput) ([]Product, uint64, error)
+	DeductStock(ctx context.Context, id string, newStock int64) error
 }
 
 type elasticRepository struct {
@@ -36,17 +41,101 @@ type productDocument struct {
 	ImageURL     string   `json:"image_url"`
 	Tags         []string `json:"tags"`
 	Availability bool     `json:"availability"`
-	Stock        uint64   `json:"stock"`
+	Stock        int64    `json:"stock"`
 }
 
 func NewElasticRepository(url string) (Repository, error) {
 	cfg := elasticsearch.Config{
-		Addresses: []string{url},
+		Addresses:     []string{url},
+		RetryOnStatus: []int{502, 503, 504, 429},
+		RetryBackoff:  func(i int) time.Duration { return time.Duration(i) * 100 * time.Millisecond },
+		MaxRetries:    5,
 	}
 	client, err := elasticsearch.NewClient(cfg)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error creating Elasticsearch client: %w", err)
 	}
+
+	// Add a short timeout context for initialization steps
+	initCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	// Check if the index exists
+	existsReq := esapi.IndicesExistsRequest{
+		Index: []string{indexName},
+	}
+
+	res, err := existsReq.Do(initCtx, client)
+	if err != nil {
+		return nil, fmt.Errorf("error checking if index '%s' exists: %w", indexName, err)
+	}
+	// Defer closing the response body *after* checking for nil
+	if res != nil {
+		defer res.Body.Close()
+	}
+
+	// If the index doesn't exist (404 Not Found), create it
+	if res.StatusCode == 404 {
+		log.Printf("Index '%s' not found, attempting to create...", indexName)
+
+		createBody := strings.NewReader(fmt.Sprintf(`{
+			"settings": {
+				"number_of_shards": 1,
+				"number_of_replicas": 0
+			},
+			"mappings": {
+				"properties": {
+					"name": {
+						"type": "text",
+						"fields": {
+							"keyword": {
+								"type": "keyword",
+								"ignore_above": 256
+							},
+							"enum": {
+								"type": "keyword",
+								"ignore_above": 256
+							}
+						}
+					},
+					"description": { "type": "text" },
+					"price": { "type": "float" },
+					"category": { "type": "keyword" },
+					"imageURL": { "type": "keyword" },
+					"tags": { "type": "keyword" },
+					"availability": { "type": "boolean" },
+					"stock": { "type": "integer" }
+				}
+			}
+		}`))
+
+		// Simple creation without specific mappings/settings:
+		createReq := esapi.IndicesCreateRequest{
+			Index: indexName,
+			Body:  createBody,
+		}
+
+		createRes, err := createReq.Do(initCtx, client)
+		if err != nil {
+			return nil, fmt.Errorf("error creating index '%s': %w", indexName, err)
+		}
+		if createRes != nil {
+			defer createRes.Body.Close()
+		}
+
+		if createRes.IsError() {
+			return nil, fmt.Errorf("error response during index '%s' creation: %s", indexName, createRes.String())
+		}
+		log.Printf("Index '%s' created successfully.", indexName)
+
+	} else if res.IsError() {
+		// Handle other errors during the existence check
+		return nil, fmt.Errorf("error checking index '%s' existence: %s", indexName, res.String())
+	} else {
+		// Index already exists
+		log.Printf("Index '%s' already exists.", indexName)
+	}
+
 	return &elasticRepository{client}, nil
 }
 
@@ -59,7 +148,7 @@ func (r *elasticRepository) PutProduct(ctx context.Context, p Product) error {
 	searchQuery := map[string]interface{}{
 		"query": map[string]interface{}{
 			"term": map[string]interface{}{
-				"name.keyword": p.Name, // Normalize the query term
+				"name.enum": p.Name, // Normalize the query term
 			},
 		},
 		"size": 1,
@@ -104,7 +193,7 @@ func (r *elasticRepository) PutProduct(ctx context.Context, p Product) error {
 		ImageURL:     p.ImageURL,
 		Tags:         p.Tags,
 		Availability: p.Availability,
-		Stock:        p.Stock,
+		Stock:        int64(p.Stock),
 	}
 	docJSON, err := json.Marshal(doc)
 	if err != nil {
@@ -132,17 +221,20 @@ func (r *elasticRepository) PutProduct(ctx context.Context, p Product) error {
 }
 
 func (r *elasticRepository) GetProductByID(ctx context.Context, id string) (*Product, error) {
+	// Step 1: Create a GetRequest to fetch the document by ID
 	req := esapi.GetRequest{
 		Index:      "catalog",
 		DocumentID: id,
 	}
 
+	// Step 2: Execute the request
 	res, err := req.Do(ctx, r.client)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error executing GetRequest: %v", err)
 	}
 	defer res.Body.Close()
 
+	// Step 3: Handle errors (e.g., document not found)
 	if res.IsError() {
 		if res.StatusCode == 404 {
 			return nil, ErrNotFound
@@ -150,63 +242,109 @@ func (r *elasticRepository) GetProductByID(ctx context.Context, id string) (*Pro
 		return nil, fmt.Errorf("error fetching document: %s", res.String())
 	}
 
-	var p productDocument
-	if err := json.NewDecoder(res.Body).Decode(&p); err != nil {
-		return nil, err
+	// Step 4: Parse the response body
+	var getResponse struct {
+		Source productDocument `json:"_source"`
+	}
+	if err := json.NewDecoder(res.Body).Decode(&getResponse); err != nil {
+		return nil, fmt.Errorf("error decoding response body: %v", err)
 	}
 
+	// Step 5: Log the product details (for debugging)
+	log.Println(getResponse.Source)
+
+	// Step 6: Map the productDocument to the Product struct
 	return &Product{
 		ID:           id,
-		Name:         p.Name,
-		Description:  p.Description,
-		Price:        p.Price,
-		Category:     p.Category,
-		ImageURL:     p.ImageURL,
-		Tags:         p.Tags,
-		Availability: p.Availability,
-		Stock:        uint64(p.Stock),
+		Name:         getResponse.Source.Name,
+		Description:  getResponse.Source.Description,
+		Price:        getResponse.Source.Price,
+		Category:     getResponse.Source.Category,
+		ImageURL:     getResponse.Source.ImageURL,
+		Tags:         getResponse.Source.Tags,
+		Availability: getResponse.Source.Availability,
+		Stock:        getResponse.Source.Stock,
 	}, nil
 }
 
-func (r *elasticRepository) ListProducts(ctx context.Context, skip, take uint64) ([]Product, error) {
+func (r *elasticRepository) ListProducts(ctx context.Context, skip, take uint64, sort *pb.ProductSortInput) ([]Product, uint64, error) { // Return uint64 for total count
+	query := map[string]interface{}{
+		"from": skip,
+		"size": take,
+		"query": map[string]interface{}{
+			"match_all": map[string]interface{}{},
+		},
+	}
+	if sort != nil {
+		log.Printf("ListProducts called with Sort Field: %s, Direction: %s", sort.Field, sort.Direction)
+	} else {
+		log.Println("ListProducts called with nil sort parameter.")
+	}
+	if sort != nil {
+		sortField := ""
+		switch sort.Field {
+		case pb.ProductSortField_NAME:
+			sortField = "name.keyword"
+		case pb.ProductSortField_PRICE:
+			sortField = "price"
+		default:
+			sortField = "_id"
+		}
+
+		sortDirection := "asc"
+		if sort.Direction == pb.SortDirection_DESC {
+			sortDirection = "desc"
+		}
+
+		query["sort"] = []map[string]interface{}{
+			{
+				sortField: map[string]interface{}{
+					"order": sortDirection,
+				},
+			},
+		}
+	}
+
+	queryJSON, err := json.Marshal(query)
+	if err != nil {
+		return nil, 0, err // Return 0 for total on error
+	}
+
 	req := esapi.SearchRequest{
 		Index: []string{"catalog"},
-		Body: strings.NewReader(fmt.Sprintf(`{
-			"from": %d,
-			"size": %d,
-			"query": {
-				"match_all": {}
-			}
-		}`, skip, take)),
+		Body:  strings.NewReader(string(queryJSON)),
 	}
 
 	res, err := req.Do(ctx, r.client)
 	if err != nil {
-		return nil, err
+		return nil, 0, err // Return 0 for total on error
 	}
 	defer res.Body.Close()
 
 	if res.IsError() {
-		return nil, fmt.Errorf("error searching documents: %s", res.String())
+		return nil, 0, fmt.Errorf("error searching documents: %s", res.String()) // Return 0 for total on error
 	}
 
 	var result map[string]interface{}
 	if err := json.NewDecoder(res.Body).Decode(&result); err != nil {
-		return nil, err
+		return nil, 0, err // Return 0 for total on error
 	}
 
 	products := []Product{}
-	hits := result["hits"].(map[string]interface{})["hits"].([]interface{})
-	for _, hit := range hits {
+	hits := result["hits"].(map[string]interface{})
+	hitsArray := hits["hits"].([]interface{})
+	totalHits := uint64(hits["total"].(map[string]interface{})["value"].(float64)) // Extract total count
+
+	for _, hit := range hitsArray {
 		source := hit.(map[string]interface{})["_source"]
 		sourceJSON, err := json.Marshal(source)
 		if err != nil {
-			return nil, err
+			return nil, 0, err // Return 0 for total on error
 		}
 
 		var p productDocument
 		if err := json.Unmarshal(sourceJSON, &p); err != nil {
-			return nil, err
+			return nil, 0, err // Return 0 for total on error
 		}
 
 		products = append(products, Product{
@@ -218,11 +356,11 @@ func (r *elasticRepository) ListProducts(ctx context.Context, skip, take uint64)
 			ImageURL:     p.ImageURL,
 			Tags:         p.Tags,
 			Availability: p.Availability,
-			Stock:        uint64(p.Stock),
+			Stock:        p.Stock,
 		})
 	}
 
-	return products, nil
+	return products, totalHits, nil // Return the products and the total count
 }
 
 func (r *elasticRepository) ListProductsWithIDs(ctx context.Context, ids []string) ([]Product, error) {
@@ -282,28 +420,76 @@ func (r *elasticRepository) ListProductsWithIDs(ctx context.Context, ids []strin
 			ImageURL:     p.ImageURL,
 			Tags:         p.Tags,
 			Availability: p.Availability,
-			Stock:        uint64(p.Stock),
+			Stock:        p.Stock,
 		})
 	}
 
 	return products, nil
 }
 
-func (r *elasticRepository) SearchProducts(ctx context.Context, query string, skip, take uint64) ([]Product, error) {
+func (r *elasticRepository) SearchProducts(ctx context.Context, query string, skip, take uint64, category string, sort *pb.ProductSortInput) ([]Product, uint64, error) {
 	searchQuery := map[string]interface{}{
 		"from": skip,
 		"size": take,
 		"query": map[string]interface{}{
-			"multi_match": map[string]interface{}{
-				"query":  query,
-				"fields": []string{"name", "description"},
+			"bool": map[string]interface{}{
+				"must":   []map[string]interface{}{}, // Initialize as an empty slice
+				"filter": []map[string]interface{}{}, // Initialize as an empty slice for filters
 			},
 		},
 	}
 
+	if query != "" {
+		searchQuery["query"].(map[string]interface{})["bool"].(map[string]interface{})["must"] = append(
+			searchQuery["query"].(map[string]interface{})["bool"].(map[string]interface{})["must"].([]map[string]interface{}),
+			map[string]interface{}{
+				"multi_match": map[string]interface{}{
+					"query":  query,
+					"fields": []string{"name", "description"},
+				},
+			},
+		)
+	}
+
+	if category != "" {
+		searchQuery["query"].(map[string]interface{})["bool"].(map[string]interface{})["filter"] = append(
+			searchQuery["query"].(map[string]interface{})["bool"].(map[string]interface{})["filter"].([]map[string]interface{}),
+			map[string]interface{}{
+				"term": map[string]interface{}{
+					"category": category,
+				},
+			},
+		)
+	}
+
+	if sort != nil {
+		sortField := ""
+		switch sort.Field {
+		case pb.ProductSortField_NAME:
+			sortField = "name.keyword"
+		case pb.ProductSortField_PRICE:
+			sortField = "price"
+		default:
+			sortField = "_id" // Default sorting
+		}
+
+		sortDirection := "asc"
+		if sort.Direction == pb.SortDirection_DESC {
+			sortDirection = "desc"
+		}
+
+		searchQuery["sort"] = []map[string]interface{}{
+			{
+				sortField: map[string]interface{}{
+					"order": sortDirection,
+				},
+			},
+		}
+	}
+
 	queryJSON, err := json.Marshal(searchQuery)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	req := esapi.SearchRequest{
@@ -313,31 +499,34 @@ func (r *elasticRepository) SearchProducts(ctx context.Context, query string, sk
 
 	res, err := req.Do(ctx, r.client)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer res.Body.Close()
 
 	if res.IsError() {
-		return nil, fmt.Errorf("error searching documents: %s", res.String())
+		return nil, 0, fmt.Errorf("error searching documents: %s", res.String())
 	}
 
 	var result map[string]interface{}
 	if err := json.NewDecoder(res.Body).Decode(&result); err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	products := []Product{}
-	hits := result["hits"].(map[string]interface{})["hits"].([]interface{})
-	for _, hit := range hits {
+	hits := result["hits"].(map[string]interface{})
+	hitsArray := hits["hits"].([]interface{})
+	totalHits := uint64(hits["total"].(map[string]interface{})["value"].(float64)) // Extract total count
+
+	for _, hit := range hitsArray {
 		source := hit.(map[string]interface{})["_source"]
 		sourceJSON, err := json.Marshal(source)
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 
 		var p productDocument
 		if err := json.Unmarshal(sourceJSON, &p); err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 
 		products = append(products, Product{
@@ -349,9 +538,66 @@ func (r *elasticRepository) SearchProducts(ctx context.Context, query string, sk
 			ImageURL:     p.ImageURL,
 			Tags:         p.Tags,
 			Availability: p.Availability,
-			Stock:        uint64(p.Stock),
+			Stock:        p.Stock,
 		})
 	}
 
-	return products, nil
+	return products, totalHits, nil // Return products and total count
+}
+
+func (r *elasticRepository) DeductStock(ctx context.Context, id string, quantity int64) error {
+	// Step 1: Get the existing product by ID
+	product, err := r.GetProductByID(ctx, id)
+	if err != nil {
+		if err == ErrNotFound {
+			return fmt.Errorf("product with ID %s not found", id)
+		}
+		return fmt.Errorf("error retrieving product: %v", err)
+	}
+
+	// Step 2: Check if the requested quantity exceeds the available stock
+	if quantity > product.Stock {
+		return fmt.Errorf("no stock. required quantity %d exceeds available stock %d. try again later", quantity, product.Stock)
+	}
+
+	// Step 3: Calculate the new stock and update availability
+	newStock := product.Stock - quantity
+	availability := true
+	if newStock == 0 {
+		availability = false
+	}
+
+	// Step 4: Prepare the update payload
+	updatePayload := map[string]interface{}{
+		"doc": map[string]interface{}{
+			"stock":        newStock,
+			"availability": availability,
+		},
+	}
+
+	// Step 5: Marshal the update payload to JSON
+	updatePayloadJSON, err := json.Marshal(updatePayload)
+	if err != nil {
+		return fmt.Errorf("error marshaling update payload: %v", err)
+	}
+
+	// Step 6: Perform a partial update using UpdateRequest
+	updateReq := esapi.UpdateRequest{
+		Index:      "catalog",
+		DocumentID: id,
+		Body:       strings.NewReader(string(updatePayloadJSON)),
+		Refresh:    "true", // Ensure the change is immediately visible
+	}
+
+	res, err := updateReq.Do(ctx, r.client)
+	if err != nil {
+		return fmt.Errorf("error executing update request: %v", err)
+	}
+	defer res.Body.Close()
+
+	if res.IsError() {
+		return fmt.Errorf("error updating product: status=%s, response=%s", res.Status(), res.String())
+	}
+
+	return nil
 }

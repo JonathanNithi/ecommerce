@@ -72,13 +72,25 @@ func (s *grpcServer) GetProduct(ctx context.Context, r *pb.GetProductRequest) (*
 func (s *grpcServer) GetProducts(ctx context.Context, r *pb.GetProductsRequest) (*pb.GetProductsResponse, error) {
 	var res []Product
 	var err error
-	if r.Query != "" {
-		res, err = s.service.SearchProducts(ctx, r.Query, r.Skip, r.Take)
-	} else if len(r.Ids) != 0 {
-		res, err = s.service.GetProductsByIDs(ctx, r.Ids)
-	} else {
-		res, err = s.service.GetProducts(ctx, r.Skip, r.Take)
+	var count uint64
+
+	var sortBy *pb.ProductSortInput
+	if r.Sort != nil {
+		sortBy = r.Sort
 	}
+
+	if r.Query != "" || r.Category != "" {
+		// Assuming your service layer has a SearchProducts that now accepts sort
+		res, count, err = s.service.SearchProducts(ctx, r.Query, r.Skip, r.Take, r.Category, sortBy)
+	} else if len(r.Ids) != 0 {
+		// Assuming your service layer can fetch by IDs without explicit sorting
+		res, err = s.service.GetProductsByIDs(ctx, r.Ids)
+		count = 1 //ID matches with only one product
+	} else {
+		// Assuming your service layer's GetProducts now accepts sort
+		res, count, err = s.service.GetProducts(ctx, r.Skip, r.Take, sortBy)
+	}
+
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -101,5 +113,15 @@ func (s *grpcServer) GetProducts(ctx context.Context, r *pb.GetProductsRequest) 
 			},
 		)
 	}
-	return &pb.GetProductsResponse{Products: products}, nil
+	return &pb.GetProductsResponse{Products: products, TotalCount: count}, nil
+}
+
+// create a method DeductStock to deduct stock from the product
+func (s *grpcServer) DeductStock(ctx context.Context, r *pb.DeductStockRequest) (*pb.DeductStockResponse, error) {
+	err := s.service.DeductStock(ctx, r.Id, r.Quantity)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	return &pb.DeductStockResponse{}, nil
 }

@@ -21,7 +21,7 @@ func (r *mutationResolver) CreateAccount(ctx context.Context, in AccountInput) (
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
 	//password without hashing will be sent to service where it will be hashed
-	a, err := r.server.accountClient.PostAccount(ctx, in.FirstName, in.LastName, in.Email, in.PasswordHash)
+	a, err := r.server.accountClient.PostAccount(ctx, in.FirstName, in.LastName, in.Email, in.Password)
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -40,7 +40,7 @@ func (r *mutationResolver) CreateProduct(ctx context.Context, in ProductInput) (
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
 
-	p, err := r.server.catalogClient.PostProduct(ctx, in.Name, in.Description, in.Price, in.Category, in.ImageURL, in.Tags, uint64(in.Stock))
+	p, err := r.server.catalogClient.PostProduct(ctx, in.Name, in.Description, in.Price, in.Category, in.ImageURL, in.Tags, int64(in.Stock))
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -69,11 +69,11 @@ func (r *mutationResolver) CreateOrder(ctx context.Context, in OrderInput) (*Ord
 			return nil, ErrInvalidParameter
 		}
 		products = append(products, order.OrderedProduct{
-			ID:       p.ID,
+			ID:       p.ProductID,
 			Quantity: uint32(p.Quantity),
 		})
 	}
-	o, err := r.server.orderClient.PostOrder(ctx, in.AccountID, products)
+	o, err := r.server.orderClient.PostOrder(ctx, in.AccountID, in.AccessToken, in.RefreshToken, products)
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -90,7 +90,7 @@ func (r *mutationResolver) Login(ctx context.Context, email string, password str
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
 
-	// Modify this line to expect the AccessToken and RefreshToken
+	// Capture all return values from accountClient.Login
 	account, accessToken, refreshToken, err := r.server.accountClient.Login(ctx, email, password)
 	if err != nil {
 		log.Println(err)
@@ -99,7 +99,7 @@ func (r *mutationResolver) Login(ctx context.Context, email string, password str
 
 	// Return the Account along with AccessToken and RefreshToken
 	return &LoginResponse{
-		Account: &Account{
+		AccountID: &Account{
 			ID:           account.ID,
 			FirstName:    account.FirstName,
 			LastName:     account.LastName,
@@ -115,11 +115,15 @@ func (r *mutationResolver) SetAccountAsAdmin(ctx context.Context, accessToken st
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
 
-	a, err := r.server.accountClient.SetAccountAsAdmin(ctx, accessToken, refreshToken, userId)
+	// Capture all return values from accountClient.SetAccountAsAdmin
+	a, newAccessToken, newRefreshToken, err := r.server.accountClient.SetAccountAsAdmin(ctx, accessToken, refreshToken, userId)
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
+
+	_ = newAccessToken
+	_ = newRefreshToken
 
 	return &Account{
 		ID:           a.ID,

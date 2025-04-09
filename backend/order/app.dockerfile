@@ -1,5 +1,8 @@
 FROM golang:1.23-alpine3.20 AS build
-RUN apk --no-cache add gcc g++ make ca-certificates
+
+# Install necessary packages including delve for debugging
+RUN apk --no-cache add gcc g++ make ca-certificates git 
+
 WORKDIR /go/src/github.com/JonathanNithi/ecommerce/backend
 COPY go.mod go.sum ./
 COPY vendor vendor

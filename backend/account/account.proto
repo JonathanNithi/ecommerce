@@ -33,6 +33,8 @@ message GetAccountRequest {
 
 message GetAccountResponse {
     Account account = 1;
+    string accessToken = 2;
+    string refreshToken = 3;
 }
 
 message GetAccountsRequest {
@@ -44,6 +46,8 @@ message GetAccountsRequest {
 
 message GetAccountsResponse {
     repeated Account accounts = 1;
+    string accessToken = 2;
+    string refreshToken = 3;
 }
 
 message LoginRequest {
@@ -73,6 +77,8 @@ message SetAccountAsAdminRequest {
 
 message SetAccountAsAdminResponse {
     Account account = 1;
+    string accessToken = 2;
+    string refreshToken = 3;
 }
 
 service AccountService {
