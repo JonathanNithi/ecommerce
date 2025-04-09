@@ -121,7 +121,8 @@ export default function ProductsPage() {
                 id: product.id,
                 name: product.name,
                 price: product.price,
-                image: product.imageUrl,
+                imageUrl: product.imageUrl,
+                description: product.description,
             },
             quantity,
         );

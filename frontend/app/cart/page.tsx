@@ -145,7 +145,7 @@ export default function CartPage() {
                                                 {/* Product Image */}
                                                 <div className="w-full sm:w-24 h-24 bg-blue-50 rounded-md overflow-hidden flex-shrink-0">
                                                     <img
-                                                        src={item.image || "/placeholder.svg"}
+                                                        src={item.imageUrl || "/placeholder.svg"}
                                                         alt={item.name}
                                                         className="w-full h-full object-cover"
                                                     />
