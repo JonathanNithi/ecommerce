@@ -48,10 +48,7 @@ const AccountPage = () => {
     return (
         <div>
             <Navbar />
-            <div className="container py-24 min-h-screen">
-                <h1 className="text-3xl font-bold mb-8">Your Account</h1>
-                <AccountDetailsClient />
-            </div>
+            <AccountDetailsClient />
             <Footer />
         </div>
     );
