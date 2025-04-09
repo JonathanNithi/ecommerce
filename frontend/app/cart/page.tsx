@@ -1,3 +1,4 @@
+// pages/cart/page.tsx
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
@@ -8,32 +9,59 @@ import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/cart-context";
 import Navbar from "@/components/navbar/Navbar";
 import Footer from "@/components/footer/Footer";
-import { useAuth } from "@/context/auth-context"; // Corrected import path
-import { useMutation, gql } from "@apollo/client";
+import { useAuth } from "@/context/auth-context";
+import { useMutation, gql, useQuery } from "@apollo/client";
 import { CREATE_ORDER_MUTATION, OrderInput } from "@/graphql/mutation/order-mutation";
-import { useApolloClient } from "@/context/apollo-client-context"; // Corrected import path
+import { useApolloClient } from "@/context/apollo-client-context";
+import { GET_PRODUCTS_BY_IDS } from "@/graphql/queries/product-queries";
+import { checkStockAndProceed } from '@/lib/check-stock'; // Import the utility function
+import UnavailableProductsModal from "@/components/modals/UnavailableProductsModal"; // Import the modal
+import { OrderedProduct } from "@/types/orders"; // Import the OrderedProduct type
+
+interface UnavailableProduct {
+    id: string;
+    name?: string;
+    requested?: number;
+    available?: number;
+}
 
 export default function CartPage() {
     const router = useRouter();
-    const { items, updateQuantity, removeItem, clearCart, subtotal, setLastOrder } = useCart(); // Get setLastOrder
+    const { items, updateQuantity, removeItem, clearCart, subtotal, setLastOrder } = useCart();
     const [isCheckingOut, setIsCheckingOut] = useState(false);
-    const { isAuthenticated, accountId, accessToken, refreshToken } = useAuth(); // Get auth info
-    const client = useApolloClient(); // Get the client from the context
+    const { isAuthenticated, accountId, accessToken, refreshToken } = useAuth();
+    const client = useApolloClient();
     const [createOrder, { data: orderData, loading: orderLoading, error: orderError }] = useMutation(
         CREATE_ORDER_MUTATION,
         { client }
     );
+    const [stockError, setStockError] = useState<string | null>(null);
+    const [showUnavailablePopup, setShowUnavailablePopup] = useState(false);
+    const [unavailableProducts, setUnavailableProducts] = useState<UnavailableProduct[]>([]);
 
-    const shippingCost = 0; // Assume free shipping
+    const productIdsToCheck = items.map((item) => item.id);
+
+    const { data: productsData, loading: availabilityLoading, error: availabilityError } = useQuery(
+        GET_PRODUCTS_BY_IDS,
+        {
+            variables: { id: productIdsToCheck },
+            skip: items.length === 0,
+        }
+    );
+
+    const shippingCost = 0;
     const total = subtotal + shippingCost;
 
     const handleCheckout = useCallback(async () => {
         if (!isAuthenticated || !accountId || !accessToken || !refreshToken) {
-            router.push("/signin"); // Redirect to signin if not authenticated or missing data
+            router.push("/signin");
             return;
         }
 
         setIsCheckingOut(true);
+        setStockError(null);
+        setShowUnavailablePopup(false);
+        setUnavailableProducts([]);
 
         const orderProducts = items.map((item) => ({
             product_id: item.id,
@@ -47,31 +75,42 @@ export default function CartPage() {
             products: orderProducts,
         };
 
-        try {
-            const response = await createOrder({ variables: { order: orderInput } });
+        const stockCheckResult = await checkStockAndProceed(
+            client,
+            items, // Cast 'items' to OrderedProduct[]
+            createOrder,
+            orderInput,
+            setLastOrder,
+            clearCart,
+            router,
+            productsData?.productsById
+        );
 
-            if (response?.data?.createOrder?.id) {
-                setLastOrder({ id: response.data.createOrder.id }); // Store the order ID
-                clearCart();
-                router.push("/checkout/success");
-            } else {
-                console.error("Failed to create order:", response?.errors || response?.data);
-                // Optionally set an error state to display to the user
-            }
-        } catch (error) {
-            console.error("Error creating order:", error);
-            // Optionally set an error state to display to the user
-        } finally {
-            setIsCheckingOut(false);
+        setIsCheckingOut(false);
+
+        if (stockCheckResult && stockCheckResult.insufficientStock.length > 0) {
+            setUnavailableProducts(stockCheckResult.insufficientStock);
+            setShowUnavailablePopup(true);
+        } else if (stockCheckResult && stockCheckResult.orderSuccessful) {
+            // Order was handled within checkStockAndProceed, no need to do anything here
+        } else if (stockCheckResult && stockCheckResult.orderFailed) {
+            setStockError("Failed to create order. Please try again.");
+        } else if (stockCheckResult && stockCheckResult.error) {
+            setStockError("An error occurred during checkout. Please try again later.");
         }
-    }, [isAuthenticated, accountId, accessToken, refreshToken, items, clearCart, createOrder, router, setLastOrder]); // Added setLastOrder to dependencies
+    }, [isAuthenticated, accountId, accessToken, refreshToken, items, clearCart, createOrder, router, setLastOrder, client, productsData?.productsById]);
 
     useEffect(() => {
         if (orderError) {
             console.error("GraphQL Error creating order:", orderError);
-            // Optionally display an error message to the user
+            setStockError("Failed to create order. Please try again.");
         }
     }, [orderError]);
+
+    const closeUnavailablePopup = () => {
+        setShowUnavailablePopup(false);
+        setUnavailableProducts([]);
+    };
 
     return (
         <div>
@@ -179,14 +218,15 @@ export default function CartPage() {
                                         </p>
                                     </div>
                                 </div>
+                                {stockError && <p className="text-red-500 mt-4">{stockError}</p>}
                                 <div className="mt-8 space-y-4">
                                     {isAuthenticated ? (
                                         <Button
                                             className="w-full bg-blue-600 hover:bg-blue-700"
                                             onClick={handleCheckout}
-                                            disabled={isCheckingOut || orderLoading}
+                                            disabled={isCheckingOut || orderLoading || availabilityLoading}
                                         >
-                                            {orderLoading ? "Processing Order..." : "Proceed to Checkout"}
+                                            {availabilityLoading ? "Checking Stock..." : (isCheckingOut || orderLoading ? "Processing Order..." : "Proceed to Checkout")}
                                         </Button>
                                     ) : (
                                         <Button variant="outline" className="w-full" onClick={() => router.push("/signin")}>
@@ -203,6 +243,12 @@ export default function CartPage() {
                 )}
             </div>
             <Footer />
+
+            <UnavailableProductsModal
+                isOpen={showUnavailablePopup}
+                unavailableProducts={unavailableProducts}
+                onClose={closeUnavailablePopup}
+            />
         </div>
     );
 }
