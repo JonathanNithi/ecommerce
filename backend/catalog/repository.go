@@ -433,41 +433,33 @@ func (r *elasticRepository) SearchProducts(ctx context.Context, query string, sk
 		"size": take,
 		"query": map[string]interface{}{
 			"bool": map[string]interface{}{
-				"must": []map[string]interface{}{
-					{
-						"multi_match": map[string]interface{}{
-							"query":  query,
-							"fields": []string{"name", "description"},
-						},
-					},
-				},
+				"must":   []map[string]interface{}{}, // Initialize as an empty slice
+				"filter": []map[string]interface{}{}, // Initialize as an empty slice for filters
 			},
 		},
 	}
 
+	if query != "" {
+		searchQuery["query"].(map[string]interface{})["bool"].(map[string]interface{})["must"] = append(
+			searchQuery["query"].(map[string]interface{})["bool"].(map[string]interface{})["must"].([]map[string]interface{}),
+			map[string]interface{}{
+				"multi_match": map[string]interface{}{
+					"query":  query,
+					"fields": []string{"name", "description"},
+				},
+			},
+		)
+	}
+
 	if category != "" {
-		if _, ok := searchQuery["query"].(map[string]interface{})["bool"].(map[string]interface{})["filter"]; !ok {
-			searchQuery["query"].(map[string]interface{})["bool"].(map[string]interface{})["filter"] = map[string]interface{}{
+		searchQuery["query"].(map[string]interface{})["bool"].(map[string]interface{})["filter"] = append(
+			searchQuery["query"].(map[string]interface{})["bool"].(map[string]interface{})["filter"].([]map[string]interface{}),
+			map[string]interface{}{
 				"term": map[string]interface{}{
 					"category": category,
 				},
-			}
-		} else {
-			// If a filter already exists, add a "must" clause with the new filter
-			mustFilters := searchQuery["query"].(map[string]interface{})["bool"].(map[string]interface{})["filter"]
-			searchQuery["query"].(map[string]interface{})["bool"].(map[string]interface{})["filter"] = map[string]interface{}{
-				"bool": map[string]interface{}{
-					"must": []interface{}{
-						mustFilters,
-						map[string]interface{}{
-							"term": map[string]interface{}{
-								"category": category,
-							},
-						},
-					},
-				},
-			}
-		}
+			},
+		)
 	}
 
 	if sort != nil {
