@@ -14,6 +14,9 @@ type Service interface {
 	GetAccount(ctx context.Context, id string, accessToken string, refreshToken string) (*Account, string, string, error)
 	GetAccounts(ctx context.Context, skip uint64, take uint64, accessToken string, refreshToken string) ([]Account, string, string, error)
 	SetAccountAsAdmin(ctx context.Context, accessToken string, refreshToken string, id string) (*Account, string, string, error)
+	ForgotPassword(ctx context.Context, email string, firstName string, lastName string) (*Account, error)
+	ResetPassword(ctx context.Context, id string, email string, password string) (*Account, error)
+	RefreshToken(ctx context.Context, refreshToken string) (string, error)
 }
 
 type Account struct {
@@ -129,4 +132,46 @@ func (s *accountService) SetAccountAsAdmin(ctx context.Context, accessToken stri
 
 	account, err := s.repository.UpdateAccountRole(ctx, id, "admin")
 	return account, newAccessToken, newRefreshToken, err
+}
+
+func (s *accountService) ForgotPassword(ctx context.Context, email string, firstName string, lastName string) (*Account, error) {
+	account, err := s.repository.GetAccountByEmail(ctx, email)
+	if err != nil {
+		return nil, fmt.Errorf("account not found")
+	}
+	// In a real scenario, you wouldn't directly return the account here.
+	return account, nil
+}
+
+func (s *accountService) ResetPassword(ctx context.Context, id string, email string, password string) (*Account, error) {
+	account, err := s.repository.GetAccountByEmail(ctx, email)
+	if err != nil {
+		return nil, fmt.Errorf("account not found")
+	}
+
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, err
+	}
+
+	account.PasswordHash = string(passwordHash)
+	if err := s.repository.PutAccount(ctx, *account); err != nil {
+		return nil, err
+	}
+
+	return account, nil
+}
+
+func (s *accountService) RefreshToken(ctx context.Context, oldRefreshToken string) (string, error) {
+	claims, err := ValidateToken(oldRefreshToken)
+	if err != nil {
+		return "", fmt.Errorf("invalid refresh token: %w", err)
+	}
+
+	newAccessToken, err := GenerateAccessToken(claims.Username, claims.Role)
+	if err != nil {
+		return "", fmt.Errorf("failed to generate new access token: %w", err)
+	}
+
+	return newAccessToken, nil
 }

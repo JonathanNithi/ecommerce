@@ -175,3 +175,56 @@ func (r *mutationResolver) UpdateStock(ctx context.Context, input UpdateProductS
 		},
 	}, nil
 }
+
+func (r *mutationResolver) ForgotPassword(ctx context.Context, in ForgotPasswordInput) (*Account, error) {
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+
+	account, err := r.server.accountClient.ForgotPassword(ctx, in.Email, in.FirstName, in.LastName)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	return &Account{
+		ID:           account.ID,
+		FirstName:    account.FirstName,
+		LastName:     account.LastName,
+		Email:        account.Email,
+		PasswordHash: account.PasswordHash,
+		Role:         Role(account.Role),
+	}, nil
+}
+
+func (r *mutationResolver) ResetPassword(ctx context.Context, in ResetPasswordInput) (*Account, error) {
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+
+	account, err := r.server.accountClient.ResetPassword(ctx, in.ID, in.Email, in.Password)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	return &Account{
+		ID:           account.ID,
+		FirstName:    account.FirstName,
+		LastName:     account.LastName,
+		Email:        account.Email,
+		PasswordHash: account.PasswordHash,
+		Role:         Role(account.Role),
+	}, nil
+}
+
+func (r *mutationResolver) RefreshToken(ctx context.Context, input RefreshTokenInput) (string, error) {
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+
+	accessToken, err := r.server.accountClient.RefreshToken(ctx, input.RefreshToken)
+	if err != nil {
+		log.Println(err)
+		return "", err
+	}
+
+	return accessToken, nil
+}

@@ -133,3 +133,51 @@ func (c *Client) SetAccountAsAdmin(ctx context.Context, accessToken string, refr
 		Role:         r.Account.Role,
 	}, r.AccessToken, r.RefreshToken, nil
 }
+
+func (c *Client) ForgotPassword(ctx context.Context, email string, firstName string, lastName string) (*Account, error) {
+	r, err := c.service.ForgotPassword(ctx, &pb.ForgotPasswordRequest{
+		Email:     email,
+		FirstName: firstName,
+		LastName:  lastName,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &Account{
+		ID:           r.Account.Id,
+		FirstName:    r.Account.FirstName,
+		LastName:     r.Account.LastName,
+		Email:        r.Account.Email,
+		PasswordHash: r.Account.PasswordHash,
+		Role:         r.Account.Role,
+	}, nil
+}
+
+func (c *Client) ResetPassword(ctx context.Context, id string, email string, password string) (*Account, error) {
+	r, err := c.service.ResetPassword(ctx, &pb.ResetPasswordRequest{
+		Id:       id,
+		Email:    email,
+		Password: password,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &Account{
+		ID:           r.Account.Id,
+		FirstName:    r.Account.FirstName,
+		LastName:     r.Account.LastName,
+		Email:        r.Account.Email,
+		PasswordHash: r.Account.PasswordHash,
+		Role:         r.Account.Role,
+	}, nil
+}
+
+func (c *Client) RefreshToken(ctx context.Context, refreshToken string) (string, error) {
+	r, err := c.service.RefreshToken(ctx, &pb.RefreshTokenRequest{
+		RefreshToken: refreshToken,
+	})
+	if err != nil {
+		return "", err
+	}
+	return r.AccessToken, nil
+}

@@ -115,6 +115,22 @@ type UpdateProductStockResponse {
   product: Product
 }
 
+input ForgotPasswordInput {
+  email: String!
+  first_name: String!
+  last_name: String!
+}
+
+input ResetPasswordInput {
+  id: String!
+  email: String!
+  password: String!
+}
+
+input RefreshTokenInput {
+  refreshToken: String!
+}
+
 type Mutation {
   createAccount(account: AccountInput!): Account
   createProduct(product: ProductInput!): Product
@@ -122,6 +138,9 @@ type Mutation {
   login(email: String!, password: String!): LoginResponse
   setAccountAsAdmin(accessToken: String!, refreshToken: String!, userId: String!): Account
   updateStock(input: UpdateProductStockInput!): UpdateProductStockResponse! 
+  forgotPassword(account: ForgotPasswordInput!): Account!
+  resetPassword(account: ResetPasswordInput!): Account!
+  refreshToken(input: RefreshTokenInput!): String!
 }
 
 type Query {

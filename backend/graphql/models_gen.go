@@ -16,6 +16,12 @@ type AccountInput struct {
 	Password  string `json:"password"`
 }
 
+type ForgotPasswordInput struct {
+	Email     string `json:"email"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+}
+
 type LoginResponse struct {
 	Account      *Account `json:"account"`
 	AccessToken  string   `json:"accessToken"`
@@ -91,6 +97,16 @@ type ProductSortInput struct {
 }
 
 type Query struct {
+}
+
+type RefreshTokenInput struct {
+	RefreshToken string `json:"refreshToken"`
+}
+
+type ResetPasswordInput struct {
+	ID       string `json:"id"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 type UpdateProductStockInput struct {

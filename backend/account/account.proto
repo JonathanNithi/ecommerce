@@ -81,6 +81,26 @@ message SetAccountAsAdminResponse {
     string refreshToken = 3;
 }
 
+message ForgotPasswordRequest {
+    string email = 1;
+    string first_name = 2;
+    string last_name = 3;
+}
+
+message ForgotPasswordResponse {
+    Account account = 1;
+}
+
+message ResetPasswordRequest {
+    string id = 1;
+    string email = 2;
+    string password = 3;
+}
+
+message ResetPasswordResponse {
+    Account account = 1;
+}
+
 service AccountService {
     rpc PostAccount (PostAccountRequest) returns (PostAccountResponse);
     rpc GetAccount (GetAccountRequest) returns (GetAccountResponse);
@@ -88,4 +108,6 @@ service AccountService {
     rpc Login (LoginRequest) returns (LoginResponse);
     rpc RefreshToken (RefreshTokenRequest) returns (RefreshTokenResponse); 
     rpc SetAccountAsAdmin (SetAccountAsAdminRequest) returns (SetAccountAsAdminResponse);
+    rpc ForgotPassword (ForgotPasswordRequest) returns (ForgotPasswordResponse);
+    rpc ResetPassword (ResetPasswordRequest) returns (ResetPasswordResponse);
 }
