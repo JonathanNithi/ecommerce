@@ -63,7 +63,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          query: LOGIN_MUTATION, // Use the imported mutation
+          query: LOGIN_MUTATION.loc?.source?.body, // Extract the query string
           variables: { email, password },
         }),
       });
@@ -73,14 +73,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (
         data?.data?.login?.accessToken &&
         data?.data?.login?.refreshToken &&
-        data?.data?.login?.account_id?.id &&
-        data?.data?.login?.role
+        data?.data?.login?.account?.id &&
+        data?.data?.login?.account?.role
       ) {
         setAuthData(
           data.data.login.accessToken,
           data.data.login.refreshToken,
-          data.data.login.account_id.id,
-          data.data.login.role
+          data.data.login.account.id,
+          data.data.login.account.role
         );
         router.push('/');
         return true;
