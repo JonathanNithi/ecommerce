@@ -5680,7 +5680,7 @@ func (ec *executionContext) unmarshalInputUpdateProductStockInput(ctx context.Co
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"accessToken", "refreshToken", "productId", "newStock"}
+	fieldsInOrder := [...]string{"accessToken", "refreshToken", "productId", "newStock", "accountId"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -5715,6 +5715,13 @@ func (ec *executionContext) unmarshalInputUpdateProductStockInput(ctx context.Co
 				return it, err
 			}
 			it.NewStock = data
+		case "accountId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("accountId"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.AccountID = data
 		}
 	}
 

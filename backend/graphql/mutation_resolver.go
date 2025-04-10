@@ -140,7 +140,7 @@ func (r *mutationResolver) UpdateStock(ctx context.Context, input UpdateProductS
 	defer cancel()
 
 	// 1. Authenticate and Authorize the user based on the provided tokens
-	accountResp, _, _, err := r.server.accountClient.GetAccount(ctx, "", input.AccessToken, input.RefreshToken)
+	accountResp, _, _, err := r.server.accountClient.GetAccount(ctx, input.AccountID, input.AccessToken, input.RefreshToken)
 	if err != nil {
 		log.Println("Authentication failed:", err)
 		return nil, err

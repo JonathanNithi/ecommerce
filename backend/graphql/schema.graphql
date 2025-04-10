@@ -108,6 +108,7 @@ input UpdateProductStockInput {
   refreshToken: String!
   productId: String!
   newStock: Int!
+  accountId: String!
 }
 
 type UpdateProductStockResponse {

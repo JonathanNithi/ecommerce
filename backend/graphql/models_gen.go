@@ -98,6 +98,7 @@ type UpdateProductStockInput struct {
 	RefreshToken string `json:"refreshToken"`
 	ProductID    string `json:"productId"`
 	NewStock     int    `json:"newStock"`
+	AccountID    string `json:"accountId"`
 }
 
 type UpdateProductStockResponse struct {
