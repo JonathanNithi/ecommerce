@@ -61,6 +61,7 @@ func (c *Client) GetAccount(ctx context.Context, id string, accessToken string, 
 		FirstName: r.Account.FirstName,
 		LastName:  r.Account.LastName,
 		Email:     r.Account.Email,
+		Role:      r.Account.Role,
 	}, r.AccessToken, r.RefreshToken, nil
 }
 

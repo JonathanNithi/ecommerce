@@ -103,12 +103,24 @@ input OrderInput {
   products: [OrderProductInput!]!
 }
 
+input UpdateProductStockInput {
+  accessToken: String!
+  refreshToken: String!
+  productId: String!
+  newStock: Int!
+}
+
+type UpdateProductStockResponse {
+  product: Product
+}
+
 type Mutation {
   createAccount(account: AccountInput!): Account
   createProduct(product: ProductInput!): Product
   createOrder(order: OrderInput!): Order
   login(email: String!, password: String!): LoginResponse
   setAccountAsAdmin(accessToken: String!, refreshToken: String!, userId: String!): Account
+  updateStock(input: UpdateProductStockInput!): UpdateProductStockResponse! 
 }
 
 type Query {

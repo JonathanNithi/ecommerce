@@ -27,6 +27,7 @@ type Repository interface {
 	ListProductsWithIDs(ctx context.Context, ids []string) ([]Product, error)
 	SearchProducts(ctx context.Context, query string, skip uint64, take uint64, category string, sort *pb.ProductSortInput) ([]Product, uint64, error)
 	DeductStock(ctx context.Context, id string, newStock int64) error
+	UpdateStock(ctx context.Context, id string, newStock int64) error
 }
 
 type elasticRepository struct {
@@ -597,6 +598,41 @@ func (r *elasticRepository) DeductStock(ctx context.Context, id string, quantity
 
 	if res.IsError() {
 		return fmt.Errorf("error updating product: status=%s, response=%s", res.Status(), res.String())
+	}
+
+	return nil
+}
+
+func (r *elasticRepository) UpdateStock(ctx context.Context, id string, newStock int64) error {
+	// Step 1: Prepare the update payload
+	updatePayload := map[string]interface{}{
+		"doc": map[string]interface{}{
+			"stock": newStock,
+		},
+	}
+
+	// Step 2: Marshal the update payload to JSON
+	updatePayloadJSON, err := json.Marshal(updatePayload)
+	if err != nil {
+		return fmt.Errorf("error marshaling update payload: %v", err)
+	}
+
+	// Step 3: Perform a partial update using UpdateRequest
+	updateReq := esapi.UpdateRequest{
+		Index:      "catalog",
+		DocumentID: id,
+		Body:       strings.NewReader(string(updatePayloadJSON)),
+		Refresh:    "true", // Ensure the change is immediately visible
+	}
+
+	res, err := updateReq.Do(ctx, r.client)
+	if err != nil {
+		return fmt.Errorf("error executing update request: %v", err)
+	}
+	defer res.Body.Close()
+
+	if res.IsError() {
+		return fmt.Errorf("error updating product stock: status=%s, response=%s", res.Status(), res.String())
 	}
 
 	return nil

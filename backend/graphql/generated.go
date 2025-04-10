@@ -70,6 +70,7 @@ type ComplexityRoot struct {
 		CreateProduct     func(childComplexity int, product ProductInput) int
 		Login             func(childComplexity int, email string, password string) int
 		SetAccountAsAdmin func(childComplexity int, accessToken string, refreshToken string, userID string) int
+		UpdateStock       func(childComplexity int, input UpdateProductStockInput) int
 	}
 
 	Order struct {
@@ -110,6 +111,10 @@ type ComplexityRoot struct {
 		Products     func(childComplexity int, pagination *PaginationInput, query *string, id *string, category *string, sort *ProductSortInput) int
 		ProductsByID func(childComplexity int, id []string) int
 	}
+
+	UpdateProductStockResponse struct {
+		Product func(childComplexity int) int
+	}
 }
 
 type AccountResolver interface {
@@ -121,6 +126,7 @@ type MutationResolver interface {
 	CreateOrder(ctx context.Context, order OrderInput) (*Order, error)
 	Login(ctx context.Context, email string, password string) (*LoginResponse, error)
 	SetAccountAsAdmin(ctx context.Context, accessToken string, refreshToken string, userID string) (*Account, error)
+	UpdateStock(ctx context.Context, input UpdateProductStockInput) (*UpdateProductStockResponse, error)
 }
 type QueryResolver interface {
 	Accounts(ctx context.Context, pagination *PaginationInput, id *string, accessToken string, refreshToken string) ([]*Account, error)
@@ -276,6 +282,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.SetAccountAsAdmin(childComplexity, args["accessToken"].(string), args["refreshToken"].(string), args["userId"].(string)), true
+
+	case "Mutation.updateStock":
+		if e.complexity.Mutation.UpdateStock == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateStock_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateStock(childComplexity, args["input"].(UpdateProductStockInput)), true
 
 	case "Order.createdAt":
 		if e.complexity.Order.CreatedAt == nil {
@@ -460,6 +478,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.ProductsByID(childComplexity, args["id"].([]string)), true
 
+	case "UpdateProductStockResponse.product":
+		if e.complexity.UpdateProductStockResponse.Product == nil {
+			break
+		}
+
+		return e.complexity.UpdateProductStockResponse.Product(childComplexity), true
+
 	}
 	return 0, false
 }
@@ -474,6 +499,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputPaginationInput,
 		ec.unmarshalInputProductInput,
 		ec.unmarshalInputProductSortInput,
+		ec.unmarshalInputUpdateProductStockInput,
 	)
 	first := true
 
@@ -796,6 +822,34 @@ func (ec *executionContext) field_Mutation_setAccountAsAdmin_argsUserID(
 	}
 
 	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_updateStock_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := ec.field_Mutation_updateStock_argsInput(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_updateStock_argsInput(
+	ctx context.Context,
+	rawArgs map[string]any,
+) (UpdateProductStockInput, error) {
+	if _, ok := rawArgs["input"]; !ok {
+		var zeroVal UpdateProductStockInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+	if tmp, ok := rawArgs["input"]; ok {
+		return ec.unmarshalNUpdateProductStockInput2githubᚗcomᚋJonathanNithiᚋecommerceᚋbackendᚋgraphqlᚐUpdateProductStockInput(ctx, tmp)
+	}
+
+	var zeroVal UpdateProductStockInput
 	return zeroVal, nil
 }
 
@@ -1982,6 +2036,65 @@ func (ec *executionContext) fieldContext_Mutation_setAccountAsAdmin(ctx context.
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_setAccountAsAdmin_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_updateStock(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_updateStock(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateStock(rctx, fc.Args["input"].(UpdateProductStockInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*UpdateProductStockResponse)
+	fc.Result = res
+	return ec.marshalNUpdateProductStockResponse2ᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋbackendᚋgraphqlᚐUpdateProductStockResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_updateStock(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "product":
+				return ec.fieldContext_UpdateProductStockResponse_product(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UpdateProductStockResponse", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_updateStock_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -3276,6 +3389,67 @@ func (ec *executionContext) fieldContext_Query___schema(_ context.Context, field
 				return ec.fieldContext___Schema_directives(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __Schema", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UpdateProductStockResponse_product(ctx context.Context, field graphql.CollectedField, obj *UpdateProductStockResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UpdateProductStockResponse_product(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Product, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*Product)
+	fc.Result = res
+	return ec.marshalOProduct2ᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋbackendᚋgraphqlᚐProduct(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UpdateProductStockResponse_product(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UpdateProductStockResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Product_id(ctx, field)
+			case "name":
+				return ec.fieldContext_Product_name(ctx, field)
+			case "description":
+				return ec.fieldContext_Product_description(ctx, field)
+			case "price":
+				return ec.fieldContext_Product_price(ctx, field)
+			case "category":
+				return ec.fieldContext_Product_category(ctx, field)
+			case "imageUrl":
+				return ec.fieldContext_Product_imageUrl(ctx, field)
+			case "tags":
+				return ec.fieldContext_Product_tags(ctx, field)
+			case "availability":
+				return ec.fieldContext_Product_availability(ctx, field)
+			case "stock":
+				return ec.fieldContext_Product_stock(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Product", field.Name)
 		},
 	}
 	return fc, nil
@@ -5499,6 +5673,54 @@ func (ec *executionContext) unmarshalInputProductSortInput(ctx context.Context, 
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputUpdateProductStockInput(ctx context.Context, obj any) (UpdateProductStockInput, error) {
+	var it UpdateProductStockInput
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"accessToken", "refreshToken", "productId", "newStock"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "accessToken":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("accessToken"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.AccessToken = data
+		case "refreshToken":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("refreshToken"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.RefreshToken = data
+		case "productId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("productId"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ProductID = data
+		case "newStock":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("newStock"))
+			data, err := ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.NewStock = data
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -5695,6 +5917,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_setAccountAsAdmin(ctx, field)
 			})
+		case "updateStock":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_updateStock(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -6049,6 +6278,42 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Query___schema(ctx, field)
 			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var updateProductStockResponseImplementors = []string{"UpdateProductStockResponse"}
+
+func (ec *executionContext) _UpdateProductStockResponse(ctx context.Context, sel ast.SelectionSet, obj *UpdateProductStockResponse) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, updateProductStockResponseImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("UpdateProductStockResponse")
+		case "product":
+			out.Values[i] = ec._UpdateProductStockResponse_product(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -6777,6 +7042,25 @@ func (ec *executionContext) marshalNTime2timeᚐTime(ctx context.Context, sel as
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNUpdateProductStockInput2githubᚗcomᚋJonathanNithiᚋecommerceᚋbackendᚋgraphqlᚐUpdateProductStockInput(ctx context.Context, v any) (UpdateProductStockInput, error) {
+	res, err := ec.unmarshalInputUpdateProductStockInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNUpdateProductStockResponse2githubᚗcomᚋJonathanNithiᚋecommerceᚋbackendᚋgraphqlᚐUpdateProductStockResponse(ctx context.Context, sel ast.SelectionSet, v UpdateProductStockResponse) graphql.Marshaler {
+	return ec._UpdateProductStockResponse(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNUpdateProductStockResponse2ᚖgithubᚗcomᚋJonathanNithiᚋecommerceᚋbackendᚋgraphqlᚐUpdateProductStockResponse(ctx context.Context, sel ast.SelectionSet, v *UpdateProductStockResponse) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._UpdateProductStockResponse(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {

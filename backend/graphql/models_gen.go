@@ -93,6 +93,17 @@ type ProductSortInput struct {
 type Query struct {
 }
 
+type UpdateProductStockInput struct {
+	AccessToken  string `json:"accessToken"`
+	RefreshToken string `json:"refreshToken"`
+	ProductID    string `json:"productId"`
+	NewStock     int    `json:"newStock"`
+}
+
+type UpdateProductStockResponse struct {
+	Product *Product `json:"product,omitempty"`
+}
+
 type ProductSortField string
 
 const (

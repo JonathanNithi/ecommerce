@@ -134,3 +134,43 @@ func (r *mutationResolver) SetAccountAsAdmin(ctx context.Context, accessToken st
 		Role:         Role(a.Role),
 	}, nil
 }
+
+func (r *mutationResolver) UpdateStock(ctx context.Context, input UpdateProductStockInput) (*UpdateProductStockResponse, error) {
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+
+	// 1. Authenticate and Authorize the user based on the provided tokens
+	accountResp, _, _, err := r.server.accountClient.GetAccount(ctx, "", input.AccessToken, input.RefreshToken)
+	if err != nil {
+		log.Println("Authentication failed:", err)
+		return nil, err
+	}
+
+	// 2. Check if the user has the 'admin' role
+	if Role(accountResp.Role) != "admin" {
+		log.Println("Unauthorized access attempt to update product stock.")
+		return nil, err
+	}
+
+	// 3. Call the Catalog service to update the stock
+	updateResp, err := r.server.catalogClient.UpdateStock(ctx, input.ProductID, int64(input.NewStock))
+	if err != nil {
+		log.Println("Error updating product stock via gRPC:", err)
+		return nil, err
+	}
+
+	// 4. Return the updated product in the UpdateProductStockResponse
+	return &UpdateProductStockResponse{
+		Product: &Product{
+			ID:           updateResp.ID,
+			Name:         updateResp.Name,
+			Description:  updateResp.Description,
+			Price:        float64(updateResp.Price),
+			Category:     updateResp.Category,
+			ImageURL:     updateResp.ImageURL,
+			Tags:         updateResp.Tags,
+			Availability: updateResp.Availability,
+			Stock:        int(updateResp.Stock),
+		},
+	}, nil
+}

@@ -153,3 +153,28 @@ func (c *Client) DeductStock(ctx context.Context, id string, quantity int64) err
 	)
 	return err
 }
+
+func (c *Client) UpdateStock(ctx context.Context, id string, newStock int64) (*Product, error) {
+	r, err := c.service.UpdateStock(
+		ctx,
+		&pb.UpdateStockRequest{
+			Id:       id,
+			NewStock: newStock,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Product{
+		ID:           r.Product.Id,
+		Name:         r.Product.Name,
+		Description:  r.Product.Description,
+		Price:        r.Product.Price,
+		Category:     r.Product.Category,
+		ImageURL:     r.Product.ImageUrl,
+		Tags:         r.Product.Tags,
+		Availability: r.Product.Availability,
+		Stock:        r.Product.Stock,
+	}, nil
+}
