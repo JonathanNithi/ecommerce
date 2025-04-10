@@ -135,7 +135,7 @@ func (s *accountService) SetAccountAsAdmin(ctx context.Context, accessToken stri
 }
 
 func (s *accountService) ForgotPassword(ctx context.Context, email string, firstName string, lastName string) (*Account, error) {
-	account, err := s.repository.GetAccountByEmail(ctx, email)
+	account, err := s.repository.GetAccountByEmailAndName(ctx, firstName, lastName, email)
 	if err != nil {
 		return nil, fmt.Errorf("account not found")
 	}
