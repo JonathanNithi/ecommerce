@@ -26,6 +26,31 @@ export const LOGIN_MUTATION = gql`
   }
 `;
 
+export const REFRESH_TOKEN_MUTATION = gql`
+  mutation RefreshToken($refreshToken: String!) {
+    refreshToken(input: { refreshToken: $refreshToken })
+  }
+`;
+
+export const RESET_PASSWORD_MUTATION = gql`
+  mutation ResetPassword($account: ResetPasswordInput!) {
+    resetPassword(account: $account) {
+      id
+      first_name
+      last_name
+      email
+    }
+  }
+`;
+
+export const FORGOT_PASSWORD_MUTATION = gql`
+  mutation ForgotPassword($account: ForgotPasswordInput!) {
+    forgotPassword(account: $account) {
+      id
+    }
+  }
+`;
+
 // Define the input type for creating an account
 export interface AccountInput {
   first_name: string;
