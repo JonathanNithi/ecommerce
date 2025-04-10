@@ -234,7 +234,6 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
                                         <Button type="submit" className="bg-blue-600 hover:bg-blue-700" disabled={isUpdatingStock}>
                                             {isUpdatingStock ? "Updating..." : "Update Stock"}
                                         </Button>
-                                        <div className="text-sm text-muted-foreground">Current Stock: {product?.stock}</div>
                                     </form>
                                 </CardContent>
                             </Card>
