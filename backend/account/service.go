@@ -155,7 +155,7 @@ func (s *accountService) ResetPassword(ctx context.Context, id string, email str
 	}
 
 	account.PasswordHash = string(passwordHash)
-	account, err = s.repository.UpdatePasswordHash(ctx, email, password)
+	account, err = s.repository.UpdatePasswordHash(ctx, email, string(passwordHash))
 	if err != nil {
 		return nil, err
 	}
