@@ -144,7 +144,7 @@ func (s *accountService) ForgotPassword(ctx context.Context, email string, first
 }
 
 func (s *accountService) ResetPassword(ctx context.Context, id string, email string, password string) (*Account, error) {
-	account, err := s.repository.GetAccountByEmail(ctx, email)
+	account, err := s.repository.GetAccountById(ctx, id)
 	if err != nil {
 		return nil, fmt.Errorf("account not found")
 	}
@@ -155,7 +155,8 @@ func (s *accountService) ResetPassword(ctx context.Context, id string, email str
 	}
 
 	account.PasswordHash = string(passwordHash)
-	if err := s.repository.PutAccount(ctx, *account); err != nil {
+	account, err = s.repository.UpdatePasswordHash(ctx, email, password)
+	if err != nil {
 		return nil, err
 	}
 
