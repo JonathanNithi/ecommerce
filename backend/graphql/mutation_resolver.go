@@ -99,12 +99,13 @@ func (r *mutationResolver) Login(ctx context.Context, email string, password str
 
 	// Return the Account along with AccessToken and RefreshToken
 	return &LoginResponse{
-		AccountID: &Account{
+		Account: &Account{
 			ID:           account.ID,
 			FirstName:    account.FirstName,
 			LastName:     account.LastName,
 			Email:        account.Email,
 			PasswordHash: account.PasswordHash,
+			Role:         Role(account.Role),
 		},
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
@@ -147,7 +148,7 @@ func (r *mutationResolver) UpdateStock(ctx context.Context, input UpdateProductS
 	}
 
 	// 2. Check if the user has the 'admin' role
-	if Role(accountResp.Role) != "admin" {
+	if accountResp.Role != "admin" {
 		log.Println("Unauthorized access attempt to update product stock.")
 		return nil, err
 	}

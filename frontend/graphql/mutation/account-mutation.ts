@@ -16,8 +16,9 @@ export const CREATE_ACCOUNT_MUTATION = gql`
 export const LOGIN_MUTATION = gql`
   mutation Login($email: String!, $password: String!) {
     login(email: $email, password: $password) {
-      account_id {
+      account {
         id
+        role
       }
       refreshToken
       accessToken
@@ -53,7 +54,7 @@ export interface LoginInput {
 // Define the expected return type of the login mutation
 export interface LoginPayload {
   login: {
-    account_id: {
+    account: {
       id: string;
     };
     refreshToken: string;

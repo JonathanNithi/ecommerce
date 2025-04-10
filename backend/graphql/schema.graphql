@@ -59,7 +59,7 @@ type OrderedProduct {
 }
 
 type LoginResponse {
-  account_id: Account!
+  account: Account!
   accessToken: String!
   refreshToken: String!
 }

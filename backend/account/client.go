@@ -108,6 +108,7 @@ func (c *Client) Login(ctx context.Context, email string, password string) (*Acc
 		LastName:     r.Account.LastName,
 		Email:        r.Account.Email,
 		PasswordHash: r.Account.PasswordHash,
+		Role:         r.Account.Role,
 	}, r.AccessToken, r.RefreshToken, nil
 }
 

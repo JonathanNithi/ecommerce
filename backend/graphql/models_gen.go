@@ -17,7 +17,7 @@ type AccountInput struct {
 }
 
 type LoginResponse struct {
-	AccountID    *Account `json:"account_id"`
+	Account      *Account `json:"account"`
 	AccessToken  string   `json:"accessToken"`
 	RefreshToken string   `json:"refreshToken"`
 }
