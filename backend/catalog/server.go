@@ -156,3 +156,24 @@ func (s *grpcServer) DeductStock(ctx context.Context, r *pb.DeductStockRequest) 
 	}
 	return &pb.DeductStockResponse{}, nil
 }
+
+func (s *grpcServer) UpdateStock(ctx context.Context, r *pb.UpdateStockRequest) (*pb.UpdateStockResponse, error) {
+	updatedProduct, err := s.service.UpdateStock(ctx, r.Id, r.NewStock)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	return &pb.UpdateStockResponse{
+		Product: &pb.Product{
+			Id:           updatedProduct.ID,
+			Name:         updatedProduct.Name,
+			Description:  updatedProduct.Description,
+			Price:        updatedProduct.Price,
+			Category:     updatedProduct.Category,
+			ImageUrl:     updatedProduct.ImageURL,
+			Tags:         updatedProduct.Tags,
+			Availability: updatedProduct.Availability,
+			Stock:        updatedProduct.Stock,
+		},
+	}, nil
+}
