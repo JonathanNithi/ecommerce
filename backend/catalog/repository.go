@@ -604,20 +604,36 @@ func (r *elasticRepository) DeductStock(ctx context.Context, id string, quantity
 }
 
 func (r *elasticRepository) UpdateStock(ctx context.Context, id string, newStock int64) error {
-	// Step 1: Prepare the update payload
+	// Step 1: Get the current product by ID
+	product, err := r.GetProductByID(ctx, id)
+	if err != nil {
+		if err == ErrNotFound {
+			return fmt.Errorf("product with ID %s not found", id)
+		}
+		return fmt.Errorf("error retrieving product: %v", err)
+	}
+
+	// Step 2: Calculate the new stock
+	updatedStock := product.Stock + newStock
+
+	// Step 3: Determine the new availability
+	availability := updatedStock > 0
+
+	// Step 4: Prepare the update payload
 	updatePayload := map[string]interface{}{
 		"doc": map[string]interface{}{
-			"stock": newStock,
+			"stock":        updatedStock,
+			"availability": availability,
 		},
 	}
 
-	// Step 2: Marshal the update payload to JSON
+	// Step 5: Marshal the update payload to JSON
 	updatePayloadJSON, err := json.Marshal(updatePayload)
 	if err != nil {
 		return fmt.Errorf("error marshaling update payload: %v", err)
 	}
 
-	// Step 3: Perform a partial update using UpdateRequest
+	// Step 6: Perform a partial update using UpdateRequest
 	updateReq := esapi.UpdateRequest{
 		Index:      "catalog",
 		DocumentID: id,
