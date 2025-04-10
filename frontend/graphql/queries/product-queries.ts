@@ -53,6 +53,8 @@ query GetProductsByIds($id: [String!]!) {
   productsById(id: $id) {
     id
     availability
+    stock
+    name
   }
 }
 `;

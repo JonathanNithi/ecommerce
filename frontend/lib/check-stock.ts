@@ -13,12 +13,6 @@ const GET_PRODUCTS_BY_IDS_FOR_STOCK = gql`
   }
 `;
 
-interface ProductStockData {
-  id: string;
-  stock: number;
-  name?: string;
-}
-
 interface StockCheckResult {
     orderSuccessful: boolean;
     orderFailed: boolean;
