@@ -142,6 +142,37 @@ func (r *queryResolver) Products(ctx context.Context, pagination *PaginationInpu
 	}, nil
 }
 
+// generate a function for productsWithIds similar to the above function
+func (r *queryResolver) ProductsByID(ctx context.Context, ids []string) ([]*Product, error) {
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+
+	productList, err := r.server.catalogClient.GetProductsById(ctx, ids)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	var products []*Product
+	for _, a := range productList {
+		products = append(products,
+			&Product{
+				ID:           a.ID,
+				Name:         a.Name,
+				Description:  a.Description,
+				Price:        a.Price,
+				Category:     a.Category,
+				ImageURL:     a.ImageURL,
+				Tags:         a.Tags,
+				Availability: a.Availability,
+				Stock:        int(a.Stock),
+			},
+		)
+	}
+
+	return products, nil
+}
+
 func (p PaginationInput) bounds() (uint64, uint64) {
 	skipValue := uint64(0)
 	takeValue := uint64(100)

@@ -1,15 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/navbar/Navbar";
 import Footer from "@/components/footer/Footer";
 import { Product } from "@/types/products";
 import { GET_PRODUCT } from "@/graphql/queries/product-queries";
-import { useQuery } from "@apollo/client";
+import { UPDATE_STOCK_MUTATION } from "@/graphql/mutation/product-mutation"; // Import the update stock mutation
+import { useQuery, useMutation } from "@apollo/client";
 import { useCart } from "@/context/cart-context";
 import { useApolloClient } from "@/context/apollo-client-context";
+import { useAuth } from "@/context/auth-context"; // Import the auth context
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 
 export default function ProductDetailPage({ params }: { params: { id: string } }) {
     const router = useRouter();
@@ -17,14 +21,82 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
     const [quantity, setQuantity] = useState(1);
     const { addItem } = useCart();
     const [isAdding, setIsAdding] = useState(false);
-    const client = useApolloClient(); // Get the client inside the component
+    const client = useApolloClient();
+    const { role, accessToken, refreshToken, accountId } = useAuth(); // Get user role and tokens
+    const [stockQuantity, setStockQuantity] = useState<number | undefined>(undefined); // Initialize with undefined
+    const [isUpdatingStock, setIsUpdatingStock] = useState(false);
+    const [updateStockError, setUpdateStockError] = useState<string | null>(null);
 
-    const { loading, error, data } = useQuery(GET_PRODUCT, {
+    const { loading, error, data, refetch } = useQuery(GET_PRODUCT, {
         client,
         variables: { id: productId },
     });
 
     const product: Product | undefined = data?.products?.items?.[0];
+
+    useEffect(() => {
+        if (product) {
+            setStockQuantity(product.stock);
+        }
+    }, [product]);
+
+    const [updateStock] = useMutation(UPDATE_STOCK_MUTATION, {
+        client,
+        onCompleted: () => {
+            setIsUpdatingStock(false);
+            setUpdateStockError(null);
+            refetch(); // Refetch product data to update the displayed stock
+            router.push("/"); // Redirect to homepage after successful update
+        },
+        onError: (err) => {
+            console.error("Error updating stock:", err);
+            setIsUpdatingStock(false);
+            setUpdateStockError("Failed to update stock. Please try again.");
+        },
+    });
+
+    const handleAddToCart = () => {
+        setIsAdding(true);
+
+        addItem(
+            {
+                id: product!.id,
+                name: product!.name,
+                price: product!.price,
+                imageUrl: product!.imageUrl,
+                description: product!.description,
+            },
+            quantity
+        );
+
+        setTimeout(() => {
+            setIsAdding(false);
+            console.log(`Added ${quantity} of ${product!.name} to cart`);
+        }, 500);
+    };
+
+    const handleStockUpdate = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!accessToken || !refreshToken || accountId === null || stockQuantity === undefined) {
+            setUpdateStockError("Authentication and valid stock required to update.");
+            return;
+        }
+
+        setIsUpdatingStock(true);
+        setUpdateStockError(null);
+
+        await updateStock({
+            variables: {
+                input: {
+                    accessToken,
+                    refreshToken,
+                    productId,
+                    newStock: stockQuantity,
+                    accountId: accountId,
+                },
+            },
+        });
+    };
 
     if (loading) {
         return (
@@ -72,27 +144,6 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
             </div>
         );
     }
-
-    const handleAddToCart = () => {
-        setIsAdding(true);
-
-        // Add item to cart
-        addItem(
-            {
-                id: product.id,
-                name: product.name,
-                price: product.price,
-                image: product.imageUrl,
-            },
-            quantity,
-        );
-
-        // Show success message
-        setTimeout(() => {
-            setIsAdding(false);
-            console.log(`Added ${quantity} of ${product.name} to cart`);
-        }, 500);
-    };
 
     return (
         <div>
@@ -158,6 +209,35 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
                         <Button variant="outline" className="w-full mt-auto" onClick={() => router.push("/products")}>
                             Back to Products
                         </Button>
+                        {role === "admin" && product && ( // Check if product exists before rendering the card
+                            <Card className="mt-6 bg-transparent border-0 shadow-none">
+                                <CardHeader className="px-0">
+                                    <CardTitle className="text-lg">Update Stock</CardTitle>
+                                    <CardDescription>Manage inventory for this product</CardDescription>
+                                </CardHeader>
+                                <CardContent className="px-0">
+                                    <form onSubmit={handleStockUpdate} className="space-y-4">
+                                        {updateStockError && <p className="text-red-500">{updateStockError}</p>}
+                                        <div className="space-y-2">
+                                            <label htmlFor="stock" className="text-sm font-medium">
+                                                New Stock
+                                            </label>
+                                            <Input
+                                                id="stock"
+                                                type="number"
+                                                min="0"
+                                                value={stockQuantity !== undefined ? stockQuantity : ""}
+                                                onChange={(e) => setStockQuantity(Number.parseInt(e.target.value) >= 0 ? Number.parseInt(e.target.value) : 0)}
+                                                className="w-32"
+                                            />
+                                        </div>
+                                        <Button type="submit" className="bg-blue-600 hover:bg-blue-700" disabled={isUpdatingStock}>
+                                            {isUpdatingStock ? "Updating..." : "Update Stock"}
+                                        </Button>
+                                    </form>
+                                </CardContent>
+                            </Card>
+                        )}
                     </div>
                 </div>
             </div>

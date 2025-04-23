@@ -18,6 +18,7 @@ export const GET_ACCOUNT_DETAILS = gql`
           name
           quantity
           price
+          imageUrl
         }
       }
     }
@@ -38,6 +39,7 @@ export interface AccountDetailsResponse {
         name: string;
         quantity: number;
         price: number;
+        imageUrl: string;
         __typename?: 'OrderedProduct';
       }[];
       __typename?: 'Order';

@@ -2,6 +2,7 @@ package catalog
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/JonathanNithi/ecommerce/backend/catalog/pb"
 	"github.com/segmentio/ksuid"
@@ -11,9 +12,10 @@ type Service interface {
 	PostProduct(ctx context.Context, name, description string, price float64, category string, imageUrl string, tags []string, stock int64) (*Product, error)
 	GetProduct(ctx context.Context, id string) (*Product, error)
 	GetProducts(ctx context.Context, skip uint64, take uint64, sort *pb.ProductSortInput) ([]Product, uint64, error)
-	GetProductsByIDs(ctx context.Context, ids []string) ([]Product, error)
+	GetProductsById(ctx context.Context, ids []string) ([]Product, error)
 	SearchProducts(ctx context.Context, query string, skip uint64, take uint64, category string, sort *pb.ProductSortInput) ([]Product, uint64, error)
 	DeductStock(ctx context.Context, productID string, quantity int64) error
+	UpdateStock(ctx context.Context, productID string, newStock int64) (*Product, error)
 }
 
 type Product struct {
@@ -73,7 +75,7 @@ func (s *catalogService) GetProducts(ctx context.Context, skip uint64, take uint
 	return s.repository.ListProducts(ctx, skip, take, sort)
 }
 
-func (s *catalogService) GetProductsByIDs(ctx context.Context, ids []string) ([]Product, error) {
+func (s *catalogService) GetProductsById(ctx context.Context, ids []string) ([]Product, error) {
 	return s.repository.ListProductsWithIDs(ctx, ids)
 }
 
@@ -86,4 +88,16 @@ func (s *catalogService) SearchProducts(ctx context.Context, query string, skip 
 
 func (s *catalogService) DeductStock(ctx context.Context, productID string, quantity int64) error {
 	return s.repository.DeductStock(ctx, productID, quantity)
+}
+
+func (s *catalogService) UpdateStock(ctx context.Context, productID string, newStock int64) (*Product, error) {
+	err := s.repository.UpdateStock(ctx, productID, newStock)
+	if err != nil {
+		return nil, fmt.Errorf("failed to update stock for product %s: %w", productID, err)
+	}
+	updatedProduct, err := s.repository.GetProductByID(ctx, productID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve updated product %s: %w", productID, err)
+	}
+	return updatedProduct, nil
 }

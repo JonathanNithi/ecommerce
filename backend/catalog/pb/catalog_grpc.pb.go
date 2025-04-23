@@ -19,10 +19,12 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	CatalogService_PostProduct_FullMethodName = "/pb.CatalogService/PostProduct"
-	CatalogService_GetProduct_FullMethodName  = "/pb.CatalogService/GetProduct"
-	CatalogService_GetProducts_FullMethodName = "/pb.CatalogService/GetProducts"
-	CatalogService_DeductStock_FullMethodName = "/pb.CatalogService/DeductStock"
+	CatalogService_PostProduct_FullMethodName     = "/pb.CatalogService/PostProduct"
+	CatalogService_GetProduct_FullMethodName      = "/pb.CatalogService/GetProduct"
+	CatalogService_GetProducts_FullMethodName     = "/pb.CatalogService/GetProducts"
+	CatalogService_GetProductsById_FullMethodName = "/pb.CatalogService/GetProductsById"
+	CatalogService_DeductStock_FullMethodName     = "/pb.CatalogService/DeductStock"
+	CatalogService_UpdateStock_FullMethodName     = "/pb.CatalogService/UpdateStock"
 )
 
 // CatalogServiceClient is the client API for CatalogService service.
@@ -32,7 +34,9 @@ type CatalogServiceClient interface {
 	PostProduct(ctx context.Context, in *PostProductRequest, opts ...grpc.CallOption) (*PostProductResponse, error)
 	GetProduct(ctx context.Context, in *GetProductRequest, opts ...grpc.CallOption) (*GetProductResponse, error)
 	GetProducts(ctx context.Context, in *GetProductsRequest, opts ...grpc.CallOption) (*GetProductsResponse, error)
+	GetProductsById(ctx context.Context, in *GetProductsByIdRequest, opts ...grpc.CallOption) (*GetProductsByIdResponse, error)
 	DeductStock(ctx context.Context, in *DeductStockRequest, opts ...grpc.CallOption) (*DeductStockResponse, error)
+	UpdateStock(ctx context.Context, in *UpdateStockRequest, opts ...grpc.CallOption) (*UpdateStockResponse, error)
 }
 
 type catalogServiceClient struct {
@@ -73,10 +77,30 @@ func (c *catalogServiceClient) GetProducts(ctx context.Context, in *GetProductsR
 	return out, nil
 }
 
+func (c *catalogServiceClient) GetProductsById(ctx context.Context, in *GetProductsByIdRequest, opts ...grpc.CallOption) (*GetProductsByIdResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetProductsByIdResponse)
+	err := c.cc.Invoke(ctx, CatalogService_GetProductsById_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *catalogServiceClient) DeductStock(ctx context.Context, in *DeductStockRequest, opts ...grpc.CallOption) (*DeductStockResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(DeductStockResponse)
 	err := c.cc.Invoke(ctx, CatalogService_DeductStock_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *catalogServiceClient) UpdateStock(ctx context.Context, in *UpdateStockRequest, opts ...grpc.CallOption) (*UpdateStockResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateStockResponse)
+	err := c.cc.Invoke(ctx, CatalogService_UpdateStock_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +114,9 @@ type CatalogServiceServer interface {
 	PostProduct(context.Context, *PostProductRequest) (*PostProductResponse, error)
 	GetProduct(context.Context, *GetProductRequest) (*GetProductResponse, error)
 	GetProducts(context.Context, *GetProductsRequest) (*GetProductsResponse, error)
+	GetProductsById(context.Context, *GetProductsByIdRequest) (*GetProductsByIdResponse, error)
 	DeductStock(context.Context, *DeductStockRequest) (*DeductStockResponse, error)
+	UpdateStock(context.Context, *UpdateStockRequest) (*UpdateStockResponse, error)
 	mustEmbedUnimplementedCatalogServiceServer()
 }
 
@@ -110,8 +136,14 @@ func (UnimplementedCatalogServiceServer) GetProduct(context.Context, *GetProduct
 func (UnimplementedCatalogServiceServer) GetProducts(context.Context, *GetProductsRequest) (*GetProductsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetProducts not implemented")
 }
+func (UnimplementedCatalogServiceServer) GetProductsById(context.Context, *GetProductsByIdRequest) (*GetProductsByIdResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetProductsById not implemented")
+}
 func (UnimplementedCatalogServiceServer) DeductStock(context.Context, *DeductStockRequest) (*DeductStockResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeductStock not implemented")
+}
+func (UnimplementedCatalogServiceServer) UpdateStock(context.Context, *UpdateStockRequest) (*UpdateStockResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateStock not implemented")
 }
 func (UnimplementedCatalogServiceServer) mustEmbedUnimplementedCatalogServiceServer() {}
 func (UnimplementedCatalogServiceServer) testEmbeddedByValue()                        {}
@@ -188,6 +220,24 @@ func _CatalogService_GetProducts_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CatalogService_GetProductsById_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetProductsByIdRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CatalogServiceServer).GetProductsById(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CatalogService_GetProductsById_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CatalogServiceServer).GetProductsById(ctx, req.(*GetProductsByIdRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _CatalogService_DeductStock_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DeductStockRequest)
 	if err := dec(in); err != nil {
@@ -202,6 +252,24 @@ func _CatalogService_DeductStock_Handler(srv interface{}, ctx context.Context, d
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CatalogServiceServer).DeductStock(ctx, req.(*DeductStockRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CatalogService_UpdateStock_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateStockRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CatalogServiceServer).UpdateStock(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CatalogService_UpdateStock_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CatalogServiceServer).UpdateStock(ctx, req.(*UpdateStockRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -226,8 +294,16 @@ var CatalogService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _CatalogService_GetProducts_Handler,
 		},
 		{
+			MethodName: "GetProductsById",
+			Handler:    _CatalogService_GetProductsById_Handler,
+		},
+		{
 			MethodName: "DeductStock",
 			Handler:    _CatalogService_DeductStock_Handler,
+		},
+		{
+			MethodName: "UpdateStock",
+			Handler:    _CatalogService_UpdateStock_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

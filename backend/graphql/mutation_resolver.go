@@ -99,12 +99,13 @@ func (r *mutationResolver) Login(ctx context.Context, email string, password str
 
 	// Return the Account along with AccessToken and RefreshToken
 	return &LoginResponse{
-		AccountID: &Account{
+		Account: &Account{
 			ID:           account.ID,
 			FirstName:    account.FirstName,
 			LastName:     account.LastName,
 			Email:        account.Email,
 			PasswordHash: account.PasswordHash,
+			Role:         Role(account.Role),
 		},
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
@@ -133,4 +134,97 @@ func (r *mutationResolver) SetAccountAsAdmin(ctx context.Context, accessToken st
 		PasswordHash: a.PasswordHash,
 		Role:         Role(a.Role),
 	}, nil
+}
+
+func (r *mutationResolver) UpdateStock(ctx context.Context, input UpdateProductStockInput) (*UpdateProductStockResponse, error) {
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+
+	// 1. Authenticate and Authorize the user based on the provided tokens
+	accountResp, _, _, err := r.server.accountClient.GetAccount(ctx, input.AccountID, input.AccessToken, input.RefreshToken)
+	if err != nil {
+		log.Println("Authentication failed:", err)
+		return nil, err
+	}
+
+	// 2. Check if the user has the 'admin' role
+	if accountResp.Role != "admin" {
+		log.Println("Unauthorized access attempt to update product stock.")
+		return nil, err
+	}
+
+	// 3. Call the Catalog service to update the stock
+	updateResp, err := r.server.catalogClient.UpdateStock(ctx, input.ProductID, int64(input.NewStock))
+	if err != nil {
+		log.Println("Error updating product stock via gRPC:", err)
+		return nil, err
+	}
+
+	// 4. Return the updated product in the UpdateProductStockResponse
+	return &UpdateProductStockResponse{
+		Product: &Product{
+			ID:           updateResp.ID,
+			Name:         updateResp.Name,
+			Description:  updateResp.Description,
+			Price:        float64(updateResp.Price),
+			Category:     updateResp.Category,
+			ImageURL:     updateResp.ImageURL,
+			Tags:         updateResp.Tags,
+			Availability: updateResp.Availability,
+			Stock:        int(updateResp.Stock),
+		},
+	}, nil
+}
+
+func (r *mutationResolver) ForgotPassword(ctx context.Context, in ForgotPasswordInput) (*Account, error) {
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+
+	account, err := r.server.accountClient.ForgotPassword(ctx, in.Email, in.FirstName, in.LastName)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	return &Account{
+		ID:           account.ID,
+		FirstName:    account.FirstName,
+		LastName:     account.LastName,
+		Email:        account.Email,
+		PasswordHash: account.PasswordHash,
+		Role:         Role(account.Role),
+	}, nil
+}
+
+func (r *mutationResolver) ResetPassword(ctx context.Context, in ResetPasswordInput) (*Account, error) {
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+
+	account, err := r.server.accountClient.ResetPassword(ctx, in.ID, in.Email, in.Password)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	return &Account{
+		ID:           account.ID,
+		FirstName:    account.FirstName,
+		LastName:     account.LastName,
+		Email:        account.Email,
+		PasswordHash: account.PasswordHash,
+		Role:         Role(account.Role),
+	}, nil
+}
+
+func (r *mutationResolver) RefreshToken(ctx context.Context, input RefreshTokenInput) (string, error) {
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+
+	accessToken, err := r.server.accountClient.RefreshToken(ctx, input.RefreshToken)
+	if err != nil {
+		log.Println(err)
+		return "", err
+	}
+
+	return accessToken, nil
 }

@@ -8,7 +8,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var jwtKey = []byte(os.Getenv("SECRET_KEY")) // Replace with a secure secret key
+var jwtKey = []byte(os.Getenv("SECRET_KEY"))
 
 type Claims struct {
 	Username string `json:"username"`
@@ -18,7 +18,7 @@ type Claims struct {
 
 // GenerateAccessToken generates a new access token
 func GenerateAccessToken(username string, role string) (string, error) {
-	expirationTime := time.Now().Add(15 * time.Minute) // Access token expires in 15 minutes
+	expirationTime := time.Now().Add(60 * time.Minute) // Access token expires in 60 minutes
 	claims := &Claims{
 		Username: username,
 		Role:     role,

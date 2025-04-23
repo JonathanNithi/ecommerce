@@ -13,7 +13,10 @@ type Repository interface {
 	GetAccountByID(ctx context.Context, id string) (*Account, error)
 	ListAccounts(ctx context.Context, skip uint64, take uint64) ([]Account, error)
 	GetAccountByEmail(ctx context.Context, email string) (*Account, error)
+	GetAccountByEmailAndName(ctx context.Context, first_name string, last_name string, email string) (*Account, error)
+	GetAccountById(ctx context.Context, id string) (*Account, error)
 	UpdateAccountRole(ctx context.Context, id string, role string) (*Account, error)
+	UpdatePasswordHash(ctx context.Context, email string, passwordHash string) (*Account, error)
 }
 
 type postgresRepository struct {
@@ -104,6 +107,32 @@ func (r *postgresRepository) GetAccountByEmail(ctx context.Context, email string
 	return account, nil
 }
 
+func (r *postgresRepository) GetAccountByEmailAndName(ctx context.Context, first_name string, last_name string, email string) (*Account, error) {
+	row := r.db.QueryRowContext(
+		ctx,
+		"SELECT id, first_name, last_name, email, password_hash, role FROM accounts WHERE email = $1 AND first_name = $2 AND last_name = $3",
+		email, first_name, last_name,
+	)
+	account := &Account{}
+	if err := row.Scan(&account.ID, &account.FirstName, &account.LastName, &account.Email, &account.PasswordHash, &account.Role); err != nil {
+		return nil, err // Return error if no account is found
+	}
+	return account, nil
+}
+
+func (r *postgresRepository) GetAccountById(ctx context.Context, id string) (*Account, error) {
+	row := r.db.QueryRowContext(
+		ctx,
+		"SELECT id, first_name, last_name, email, password_hash, role FROM accounts WHERE id = $1",
+		id,
+	)
+	account := &Account{}
+	if err := row.Scan(&account.ID, &account.FirstName, &account.LastName, &account.Email, &account.PasswordHash, &account.Role); err != nil {
+		return nil, err // Return error if no account is found
+	}
+	return account, nil
+}
+
 func (r *postgresRepository) UpdateAccountRole(ctx context.Context, id string, role string) (*Account, error) {
 	_, err := r.db.ExecContext(
 		ctx,
@@ -115,6 +144,26 @@ func (r *postgresRepository) UpdateAccountRole(ctx context.Context, id string, r
 		ctx,
 		"SELECT id, first_name, last_name, email, password_hash, role FROM accounts WHERE id = $1",
 		id,
+	)
+	account := &Account{}
+	if err := row.Scan(&account.ID, &account.FirstName, &account.LastName, &account.Email, &account.PasswordHash, &account.Role); err != nil {
+		return nil, err // Return error if no account is found
+	}
+
+	return account, err
+}
+
+func (r *postgresRepository) UpdatePasswordHash(ctx context.Context, email string, passwordHash string) (*Account, error) {
+	_, err := r.db.ExecContext(
+		ctx,
+		"UPDATE accounts SET password_hash = $1 WHERE email = $2",
+		passwordHash, email,
+	)
+
+	row := r.db.QueryRowContext(
+		ctx,
+		"SELECT id, first_name, last_name, email, password_hash, role FROM accounts WHERE email = $1",
+		email,
 	)
 	account := &Account{}
 	if err := row.Scan(&account.ID, &account.FirstName, &account.LastName, &account.Email, &account.PasswordHash, &account.Role); err != nil {

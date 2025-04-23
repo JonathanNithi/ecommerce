@@ -144,3 +144,37 @@ func (s *grpcServer) SetAccountAsAdmin(ctx context.Context, r *pb.SetAccountAsAd
 		RefreshToken: newRefreshToken,
 	}, nil
 }
+
+func (s *grpcServer) ForgotPassword(ctx context.Context, r *pb.ForgotPasswordRequest) (*pb.ForgotPasswordResponse, error) {
+	account, err := s.service.ForgotPassword(ctx, r.Email, r.FirstName, r.LastName)
+	if err != nil {
+		return nil, err
+	}
+	return &pb.ForgotPasswordResponse{
+		Account: &pb.Account{
+			Id:           account.ID,
+			FirstName:    account.FirstName,
+			LastName:     account.LastName,
+			Email:        account.Email,
+			PasswordHash: account.PasswordHash,
+			Role:         account.Role,
+		},
+	}, nil
+}
+
+func (s *grpcServer) ResetPassword(ctx context.Context, r *pb.ResetPasswordRequest) (*pb.ResetPasswordResponse, error) {
+	account, err := s.service.ResetPassword(ctx, r.Id, r.Email, r.Password)
+	if err != nil {
+		return nil, err
+	}
+	return &pb.ResetPasswordResponse{
+		Account: &pb.Account{
+			Id:           account.ID,
+			FirstName:    account.FirstName,
+			LastName:     account.LastName,
+			Email:        account.Email,
+			PasswordHash: account.PasswordHash,
+			Role:         account.Role,
+		},
+	}, nil
+}

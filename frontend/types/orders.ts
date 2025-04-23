@@ -4,6 +4,7 @@ export interface OrderedProduct {
     description: string;
     price: number;
     quantity: number
+    imageUrl: string;
   }
 
 export interface Order {

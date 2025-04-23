@@ -95,6 +95,7 @@ func (c *Client) GetOrdersForAccount(ctx context.Context, accountID string) ([]O
 				Name:        p.Name,
 				Description: p.Description,
 				Price:       p.Price,
+				ImageUrl:    p.ImageUrl,
 			})
 		}
 		newOrder.Products = products

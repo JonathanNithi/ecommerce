@@ -36,6 +36,7 @@ func (r *accountResolver) Orders(ctx context.Context, obj *Account) ([]*Order, e
 				Description: p.Description,
 				Price:       p.Price,
 				Quantity:    int(p.Quantity),
+				ImageURL:    p.ImageUrl,
 			})
 		}
 		orders = append(orders, &Order{

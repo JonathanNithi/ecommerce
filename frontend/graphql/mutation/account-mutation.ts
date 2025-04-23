@@ -16,11 +16,37 @@ export const CREATE_ACCOUNT_MUTATION = gql`
 export const LOGIN_MUTATION = gql`
   mutation Login($email: String!, $password: String!) {
     login(email: $email, password: $password) {
-      account_id {
+      account {
         id
+        role
       }
       refreshToken
       accessToken
+    }
+  }
+`;
+
+export const REFRESH_TOKEN_MUTATION = gql`
+  mutation RefreshToken($refreshToken: String!) {
+    refreshToken(input: { refreshToken: $refreshToken })
+  }
+`;
+
+export const RESET_PASSWORD_MUTATION = gql`
+  mutation ResetPassword($account: ResetPasswordInput!) {
+    resetPassword(account: $account) {
+      id
+      first_name
+      last_name
+      email
+    }
+  }
+`;
+
+export const FORGOT_PASSWORD_MUTATION = gql`
+  mutation ForgotPassword($account: ForgotPasswordInput!) {
+    forgotPassword(account: $account) {
+      id
     }
   }
 `;
@@ -53,7 +79,7 @@ export interface LoginInput {
 // Define the expected return type of the login mutation
 export interface LoginPayload {
   login: {
-    account_id: {
+    account: {
       id: string;
     };
     refreshToken: string;

@@ -26,6 +26,7 @@ type OrderedProduct struct {
 	Description string
 	Price       float64
 	Quantity    uint32
+	ImageUrl    string
 }
 
 type orderService struct {

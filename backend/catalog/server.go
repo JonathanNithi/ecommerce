@@ -84,7 +84,7 @@ func (s *grpcServer) GetProducts(ctx context.Context, r *pb.GetProductsRequest) 
 		res, count, err = s.service.SearchProducts(ctx, r.Query, r.Skip, r.Take, r.Category, sortBy)
 	} else if len(r.Ids) != 0 {
 		// Assuming your service layer can fetch by IDs without explicit sorting
-		res, err = s.service.GetProductsByIDs(ctx, r.Ids)
+		res, err = s.service.GetProductsById(ctx, r.Ids)
 		count = 1 //ID matches with only one product
 	} else {
 		// Assuming your service layer's GetProducts now accepts sort
@@ -116,6 +116,37 @@ func (s *grpcServer) GetProducts(ctx context.Context, r *pb.GetProductsRequest) 
 	return &pb.GetProductsResponse{Products: products, TotalCount: count}, nil
 }
 
+func (s *grpcServer) GetProductsById(ctx context.Context, req *pb.GetProductsByIdRequest) (*pb.GetProductsByIdResponse, error) {
+	productIDs := req.GetIds()
+	if len(productIDs) == 0 {
+		return &pb.GetProductsByIdResponse{Products: []*pb.Product{}}, nil
+	}
+
+	products, err := s.service.GetProductsById(ctx, productIDs)
+	if err != nil {
+		log.Printf("Error fetching products by IDs: %v", err)
+		return nil, err
+	}
+
+	// Map your service/repository Product type to the gRPC pb.Product type
+	pbProducts := make([]*pb.Product, len(products))
+	for i, p := range products {
+		pbProducts[i] = &pb.Product{
+			Id:           p.ID,
+			Name:         p.Name,
+			Description:  p.Description,
+			Price:        p.Price,
+			Category:     p.Category,
+			ImageUrl:     p.ImageURL,
+			Tags:         p.Tags,
+			Availability: p.Availability,
+			Stock:        p.Stock,
+		}
+	}
+
+	return &pb.GetProductsByIdResponse{Products: pbProducts}, nil
+}
+
 // create a method DeductStock to deduct stock from the product
 func (s *grpcServer) DeductStock(ctx context.Context, r *pb.DeductStockRequest) (*pb.DeductStockResponse, error) {
 	err := s.service.DeductStock(ctx, r.Id, r.Quantity)
@@ -124,4 +155,25 @@ func (s *grpcServer) DeductStock(ctx context.Context, r *pb.DeductStockRequest) 
 		return nil, err
 	}
 	return &pb.DeductStockResponse{}, nil
+}
+
+func (s *grpcServer) UpdateStock(ctx context.Context, r *pb.UpdateStockRequest) (*pb.UpdateStockResponse, error) {
+	updatedProduct, err := s.service.UpdateStock(ctx, r.Id, r.NewStock)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	return &pb.UpdateStockResponse{
+		Product: &pb.Product{
+			Id:           updatedProduct.ID,
+			Name:         updatedProduct.Name,
+			Description:  updatedProduct.Description,
+			Price:        updatedProduct.Price,
+			Category:     updatedProduct.Category,
+			ImageUrl:     updatedProduct.ImageURL,
+			Tags:         updatedProduct.Tags,
+			Availability: updatedProduct.Availability,
+			Stock:        updatedProduct.Stock,
+		},
+	}, nil
 }

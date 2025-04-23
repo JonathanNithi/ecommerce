@@ -113,6 +113,34 @@ func (c *Client) GetProducts(ctx context.Context, skip uint64, take uint64, ids 
 	return products, r.TotalCount, nil // Return the total count from the response
 }
 
+// GetProductsByIDs fetches products by their IDs
+func (c *Client) GetProductsById(ctx context.Context, ids []string) ([]Product, error) {
+	r, err := c.service.GetProductsById(
+		ctx,
+		&pb.GetProductsByIdRequest{
+			Ids: ids,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+	products := []Product{}
+	for _, p := range r.Products {
+		products = append(products, Product{
+			ID:           p.Id,
+			Name:         p.Name,
+			Description:  p.Description,
+			Price:        p.Price,
+			Category:     p.Category,
+			ImageURL:     p.ImageUrl,
+			Tags:         p.Tags,
+			Availability: p.Availability,
+			Stock:        p.Stock,
+		})
+	}
+	return products, nil
+}
+
 // create a method DeductStock to deduct stock from the product
 func (c *Client) DeductStock(ctx context.Context, id string, quantity int64) error {
 	// Ensure DeductStock method is defined in the pb package
@@ -124,4 +152,29 @@ func (c *Client) DeductStock(ctx context.Context, id string, quantity int64) err
 		},
 	)
 	return err
+}
+
+func (c *Client) UpdateStock(ctx context.Context, id string, newStock int64) (*Product, error) {
+	r, err := c.service.UpdateStock(
+		ctx,
+		&pb.UpdateStockRequest{
+			Id:       id,
+			NewStock: newStock,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Product{
+		ID:           r.Product.Id,
+		Name:         r.Product.Name,
+		Description:  r.Product.Description,
+		Price:        r.Product.Price,
+		Category:     r.Product.Category,
+		ImageURL:     r.Product.ImageUrl,
+		Tags:         r.Product.Tags,
+		Availability: r.Product.Availability,
+		Stock:        r.Product.Stock,
+	}, nil
 }

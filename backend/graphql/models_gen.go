@@ -16,8 +16,14 @@ type AccountInput struct {
 	Password  string `json:"password"`
 }
 
+type ForgotPasswordInput struct {
+	Email     string `json:"email"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+}
+
 type LoginResponse struct {
-	AccountID    *Account `json:"account_id"`
+	Account      *Account `json:"account"`
 	AccessToken  string   `json:"accessToken"`
 	RefreshToken string   `json:"refreshToken"`
 }
@@ -50,6 +56,7 @@ type OrderedProduct struct {
 	Description string  `json:"description"`
 	Price       float64 `json:"price"`
 	Quantity    int     `json:"quantity"`
+	ImageURL    string  `json:"imageUrl"`
 }
 
 type PaginationInput struct {
@@ -90,6 +97,28 @@ type ProductSortInput struct {
 }
 
 type Query struct {
+}
+
+type RefreshTokenInput struct {
+	RefreshToken string `json:"refreshToken"`
+}
+
+type ResetPasswordInput struct {
+	ID       string `json:"id"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type UpdateProductStockInput struct {
+	AccessToken  string `json:"accessToken"`
+	RefreshToken string `json:"refreshToken"`
+	ProductID    string `json:"productId"`
+	NewStock     int    `json:"newStock"`
+	AccountID    string `json:"accountId"`
+}
+
+type UpdateProductStockResponse struct {
+	Product *Product `json:"product,omitempty"`
 }
 
 type ProductSortField string
