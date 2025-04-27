@@ -2,7 +2,10 @@ package account
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"regexp"
+	"strings"
 
 	"github.com/segmentio/ksuid"
 	"golang.org/x/crypto/bcrypt"
@@ -36,7 +39,33 @@ func NewService(r Repository) Service {
 	return &accountService{r}
 }
 
+var emailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`)
+
+func validateAccountInput(firstName, lastName, email, password string) error {
+	if strings.TrimSpace(firstName) == "" {
+		return errors.New("first name cannot be empty")
+	}
+	if strings.TrimSpace(lastName) == "" {
+		return errors.New("last name cannot be empty")
+	}
+	if strings.TrimSpace(email) == "" {
+		return errors.New("email cannot be empty")
+	}
+	if !emailRegex.MatchString(email) {
+		return errors.New("invalid email format")
+	}
+	if len(password) < 8 {
+		return errors.New("password must be at least 8 characters")
+	}
+	return nil
+}
+
 func (s *accountService) PostAccount(ctx context.Context, first_name string, last_name string, email string, password string) (*Account, error) {
+
+	if err := validateAccountInput(first_name, last_name, email, password); err != nil {
+		return nil, err
+	}
+
 	// Hash the password
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
